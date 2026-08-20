@@ -1,0 +1,104 @@
+﻿@model List<MedLinkPortal.Models.Capability>
+
+<section class="py-16 px-6 bg-[#0B0F1A] text-white overflow-hidden relative">
+    <div class="absolute inset-0 opacity-10 pointer-events-none bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            <!-- LEFT CONTENT -->
+            <div class="max-w-xl fade-right" data-animate>
+                <div class="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+                    AI-Core Integrated
+                </div>
+
+                <h2 class="text-3xl md:text-5xl font-bold mb-6 leading-tight tracking-tight">
+                    Intelligence that <br />
+                    <span class="text-blue-500">saves lives.</span>
+                </h2>
+
+                <p class="text-gray-400 text-base mb-8 leading-relaxed">
+                    MedLink's AI isn't just about speed; it's about precision. We use federated
+                    learning to provide world-class diagnostic tools directly to your portal,
+                    ensuring your specialist has the best data possible.
+                </p>
+
+                <div class="space-y-3 stagger-children" data-animate>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var cap = Model[i];
+                        <div class="capability-tab p-4 rounded-[1.5rem] border transition-all cursor-pointer
+                                        @(i == 0 ? "bg-blue-600/10 border-blue-500/30" : "bg-white/5 border-white/5")
+                                        hover:border-white/10 fade-up" data-animate
+                             onmouseenter="setActiveTab(@i)">
+
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="flex items-center gap-3">
+                                    <div class="@(i == 0 ? "text-blue-400" : "text-gray-500") transition-colors">
+                                        @{
+                                            var iconName = cap.Icon.ToLower();
+                                            <i data-lucide="@iconName" class="w-5 h-5"></i>
+                                        }
+                                    </div>
+                                    <h4 class="text-lg font-bold">@cap.Title</h4>
+                                </div>
+                                <span class="text-[10px] font-black text-blue-500/50 uppercase tracking-tighter">
+                                    @cap.Stats
+                                </span>
+                            </div>
+
+                            <p class="text-sm @(i == 0 ? "text-gray-300" : "text-gray-500") transition-colors">
+                                @cap.Description
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- RIGHT VISUAL -->
+            <div class="relative zoom-in delay-200" data-animate>
+                <div class="relative bg-gradient-to-br from-gray-800/50 to-gray-900/50
+                            rounded-[3rem] p-1 border border-white/10 shadow-2xl
+                            overflow-hidden h-[420px] flex items-center justify-center">
+
+                    <div class="relative w-full h-full flex items-center justify-center">
+                        <div class="absolute w-3/4 h-3/4 border-2 border-dashed border-blue-500/20 rounded-full animate-[spin_20s_linear_infinite]"></div>
+                        <div class="absolute w-1/2 h-1/2 border border-blue-400/10 rounded-full animate-[spin_10s_linear_infinite_reverse]"></div>
+
+                        <div class="relative z-10 w-44 h-44 md:w-56 md:h-56 opacity-80 group">
+                            <img src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?auto=format&fit=crop&q=80&w=400"
+                                 class="w-full h-full object-cover rounded-full grayscale mix-blend-screen"
+                                 alt="Neural Scan">
+
+                            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_15px_rgba(59,130,246,0.5)] animate-scan"></div>
+
+                            <div class="absolute top-1/4 left-1/4 w-3 h-3 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6] animate-pulse"></div>
+                            <div class="absolute bottom-1/3 right-1/4 w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_10px_#22d3ee] animate-pulse delay-500"></div>
+                            <div class="absolute top-1/2 right-1/2 w-4 h-4 border-2 border-blue-400 rounded-full animate-ping"></div>
+                        </div>
+
+                        <div class="absolute top-10 right-10 bg-white/5 backdrop-blur-xl border border-white/10 p-3 rounded-2xl animate-float">
+                            <div class="flex items-center gap-2 mb-1">
+                                <i data-lucide="activity" class="w-4 h-4 text-green-400"></i>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase">Neural Link</span>
+                            </div>
+                            <div class="text-lg font-bold">Stable</div>
+                        </div>
+
+                        <div class="absolute bottom-14 left-10 bg-white/5 backdrop-blur-xl border border-white/10 p-3 rounded-2xl animate-float-delayed">
+                            <div class="flex items-center gap-2 mb-1">
+                                <i data-lucide="shield-alert" class="w-4 h-4 text-orange-400"></i>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase">Detection</span>
+                            </div>
+                            <div class="text-sm font-bold">No anomalies</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute -z-10 w-full h-full bg-blue-600/20 blur-[120px] rounded-full top-0 left-0"></div>
+            </div>
+
+        </div>
+    </div>
+</section>

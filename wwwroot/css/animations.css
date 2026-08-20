@@ -1,0 +1,303 @@
+/* 
+   MedLink Premium Animations 
+   State-of-the-art keyframes and utilities
+*/
+
+/* --- Base Animation Classes --- */
+
+/* Elements with this class will rely on the Intersection Observer in _Layout.cshtml to add .animate-in */
+[data-animate] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+[data-animate].animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Stagger Delays */
+.delay-100 {
+    transition-delay: 100ms;
+}
+
+.delay-200 {
+    transition-delay: 200ms;
+}
+
+.delay-300 {
+    transition-delay: 300ms;
+}
+
+.delay-400 {
+    transition-delay: 400ms;
+}
+
+.delay-500 {
+    transition-delay: 500ms;
+}
+
+.delay-700 {
+    transition-delay: 700ms;
+}
+
+.delay-1000 {
+    transition-delay: 1000ms;
+}
+
+/* --- Specific Animation Variants --- */
+
+/* Fade Up (Default behavior of data-animate, but explicit class for clarity) */
+.fade-up[data-animate] {
+    transform: translateY(30px);
+}
+
+.fade-up[data-animate].animate-in {
+    transform: translateY(0);
+}
+
+/* Fade Down */
+.fade-down[data-animate] {
+    transform: translateY(-30px);
+}
+
+.fade-down[data-animate].animate-in {
+    transform: translateY(0);
+}
+
+/* Fade Left */
+.fade-left[data-animate] {
+    transform: translateX(30px);
+}
+
+.fade-left[data-animate].animate-in {
+    transform: translateX(0);
+}
+
+/* Fade Right */
+.fade-right[data-animate] {
+    transform: translateX(-30px);
+}
+
+.fade-right[data-animate].animate-in {
+    transform: translateX(0);
+}
+
+/* Scale Up / Zoom In */
+.zoom-in[data-animate] {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+.zoom-in[data-animate].animate-in {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Blur In (Premium Glass Effect) */
+.blur-in[data-animate] {
+    opacity: 0;
+    filter: blur(10px);
+    transform: scale(0.95);
+}
+
+.blur-in[data-animate].animate-in {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+}
+
+/* --- Continuous Animations (Loops) --- */
+
+@keyframes float-gentle {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes float-card {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-1deg);
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(1deg);
+    }
+}
+
+@keyframes pulse-soft {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+}
+
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+    }
+}
+
+.animate-float-gentle {
+    animation: float-gentle 4s ease-in-out infinite;
+}
+
+.animate-float-card {
+    animation: float-card 6s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+    animation: pulse-soft 3s ease-in-out infinite;
+}
+
+.animate-glow {
+    animation: glow-pulse 3s infinite;
+}
+
+/* --- Cinematic Background Animations --- */
+
+@keyframes float-orb {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        opacity: 0.4;
+        filter: blur(80px);
+    }
+
+    50% {
+        opacity: 0.7;
+        filter: blur(100px);
+    }
+}
+
+@keyframes glass-shine {
+    0% {
+        transform: translateX(-100%) skewX(-15deg);
+    }
+
+    100% {
+        transform: translateX(200%) skewX(-15deg);
+    }
+}
+
+.animate-float-orb {
+    animation: float-orb 15s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 8s ease-in-out infinite;
+}
+
+.hover-shine {
+    position: relative;
+    overflow: hidden;
+}
+
+.hover-shine::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: translateX(-100%) skewX(-15deg);
+    transition: none;
+    pointer-events: none;
+}
+
+.hover-shine:hover::after {
+    animation: glass-shine 0.8s ease-in-out forwards;
+}
+
+/* --- Hover Effects --- */
+
+.hover-lift {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+}
+
+.hover-scale {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-scale:hover {
+    transform: scale(1.03);
+}
+
+.hover-glow {
+    transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+/* --- Utility for Staggered Children --- */
+/* Use by adding .stagger-children to parent and data-animate to children */
+.stagger-children>*[data-animate]:nth-child(1) {
+    transition-delay: 100ms;
+}
+
+.stagger-children>*[data-animate]:nth-child(2) {
+    transition-delay: 200ms;
+}
+
+.stagger-children>*[data-animate]:nth-child(3) {
+    transition-delay: 300ms;
+}
+
+.stagger-children>*[data-animate]:nth-child(4) {
+    transition-delay: 400ms;
+}
+
+.stagger-children>*[data-animate]:nth-child(5) {
+    transition-delay: 500ms;
+}
+
+.stagger-children>*[data-animate]:nth-child(6) {
+    transition-delay: 600ms;
+}

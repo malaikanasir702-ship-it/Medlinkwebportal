@@ -1,0 +1,142 @@
+﻿@model List<MedLinkPortal.Models.Doctor>
+
+<section id="specialists" class="py-32 px-6 bg-white overflow-hidden">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8 fade-left" data-animate>
+            <div class="max-w-xl">
+                <div class="inline-flex items-center gap-2 text-blue-600 font-bold mb-4 text-sm tracking-widest uppercase">
+                    <i data-lucide="shield-check" class="w-4.5 h-4.5"></i>
+                    Verified Professionals
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-tight">
+                    Consult with top-tier <br />
+                    <span class="text-gray-400 italic">global specialists.</span>
+                </h2>
+            </div>
+            <a href="@Url.Action("Doctors", "Dashboard")" class="flex items-center gap-2 group text-blue-600 font-bold text-lg hover:gap-4 transition-all">
+                View All 500+ Specialists
+                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 stagger-children" data-animate>
+            @foreach (var doctor in Model)
+            {
+                <div class="group relative fade-up" data-animate data-doctor-id="@doctor.Id"
+                     onmouseenter="handleDoctorHover(@doctor.Id, true)"
+                     onmouseleave="handleDoctorHover(@doctor.Id, false)">
+                    <div class="relative h-[480px] w-full rounded-[2.5rem] overflow-hidden bg-gray-100 shadow-sm border border-gray-100 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
+                        <img src="@doctor.Image"
+                             alt="@doctor.Name"
+                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                             id="doctor-img-@doctor.Id">
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/20 to-transparent"></div>
+
+                        @if (doctor.Online)
+                        {
+                            <div class="absolute top-6 left-6 bg-green-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2 animate-pulse">
+                                <span class="w-1.5 h-1.5 bg-white rounded-full"></span>
+                                LIVE NOW
+                            </div>
+                        }
+
+                        <div class="absolute bottom-0 left-0 right-0 p-8 transform transition-transform duration-500">
+                            <div class="flex items-center gap-1 text-yellow-400 mb-2">
+                                @for (int i = 0; i < 5; i++)
+                                {
+                                    <i data-lucide="star" class="w-3.5 h-3.5 @(i < Math.Floor(doctor.Rating) ? "fill-current" : "")"></i>
+                                }
+                                <span class="text-white text-xs font-bold">@doctor.Rating (@doctor.Reviews reviews)</span>
+                            </div>
+                            <h4 class="text-2xl font-bold text-white mb-1">@doctor.Name</h4>
+                            <p class="text-blue-300 text-sm font-medium mb-4">@doctor.Specialty</p>
+
+                            <div class="flex flex-col gap-2 transition-all duration-500 opacity-0 translate-y-4" id="doctor-actions-@doctor.Id">
+                                <button onclick="openBookingForDoctor(@doctor.Id)"
+                                        class="w-full bg-white text-gray-900 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-colors">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i>
+                                    Book Appointment
+                                </button>
+                                <button class="w-full bg-white/10 backdrop-blur-md border border-white/20 text-white py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/20 transition-colors">
+                                    <i data-lucide="video" class="w-4 h-4"></i>
+                                    Video Call
+                                </button>
+                            </div>
+
+                            <div class="flex items-center gap-2 mt-2 transition-opacity duration-500" id="doctor-availability-@doctor.Id">
+                                <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i>
+                                <span class="text-blue-100/70 text-xs font-medium uppercase tracking-wider">@doctor.Availability</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="absolute -right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 transition-all duration-500 opacity-0 translate-x-4" id="quick-action-@doctor.Id">
+                        <div class="bg-white p-3 rounded-full shadow-xl text-blue-600 hover:bg-blue-600 hover:text-white transition-all cursor-pointer">
+                            <i data-lucide="message-circle" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mt-20 flex flex-wrap justify-center gap-8 md:gap-16 items-center py-12 border-y border-gray-100 fade-up delay-500" data-animate>
+            <div class="text-center">
+                <div class="text-3xl font-black text-gray-900">12k+</div>
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Consultations Done</div>
+            </div>
+            <div class="w-1 h-1 rounded-full bg-gray-200 hidden md:block"></div>
+            <div class="text-center">
+                <div class="text-3xl font-black text-gray-900">4.9/5</div>
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Patient Satisfaction</div>
+            </div>
+            <div class="w-1 h-1 rounded-full bg-gray-200 hidden md:block"></div>
+            <div class="text-center">
+                <div class="text-3xl font-black text-gray-900">2 min</div>
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Avg. Response Time</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function handleDoctorHover(doctorId, isHovered) {
+        const actions = document.getElementById(`doctor-actions-${doctorId}`);
+        const availability = document.getElementById(`doctor-availability-${doctorId}`);
+        const quickAction = document.getElementById(`quick-action-${doctorId}`);
+
+        if (isHovered) {
+            actions.classList.remove('opacity-0', 'translate-y-4');
+            actions.classList.add('opacity-100', 'translate-y-0');
+            availability.classList.add('opacity-0');
+            quickAction.classList.remove('opacity-0', 'translate-x-4');
+            quickAction.classList.add('opacity-100', 'translate-x-0');
+        } else {
+            actions.classList.remove('opacity-100', 'translate-y-0');
+            actions.classList.add('opacity-0', 'translate-y-4');
+            availability.classList.remove('opacity-0');
+            quickAction.classList.remove('opacity-100', 'translate-x-0');
+            quickAction.classList.add('opacity-0', 'translate-x-4');
+        }
+    }
+
+    function openBookingForDoctor(doctorId) {
+        // Fetch doctor data and open booking modal
+        fetch(`/Home/GetDoctor?id=${doctorId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Set doctor data in modal
+                    document.getElementById('selectedDoctorName').innerText = data.doctor.name;
+                    document.getElementById('selectedDoctorSpecialty').innerText = data.doctor.specialty;
+                    document.getElementById('selectedDoctorImage').src = data.doctor.image;
+
+                    // Store doctor data for form submission
+                    document.getElementById('doctorId').value = data.doctor.id;
+
+                    // Open modal
+                    toggleModal('bookingModal');
+                }
+            });
+    }
+</script>

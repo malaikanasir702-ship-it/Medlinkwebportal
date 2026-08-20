@@ -1,0 +1,125 @@
+﻿@using MedLinkPortal.Models
+@using MedLinkPortal.Areas.Identity.Pages.Account
+@model List<Rider>
+@{
+    ViewData["Title"] = "Rider Management";
+    Layout = "_Layout";
+    var activeRiderIds = ViewBag.ActiveRiderIds as List<int> ?? new List<int>();
+}
+
+<div class="min-h-screen bg-slate-50 pb-20">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">Rider Management</h1>
+                <p class="text-sm text-slate-500 mt-1">Manage delivery riders and track their status</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="/Admin/Rider/TrackingDashboard"
+                   class="px-4 py-2.5 bg-slate-800 text-white text-xs font-bold rounded-xl hover:bg-slate-900 transition-all">
+                    📊 Tracking Dashboard
+                </a>
+                <a href="/Admin/Rider/LiveMapDashboard"
+                   class="px-4 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 transition-all">
+                    🗺️ Live Map
+                </a>
+                <a href="/Admin/Rider/Create"
+                   class="px-4 py-2.5 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition-all">
+                    + Create Rider
+                </a>
+            </div>
+        </div>
+
+        <!-- Riders Table -->
+        <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rider</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Vehicle</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rating</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Active</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    @foreach (var rider in Model)
+                    {
+                        var isOnDelivery = activeRiderIds.Contains(rider.Id);
+                        var statusBadge  = !rider.IsActive ? ("Inactive", "bg-rose-50 text-rose-600")
+                                         : isOnDelivery    ? ("On Delivery", "bg-blue-50 text-blue-600")
+                                         :                   ("Available", "bg-emerald-50 text-emerald-600");
+                        var riderName = rider.User != null
+                            ? $"{rider.User.FirstName} {rider.User.LastName}".Trim()
+                            : "Unknown";
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-sm">
+                                        @(riderName.Length > 0 ? riderName[0].ToString().ToUpper() : "R")
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900 text-sm">@riderName</p>
+                                        <p class="text-xs text-slate-400">@rider.User?.PhoneNumber</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="text-sm font-bold text-slate-700">@rider.VehicleType</p>
+                                <p class="text-xs text-slate-400">@(rider.VehicleNumber ?? "—")</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm font-bold text-amber-500">⭐ @rider.AverageRating.ToString("F1")</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black @statusBadge.Item2">
+                                    @statusBadge.Item1
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <button onclick="toggleStatus(@rider.Id, this)"
+                                        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors @(rider.IsActive ? "bg-blue-600" : "bg-slate-200")"
+                                        data-active="@rider.IsActive.ToString().ToLower()">
+                                    <span class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform @(rider.IsActive ? "translate-x-6" : "translate-x-1")"></span>
+                                </button>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="text-xs text-slate-400">#@rider.Id</span>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="px-6 py-16 text-center text-slate-400 font-medium">
+                                No riders found. <a href="/Admin/Rider/Create" class="text-blue-600 font-bold">Create one</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+async function toggleStatus(riderId, btn) {
+    const res = await fetch('/Admin/Rider/ToggleStatus', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? ''
+        },
+        body: JSON.stringify(riderId)
+    });
+    const data = await res.json();
+    const isActive = data.isActive;
+    btn.classList.toggle('bg-blue-600', isActive);
+    btn.classList.toggle('bg-slate-200', !isActive);
+    btn.querySelector('span').classList.toggle('translate-x-6', isActive);
+    btn.querySelector('span').classList.toggle('translate-x-1', !isActive);
+    btn.dataset.active = isActive;
+}
+</script>

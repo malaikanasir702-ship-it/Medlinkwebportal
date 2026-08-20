@@ -1,0 +1,358 @@
+@model IEnumerable<MedLinkPortal.Areas.Admin.Models.Appointment>
+<div class="skeleton-container space-y-12 pb-20">
+    <div class="flex flex-col flex-md-row md:items-center justify-between gap-10 py-6">
+        <div class="w-full max-w-xl">
+            <div class="skeleton skeleton-title w-full h-16 md:h-24"></div>
+            <div class="skeleton skeleton-text w-3/4 h-6"></div>
+        </div>
+        <div class="skeleton w-48 h-16 rounded-[24px]"></div>
+    </div>
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-10">
+        <div class="xl:col-span-8">
+            <div class="skeleton-card h-[600px] space-y-8">
+                <div class="flex justify-between">
+                    <div class="skeleton skeleton-text w-48 h-8"></div>
+                    <div class="skeleton w-32 h-10 rounded-full"></div>
+                </div>
+                <div class="space-y-6">
+                    @for(int i=0; i<3; i++) {
+                        <div class="p-6 border border-slate-50 rounded-[32px] flex gap-8">
+                            <div class="w-24 h-12 skeleton rounded-xl"></div>
+                            <div class="flex-1 space-y-2">
+                                <div class="skeleton skeleton-text w-48 h-6"></div>
+                                <div class="skeleton skeleton-text w-32"></div>
+                            </div>
+                            <div class="w-24 h-10 skeleton rounded-full"></div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="xl:col-span-4 space-y-10">
+            <div class="skeleton-card h-[300px] bg-[#0F172A] opacity-50"></div>
+            <div class="skeleton-card h-[200px] bg-orange-50/30"></div>
+        </div>
+    </div>
+</div>
+<div class="main-content-actual content-hidden space-y-12 pb-20">
+    <div class="flex flex-col flex-md-row md:items-center justify-between gap-10 py-6">
+        <div class="animate-in fade-in slide-in-from-left-8 duration-1000">
+            <h1 class="text-6xl md:text-7xl font-semibold text-slate-900 tracking-tighter mb-4">
+                Clinical <span class="text-blue-600">Scheduling</span>
+            </h1>
+            <p class="text-slate-500 text-xl font-medium leading-relaxed max-w-2xl">
+                Real-time appointment orchestration and departmental load balancing.
+            </p>
+        </div>
+        <button id="btnOpenReserveModal" class="flex items-center gap-3 px-10 py-5 bg-[#0F172A] text-white rounded-[24px] text-sm font-semibold hover:bg-black transition-all shadow-xl active:scale-95 group">
+            <i class="fas fa-calendar-plus group-hover:rotate-12 transition-transform"></i> Reserve Slot
+        </button>
+    </div>
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-10">
+        <div class="xl:col-span-8">
+            <div class="bento-card p-5 md:p-12 h-full">
+                <div class="flex items-center justify-between mb-10">
+                    <h3 class="text-2xl font-semibold text-slate-900 tracking-tight">Active Itinerary</h3>
+                    <div class="flex gap-2 bg-slate-50 p-1.5 rounded-full border border-slate-100">
+                        <button id="btnViewToday" class="px-5 py-2 bg-white shadow-sm border border-slate-200 rounded-full text-[10px] font-semibold uppercase tracking-widest text-slate-900 transition-all view-btn active">Today</button>
+                        <button id="btnViewWeekly" class="px-5 py-2 text-slate-400 hover:text-slate-600 rounded-full text-[10px] font-semibold uppercase tracking-widest transition-all view-btn">Weekly</button>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    @foreach (var appt in Model) {
+                        <div class="flex flex-col md:flex-row md:items-center gap-8 p-6 rounded-[32px] hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group cursor-pointer border border-slate-50 appointment-item" 
+                             data-id="@appt.Id" data-time="@appt.AppointmentTime.ToString("yyyy-MM-ddTHH:mm")" 
+                             data-patient="@appt.PatientId" data-physician="@appt.PhysicianId" 
+                             data-type="@appt.ConsultationType" data-reason="@appt.Reason" data-status="@appt.Status">
+                            <div class="text-center md:min-w-[120px]">
+                                <p class="text-[10px] font-semibold text-blue-500 uppercase tracking-widest mb-1">Entry Time</p>
+                                <p class="text-lg font-semibold text-slate-900">@appt.AppointmentTime.ToString("hh:mm tt")</p>
+                            </div>
+                            <div class="hidden md:block h-12 w-px bg-slate-200"></div>
+                            <div class="flex-grow">
+                                <p class="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">@appt.Patient?.Name</p>
+                                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Type: @appt.ConsultationType • Lead: @appt.Physician?.Name • @appt.Physician?.Specialty</p>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <span class="inline-flex items-center px-5 py-2 @(appt.Status == "COMPLETED" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : appt.Status == "IN-PROGRESS" ? "bg-blue-500/10 text-blue-600 border-blue-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20") rounded-full text-[10px] font-semibold uppercase tracking-widest border border-opacity-20">
+                                    @appt.Status
+                                </span>
+                                <div class="flex gap-2">
+                                    <button class="w-10 h-10 flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:text-blue-600 hover:shadow-xl hover:scale-110 rounded-xl transition-all opacity-0 group-hover:opacity-100 btn-edit-appt">
+                                        <i class="fas fa-edit text-xs"></i>
+                                    </button>
+                                    <button class="w-10 h-10 flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:text-red-600 hover:shadow-xl hover:scale-110 rounded-xl transition-all opacity-0 group-hover:opacity-100 btn-delete-appt" data-id="@appt.Id">
+                                        <i class="fas fa-trash-alt text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="xl:col-span-4 space-y-10">
+            <div class="bento-card p-12 bg-[#0F172A] text-white relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-12 opacity-[0.05] group-hover:scale-125 transition-transform duration-700">
+                    <i class="fas fa-chart-pie text-[120px]"></i>
+                </div>
+                <h3 class="text-2xl font-semibold mb-8 tracking-tight relative z-10">Unit Utilization</h3>
+                <div class="space-y-10 relative z-10">
+                    @{
+                        var cardiologyLoad = 85;
+                        var neurologyLoad = 42;
+                    }
+                    <div>
+                        <div class="flex justify-between items-end mb-3">
+                            <div>
+                                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Cardiology Hub</p>
+                                <p class="text-sm font-bold text-white">High Capacity</p>
+                            </div>
+                            <span class="text-3xl font-semibold text-blue-400">@cardiologyLoad%</span>
+                        </div>
+                        <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                            <div class="bg-blue-500 h-full w-[@cardiologyLoad%] shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-in slide-in-from-left duration-1000"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-end mb-3">
+                            <div>
+                                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Neurology Wing</p>
+                                <p class="text-sm font-bold text-white">Optimal Load</p>
+                            </div>
+                            <span class="text-3xl font-semibold text-cyan-400">@neurologyLoad%</span>
+                        </div>
+                        <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                            <div class="bg-cyan-400 h-full w-[@neurologyLoad%] shadow-[0_0_15px_rgba(34,211,238,0.6)] animate-in slide-in-from-left duration-1000"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bento-card p-12 relative overflow-hidden group bg-orange-50/30 border-orange-100">
+                <div class="flex items-center gap-4 mb-6 text-orange-500">
+                    <i class="fas fa-exclamation-triangle text-2xl"></i>
+                    <h4 class="text-sm font-semibold text-slate-900 tracking-widest uppercase mb-0">Priority Alert</h4>
+                </div>
+                <p class="text-sm font-bold text-slate-500 leading-relaxed mb-8">Surge in outpatient requests detected for the evening shift. Recommend opening B-Wing for overflow.</p>
+                <button class="w-full py-5 bg-[#0F172A] text-white rounded-2xl text-[10px] font-semibold uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-95">Optimize Staffing</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="reserveModal" class="fixed inset-0 hidden items-center justify-center modal-overlay p-4 z-[100]">
+    <div class="modal-content w-full max-w-sm max-h-[90vh] overflow-hidden relative flex flex-col bg-white rounded-2xl shadow-2xl" style="background-color: #ffffff !important;">
+        <div class="p-4 pb-2 flex justify-between items-start flex-shrink-0 border-b border-slate-100">
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900 tracking-tight">Clinical <span class="text-blue-600">Reserve</span></h3>
+                <p class="text-slate-500 text-[9px] font-medium mt-0.5">Schedule a new consultation slot.</p>
+            </div>
+            <button id="btnCloseModal" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:text-slate-900 transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="reserveForm" class="p-4 space-y-3 overflow-y-auto flex-1">
+            <div class="space-y-0.5">
+                <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Patient</label>
+                <select name="PatientId" data-val="true" data-val-required="Patient is required" data-val-length="Patient ID cannot exceed 50 characters" data-val-length-max="50" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 transition-all text-xs">
+                    <option value="">Select Patient</option>
+                    @foreach(var p in ViewBag.Patients) {
+                        <option value="@p.Id">@p.Name (@p.Id)</option>
+                    }
+                </select>
+                <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="PatientId" data-valmsg-replace="true"></span>
+            </div>
+            <div class="space-y-0.5">
+                <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Lead Physician</label>
+                <select name="PhysicianId" data-val="true" data-val-required="Physician is required" data-val-length="Physician ID cannot exceed 50 characters" data-val-length-max="50" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 transition-all text-xs">
+                    <option value="">Select Physician</option>
+                    @foreach(var d in ViewBag.Physicians) {
+                        <option value="@d.Id">@d.Name - @d.Specialty</option>
+                    }
+                </select>
+                <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="PhysicianId" data-valmsg-replace="true"></span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Time Slot</label>
+                    <input type="datetime-local" name="AppointmentTime" data-val="true" data-val-required="Appointment time is required" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 transition-all text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="AppointmentTime" data-valmsg-replace="true"></span>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Type</label>
+                    <select name="ConsultationType" data-val="true" data-val-required="Consultation type is required" data-val-regex="Consultation type must be Video, Audio, or Chat" data-val-regex-pattern="^(Video|Audio|Chat)$" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 transition-all text-xs">
+                        <option value="">Select Type</option>
+                        <option value="Video">Video Call</option>
+                        <option value="Audio">Audio Call</option>
+                        <option value="Chat">Secure Chat</option>
+                    </select>
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="ConsultationType" data-valmsg-replace="true"></span>
+                </div>
+            </div>
+            <div class="space-y-0.5">
+                <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Consultation Notes</label>
+                <textarea name="Reason" data-val="true" data-val-length="Reason cannot exceed 500 characters" data-val-length-max="500" placeholder="Brief reason for the visit..." class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium text-slate-900 placeholder:text-slate-300 transition-all text-xs resize-none h-16"></textarea>
+                <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Reason" data-valmsg-replace="true"></span>
+            </div>
+            <input type="hidden" name="Status" data-val="true" data-val-required="Status is required" data-val-regex="Status must be Scheduled, Completed, Cancelled, or In-Progress" data-val-regex-pattern="^(Scheduled|Completed|Cancelled|In-Progress)$" value="Scheduled" />
+            <div class="pt-2 flex-shrink-0 border-t border-slate-100 mt-3">
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg active:scale-95">Validate & Reserve</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="deleteApptModal" class="fixed inset-0 hidden items-center justify-center modal-overlay transition-opacity duration-300 p-4 z-[100]">
+    <div class="modal-content w-full max-w-sm overflow-hidden relative p-8 md:p-10 text-center">
+        <div class="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-trash-alt text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-semibold text-slate-900 tracking-tight mb-2">Cancel Reservation?</h3>
+        <p class="text-slate-500 font-medium mb-8">This will remove the appointment from the schedule.</p>
+        <div class="flex gap-4">
+            <button id="btnCancelDelete" class="flex-1 py-4 bg-slate-50 text-slate-500 rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-slate-100 transition-all">Keep It</button>
+            <button id="btnConfirmDelete" class="flex-1 py-4 bg-red-500 text-white rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg active:scale-95">Yes, Cancel</button>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Initialize jQuery validation for appointment form
+            $('#reserveForm').validate({
+                errorClass: 'input-validation-error',
+                errorElement: 'span',
+                errorPlacement: function(error, element) {
+                    error.addClass('text-red-500 text-xs');
+                    error.insertAfter(element);
+                },
+                highlight: function(element) {
+                    $(element).addClass('border-red-500');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('border-red-500');
+                }
+            });
+            
+            const $reserveModal = $('#reserveModal');
+            const $reserveForm = $('#reserveForm');
+            function toggleModal($modal, show) {
+                if (show) {
+                    $modal.removeClass('hidden').addClass('flex');
+                    setTimeout(() => $modal.addClass('modal-open'), 10);
+                } else {
+                    $modal.removeClass('modal-open');
+                    // Immediate close - no delay
+                    $modal.removeClass('flex').addClass('hidden');
+                    if($modal.attr('id') === 'reserveModal') {
+                        $reserveForm[0].reset();
+                        $reserveForm.find('input[name="Id"]').remove();
+                        $reserveForm.find('h3').html('Clinical <span class="text-blue-600">Reserve</span>');
+                        $reserveForm.find('button[type="submit"]').text('Validate & Reserve');
+                        $reserveForm.find('input[name="Status"]').val('Scheduled');
+                    }
+                }
+            }
+            // View Toggling logic
+            function filterAppointments(view) {
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0];
+                // Get the start and end of the current week (ISO week)
+                const startOfWeek = new Date(now);
+                startOfWeek.setDate(now.getDate() - now.getDay());
+                startOfWeek.setHours(0,0,0,0);
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 7);
+                $('.appointment-item').each(function() {
+                    const apptTime = new Date($(this).data('time'));
+                    const apptDateStr = apptTime.toISOString().split('T')[0];
+                    if (view === 'today') {
+                        if (apptDateStr === todayStr) $(this).removeClass('hidden');
+                        else $(this).addClass('hidden');
+                    } else if (view === 'weekly') {
+                        if (apptTime >= startOfWeek && apptTime < endOfWeek) $(this).removeClass('hidden');
+                        else $(this).addClass('hidden');
+                    }
+                });
+            }
+            $('#btnViewToday').on('click', function() {
+                $('.view-btn').removeClass('active bg-white shadow-sm border border-slate-200 text-slate-900').addClass('text-slate-400');
+                $(this).addClass('active bg-white shadow-sm border border-slate-200 text-slate-900').removeClass('text-slate-400');
+                filterAppointments('today');
+            });
+            $('#btnViewWeekly').on('click', function() {
+                $('.view-btn').removeClass('active bg-white shadow-sm border border-slate-200 text-slate-900').addClass('text-slate-400');
+                $(this).addClass('active bg-white shadow-sm border border-slate-200 text-slate-900').removeClass('text-slate-400');
+                filterAppointments('weekly');
+            });
+            // Default to today
+            filterAppointments('today');
+            $('#btnOpenReserveModal').on('click', () => {
+                $reserveForm.find('h3').html('Clinical <span class="text-blue-600">Reserve</span>');
+                $reserveForm.find('button[type="submit"]').text('Validate & Reserve');
+                toggleModal($reserveModal, true);
+            });
+            $('#btnCloseModal').on('click', () => toggleModal($reserveModal, false));
+            $reserveForm.off('submit').on('submit', function(e) {
+                e.preventDefault();
+                const $form = $(this);
+                if (!$form.valid()) {
+                    return false;
+                }
+                const id = $(this).find('input[name="Id"]').val();
+                const url = id ? '/Appointment/Edit' : '/Appointment/Create';
+                const formData = $(this).serialize();
+                $.post(url, formData, function(res) {
+                    if (res.success) location.reload();
+                    else alert(res.message);
+                }).fail(function(xhr) {
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        const errors = xhr.responseJSON.errors;
+                        Object.keys(errors).forEach(function(key) {
+                            const errorMsg = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+                            $form.find('[data-valmsg-for="' + key + '"]').text(errorMsg).removeClass('field-validation-valid').addClass('field-validation-error');
+                        });
+                    } else {
+                        alert(xhr.responseJSON?.message || 'An error occurred');
+                    }
+                });
+            });
+            $(document).off('click', '.btn-edit-appt').on('click', '.btn-edit-appt', function() {
+                const $item = $(this).closest('.appointment-item');
+                const data = $item.data();
+                $reserveForm.find('h3').html('Edit <span class="text-blue-600">Slot</span>');
+                $reserveForm.find('button[type="submit"]').text('Update Reservation');
+                $reserveForm.find('[name="PatientId"]').val(data.patient);
+                $reserveForm.find('[name="PhysicianId"]').val(data.physician);
+                $reserveForm.find('[name="AppointmentTime"]').val(data.time);
+                $reserveForm.find('[name="ConsultationType"]').val(data.type);
+                $reserveForm.find('[name="Reason"]').val(data.reason);
+                $reserveForm.find('[name="Status"]').val(data.status);
+                if($reserveForm.find('input[name="Id"]').length === 0) {
+                    $reserveForm.append(`<input type="hidden" name="Id" value="${data.id}" />`);
+                } else {
+                    $reserveForm.find('input[name="Id"]').val(data.id);
+                }
+                toggleModal($reserveModal, true);
+            });
+            // Delete Logic
+            let deleteId = null;
+            $(document).off('click', '.btn-delete-appt').on('click', '.btn-delete-appt', function(e) {
+                e.stopPropagation();
+                deleteId = $(this).data('id');
+                toggleModal($('#deleteApptModal'), true);
+            });
+            $('#btnCancelDelete').off('click').on('click', function() {
+                toggleModal($('#deleteApptModal'), false);
+            });
+            $('#btnConfirmDelete').off('click').on('click', function() {
+                $.ajax({
+                    url: '/Appointment/Delete/' + deleteId,
+                    type: 'DELETE',
+                    success: function(res) {
+                        if (res.success) location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+}

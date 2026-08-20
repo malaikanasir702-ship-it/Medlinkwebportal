@@ -1,0 +1,254 @@
+@using Microsoft.AspNetCore.Identity
+@using MedLinkPortal.Areas.Identity.Pages.Account
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = "Customer Support";
+    Layout = "_PharmacistLayout";
+}
+
+<div class="h-[calc(100vh-2rem)] flex gap-6">
+    <!-- Chat List Sidebar -->
+    <div class="w-96 bg-white rounded-[2rem] shadow-sm border border-slate-100 flex flex-col overflow-hidden">
+        <div class="p-6 border-b border-slate-100">
+            <h2 class="text-xl font-black text-slate-900 tracking-tight mb-4">Messages</h2>
+            <div class="relative">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-4 top-3.5"></i>
+                <input type="text" placeholder="Search patients..." 
+                    class="w-full pl-11 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2" id="chatList">
+            <!-- Chat Items will be loaded here -->
+            <div class="flex items-center justify-center h-full text-slate-400 text-sm">
+                Loading chats...
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="flex-1 bg-white rounded-[2rem] shadow-sm border border-slate-100 flex flex-col overflow-hidden relative">
+        <!-- Chat Header -->
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-white z-10">
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <img id="activeChatImage" src="https://picsum.photos/seed/default/50/50" class="w-12 h-12 rounded-2xl object-cover shadow-sm bg-slate-100" />
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                </div>
+                <div>
+                    <h3 id="activeChatName" class="text-lg font-black text-slate-900 tracking-tight">Select a Chat</h3>
+                    <p id="activeChatStatus" class="text-xs font-bold text-slate-400">Online</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button class="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                    <i data-lucide="phone" class="w-5 h-5"></i>
+                </button>
+                <button class="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                    <i data-lucide="video" class="w-5 h-5"></i>
+                </button>
+                <div class="w-px h-8 bg-slate-100 mx-2"></div>
+                <button class="p-3 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all">
+                    <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="flex-1 overflow-y-auto p-8 space-y-8 bg-slate-50/50 custom-scrollbar relative" id="messageContainer">
+            <div class="flex flex-col items-center justify-center h-full text-slate-400 space-y-4">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="message-square" class="w-8 h-8 text-slate-300"></i>
+                </div>
+                <p>Select a conversation to start messaging</p>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-6 bg-white border-t border-slate-100 relative z-20">
+            <form id="replyForm" onsubmit="handleReplySubmit(event)" class="relative flex items-end gap-4">
+                <button type="button" class="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                    <i data-lucide="paperclip" class="w-5 h-5"></i>
+                </button>
+                <div class="flex-1 relative">
+                    <textarea id="replyInput" rows="1"
+                        class="w-full pl-6 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-sm resize-none"
+                        placeholder="Type your message..." disabled></textarea>
+                    <button type="button" class="absolute right-3 top-3 p-1.5 text-slate-400 hover:text-emerald-600 transition-all">
+                        <i data-lucide="smile" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <button id="sendBtn" type="submit" disabled class="p-4 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-2xl transition-all shadow-lg shadow-emerald-500/20">
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+<script>
+    let currentChatUserId = null;
+    const currentPharmacistId = "@UserManager.GetUserId(User)"; 
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .build();
+
+    connection.on("ReceiveMessage", (senderId, message, type, attachmentUrl, attachmentName, originalSenderId) => {
+        console.log("Pharmacist received message from:", senderId);
+        if (senderId === currentChatUserId) {
+            appendMessage(message, false);
+        }
+        loadActiveChats(); // Always refresh list to update last message/unread
+    });
+
+    connection.start().catch(err => console.error(err.toString()));
+
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        loadActiveChats();
+    });
+
+    async function loadActiveChats() {
+        try {
+            const res = await fetch('/Pharmacy/GetActiveChats');
+            if (!res.ok) throw new Error('Failed to load chats');
+            const users = await res.json();
+            const list = document.getElementById('chatList');
+            
+            if (users.length === 0) {
+                list.innerHTML = '<div class="text-center text-slate-400 p-4">No active conversations found.</div>';
+                return;
+            }
+
+            list.innerHTML = users.map(u => `
+                <div onclick="selectChat('${u.id}', '${u.name}', '${u.image}')" class="p-3 rounded-2xl hover:bg-slate-50 cursor-pointer transition-all border border-transparent hover:border-slate-100 group ${currentChatUserId === u.id ? 'bg-emerald-50 border-emerald-100' : ''}">
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <img src="${u.image}" class="w-12 h-12 rounded-xl object-cover bg-slate-100" />
+                            ${u.unreadCount > 0 ? `<div class="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">${u.unreadCount}</div>` : ''}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-0.5">
+                                <h4 class="font-bold text-slate-900 truncate group-hover:text-emerald-700 transition-colors">${u.name}</h4>
+                                <span class="text-[10px] font-bold text-slate-400">${u.lastMessageTime ? new Date(u.lastMessageTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</span>
+                            </div>
+                            <p class="text-xs font-medium text-slate-500 truncate group-hover:text-slate-600">${u.lastMessage || 'No messages yet'}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading chats:', error);
+            document.getElementById('chatList').innerHTML = '<div class="text-center text-red-500 p-4">Error loading chats. Please refresh.</div>';
+        }
+    }
+
+    async function selectChat(userId, userName, userImage) {
+        currentChatUserId = userId;
+        document.getElementById('activeChatName').innerText = userName;
+        document.getElementById('activeChatImage').src = userImage;
+        
+        document.getElementById('replyInput').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        
+        // Load History
+        const res = await fetch(`/Pharmacy/GetChatHistory?otherUserId=${userId}`);
+        const messages = await res.json();
+        
+        const container = document.getElementById('messageContainer');
+        container.innerHTML = '';
+        
+        // Group by Date logic can be added here
+        
+        messages.forEach(m => {
+            appendMessage(m.content, m.isMe);
+        });
+        
+        scrollToBottom();
+        
+        // Refresh list to highlight selection
+        loadActiveChats();
+    }
+
+    async function handleReplySubmit(e) {
+        e.preventDefault();
+        const input = document.getElementById('replyInput');
+        const text = input.value.trim();
+        
+        if (text && currentChatUserId) {
+            // Optimistic Append
+            appendMessage(text, true);
+
+            try {
+                // Use API for storage + notification
+                const response = await fetch('/Pharmacy/SendMessage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        receiverId: currentChatUserId,
+                        content: text
+                    })
+                });
+                
+                if (!response.ok) {
+                    console.error("Failed to reply via API");
+                }
+            } catch (err) {
+                console.error("Reply failed", err);
+            }
+            
+            input.value = '';
+        }
+    }
+
+    function appendMessage(text, isMe) {
+        const container = document.getElementById('messageContainer');
+         // Check if container is empty placeholder
+        if(container.children.length === 1 && container.children[0].classList.contains('items-center')) {
+            container.innerHTML = '';
+        }
+
+        const div = document.createElement('div');
+        div.className = isMe 
+            ? 'flex gap-4 max-w-[80%] ml-auto flex-row-reverse animate-in fade-in slide-in-from-bottom-2 duration-300'
+            : 'flex gap-4 max-w-[80%] animate-in fade-in slide-in-from-bottom-2 duration-300';
+            
+        div.innerHTML = isMe ? `
+            <div class="space-y-1 text-right">
+                <div class="p-4 bg-emerald-500 rounded-2xl rounded-tr-none text-sm text-white font-medium shadow-lg shadow-emerald-500/20 text-left">
+                    ${text}
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 pr-1">Just now</span>
+            </div>
+        ` : `
+            <div class="w-8 h-8 rounded-xl bg-slate-100 flex shrink-0 items-center justify-center text-slate-500 text-[10px]">
+                <img src="${document.getElementById('activeChatImage').src}" class="w-8 h-8 rounded-xl object-cover" onerror="this.style.display='none'; this.parentElement.innerText='PT'" />
+            </div>
+            <div class="space-y-2">
+                <div class="p-4 bg-white rounded-2xl rounded-tl-none text-sm text-slate-600 leading-relaxed border border-slate-100 shadow-sm">
+                    ${text}
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 pl-1">Just now</span>
+            </div>
+        `;
+        
+        container.appendChild(div);
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
+        const container = document.getElementById('messageContainer');
+        container.scrollTop = container.scrollHeight;
+    }
+</script>

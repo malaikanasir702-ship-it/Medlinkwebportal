@@ -1,0 +1,65 @@
+@model MedLinkPortal.Models.SubscriptionPlan
+
+@{
+    ViewData["Title"] = "Configure Plan";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="max-w-4xl animate-in fade-in duration-700">
+    <div class="mb-8">
+        <a href="@Url.Action("Index")" class="text-slate-400 hover:text-blue-600 text-xs font-semibold uppercase tracking-widest flex items-center gap-2 transition-all">
+            <i class="fas fa-arrow-left"></i> Back to Plans
+        </a>
+        <h2 class="text-3xl font-semibold text-slate-900 tracking-tight mt-4">Configure @Model.Name</h2>
+        <p class="text-slate-500 font-medium text-sm">Modify plan economics and capability thresholds.</p>
+    </div>
+
+    <div class="bento-card p-10 bg-white border border-slate-100 shadow-xl shadow-slate-200/50">
+        <form asp-action="Edit" method="post" class="space-y-8">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="CreatedAt" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Plan Name</label>
+                    <input asp-for="Name" class="w-full px-6 py-4 bg-slate-50 border-transparent rounded-2xl text-slate-900 font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" />
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Price per Month ($)</label>
+                    <input asp-for="Price" type="number" step="0.01" class="w-full px-6 py-4 bg-slate-50 border-transparent rounded-2xl text-slate-900 font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Patient Record Limit</label>
+                    <input asp-for="PatientLimit" type="number" class="w-full px-6 py-4 bg-slate-50 border-transparent rounded-2xl text-slate-900 font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" placeholder="-1 for Unlimited" />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Status</label>
+                    <select asp-for="IsActive" class="w-full px-6 py-4 bg-slate-50 border-transparent rounded-2xl text-slate-900 font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all outline-none appearance-none">
+                        <option value="true">Active & Visible</option>
+                        <option value="false">Inactive / Hidden</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Internal Description</label>
+                <textarea asp-for="Description" rows="3" class="w-full px-6 py-4 bg-slate-50 border-transparent rounded-2xl text-slate-900 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all outline-none resize-none"></textarea>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Features (Pipe-separated list)</label>
+                <textarea asp-for="Features" rows="3" class="w-full px-6 py-4 bg-slate-50 border-transparent rounded-2xl text-slate-900 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all outline-none resize-none" placeholder="Feature 1|Feature 2|Feature 3"></textarea>
+            </div>
+
+            <div class="pt-6 border-t border-slate-50 flex items-center justify-end gap-4">
+                <a href="@Url.Action("Index")" class="px-8 py-4 text-slate-500 font-bold text-xs uppercase tracking-widest hover:text-slate-900 transition-all">Cancel</a>
+                <button type="submit" class="px-10 py-5 bg-blue-600 text-white rounded-3xl font-semibold text-xs uppercase tracking-[0.2em] hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-500/30 transition-all active:scale-95 flex items-center gap-3">
+                    <i class="fas fa-save"></i> Synchronize Plan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

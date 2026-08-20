@@ -1,0 +1,132 @@
+@model IEnumerable<MedLinkPortal.Models.Hospital>
+
+@{
+    ViewData["Title"] = "Hospital Management";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml"; // Assuming standard admin layout
+}
+
+<!-- Lucide Icons Script -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<div class="p-8 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+        <div>
+            <h1 class="text-3xl font-semibold text-slate-900 tracking-tight mb-2">Hospital Management</h1>
+            <p class="text-slate-500 font-medium">Manage and verify partner hospitals for the Medical Tourism program.</p>
+        </div>
+        <a asp-action="Create" class="group bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-2xl font-bold flex items-center gap-3 transition-all shadow-lg shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5 active:scale-95">
+            <i data-lucide="plus" class="w-5 h-5 group-hover:rotate-90 transition-transform"></i>
+            <span>Add New Hospital</span>
+        </a>
+    </div>
+
+    <div class="bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-[0.2em] font-semibold border-b border-slate-100">
+                        <th class="px-8 py-6">Hospital Details</th>
+                        <th class="px-8 py-6">Location</th>
+                        <th class="px-8 py-6">Specialties</th>
+                        <th class="px-8 py-6">Status</th>
+                        <th class="px-8 py-6 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    @foreach (var item in Model) {
+                        <tr class="group hover:bg-slate-50/50 transition-all duration-300">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="relative">
+                                        @if(!string.IsNullOrEmpty(item.ImageUrl)) {
+                                            <img src="@item.ImageUrl" class="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow-md group-hover:scale-105 transition-transform duration-500" alt="@item.Name" />
+                                        } else {
+                                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center text-blue-600 font-semibold text-xl border-2 border-white shadow-md">
+                                                @item.Name.Substring(0,1)
+                                            </div>
+                                        }
+                                        @if(item.IsVerified) {
+                                            <div class="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-white shadow-sm">
+                                                <i data-lucide="check" class="w-2.5 h-2.5 stroke-[4]"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-slate-800 text-lg group-hover:text-blue-600 transition-colors">@item.Name</h3>
+                                        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 w-fit mt-1">
+                                            <span class="text-[10px] font-semibold text-slate-400">ID:</span>
+                                            <span class="text-[10px] font-semibold text-slate-500">@item.Id.ToString("D4")</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="flex flex-col">
+                                    <span class="text-slate-700 font-bold">@item.City</span>
+                                    <span class="text-slate-400 text-sm font-medium">@item.Country</span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="flex flex-wrap gap-2 max-w-[250px]">
+                                    @foreach (var spec in (item.Specialties?.Split(',') ?? Array.Empty<string>()).Take(2))
+                                    {
+                                        <span class="px-3 py-1 bg-white border border-slate-100 rounded-lg text-xs font-bold text-slate-600 shadow-sm">
+                                            @spec.Trim()
+                                        </span>
+                                    }
+                                    @if ((item.Specialties?.Split(',').Length ?? 0) > 2)
+                                    {
+                                        <span class="px-2 py-1 bg-slate-50 text-slate-400 text-[10px] font-semibold rounded-lg">
+                                            +@((item.Specialties?.Split(',').Length ?? 0) - 2)
+                                        </span>
+                                    }
+                                </div>
+                            </td>
+                             <td class="px-8 py-6">
+                                @if (item.IsVerified) {
+                                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 w-fit border border-blue-100 shadow-sm shadow-blue-500/5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                        <span class="text-[11px] font-semibold uppercase tracking-wider">Verified</span>
+                                    </div>
+                                } else {
+                                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 w-fit border border-amber-100 shadow-sm shadow-amber-500/5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        <span class="text-[11px] font-semibold uppercase tracking-wider">Pending</span>
+                                    </div>
+                                }
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="flex items-center justify-end gap-3">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-100 hover:bg-blue-50 transition-all duration-300 shadow-sm active:scale-95" title="Edit">
+                                        <i data-lucide="edit-3" class="w-4.5 h-4.5"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 hover:bg-indigo-50 transition-all duration-300 shadow-sm active:scale-95" title="View Full Details">
+                                        <i data-lucide="eye" class="w-4.5 h-4.5"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:border-rose-100 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-95" title="Archive / Delete">
+                                        <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        
+        @if (!Model.Any())
+        {
+            <div class="py-20 flex flex-col items-center justify-center text-center">
+                <div class="w-24 h-24 rounded-[32px] bg-slate-50 flex items-center justify-center text-slate-200 mb-6">
+                    <i data-lucide="pro-hospital" class="w-12 h-12"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-1">No Hospitals Found</h3>
+                <p class="text-slate-500 font-medium max-w-xs mx-auto">Click the button above to register your first partner hospital.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>

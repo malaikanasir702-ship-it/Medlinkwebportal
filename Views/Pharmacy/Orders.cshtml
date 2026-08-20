@@ -1,0 +1,146 @@
+@model List<MedLinkPortal.Models.PharmacyOrder>
+@{
+    ViewData["Title"] = "Order History";
+    Layout = "_PharmacistLayout";
+}
+
+<div class="min-h-screen bg-slate-50/50 pb-20">
+    <div class="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+            <div class="flex items-center gap-6">
+                <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
+                    <i data-lucide="history" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Order History</h1>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Complete Archive of Transactions</p>
+                </div>
+            </div>
+            
+            <div class="relative group z-20">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
+                <input type="text" id="orderSearch" placeholder="Search orders..." class="pl-12 pr-4 py-3 bg-white border border-slate-100 rounded-xl text-sm font-bold text-slate-700 shadow-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none w-64 transition-all">
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden relative">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-100">
+                            <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Order ID</th>
+                            <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
+                            <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Items</th>
+                            <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Amount</th>
+                            <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                            <th class="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50" id="ordersTableBody">
+                        @foreach (var order in Model)
+                        {
+                            <tr class="group hover:bg-slate-50/50 transition-colors duration-200">
+                                <td class="p-6">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs">
+                                            #@order.Id
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-6">
+                                    <p class="text-sm font-bold text-slate-900">@order.CreatedAt.ToString("MMM dd, yyyy")</p>
+                                    <p class="text-xs font-medium text-slate-400">@order.CreatedAt.ToString("hh:mm tt")</p>
+                                </td>
+                                <td class="p-6">
+                                    <div class="flex -space-x-2">
+                                        @foreach(var item in order.OrderItems.Take(3))
+                                        {
+                                            <div class="w-8 h-8 rounded-full bg-white border-2 border-white shadow-sm flex items-center justify-center text-[10px] font-bold text-slate-600" title="@item.Medicine.Name">
+                                                @item.Medicine.Name.Substring(0,1)
+                                            </div>
+                                        }
+                                        @if(order.OrderItems.Count > 3)
+                                        {
+                                            <div class="w-8 h-8 rounded-full bg-slate-100 border-2 border-white shadow-sm flex items-center justify-center text-[9px] font-black text-slate-500">
+                                                +@(order.OrderItems.Count - 3)
+                                            </div>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="p-6">
+                                    <span class="text-sm font-black text-emerald-600">PKR @order.TotalAmount.ToString("N0")</span>
+                                </td>
+                                <td class="p-6">
+                                    @switch(order.Status)
+                                    {
+                                        case MedLinkPortal.Models.PharmacyOrderStatus.Pending:
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-wider">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending
+                                            </span>
+                                            break;
+                                        case MedLinkPortal.Models.PharmacyOrderStatus.Accepted:
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Accepted
+                                            </span>
+                                            break;
+                                        case MedLinkPortal.Models.PharmacyOrderStatus.OnTheWay:
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-wider">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> On The Way
+                                            </span>
+                                            break;
+                                        case MedLinkPortal.Models.PharmacyOrderStatus.Delivered:
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-wider">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Delivered
+                                            </span>
+                                            break;
+                                        case MedLinkPortal.Models.PharmacyOrderStatus.Cancelled:
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-wider">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Cancelled
+                                            </span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="p-6 text-right">
+                                    <a href="/Pharmacy/OrderDetails/@order.Id" class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-20">
+                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+                        <i data-lucide="history" class="w-12 h-12 text-slate-300"></i>
+                    </div>
+                    <h3 class="text-slate-900 font-bold text-lg">No orders found</h3>
+                    <p class="text-slate-500 text-sm mt-2">History will appear here once orders are placed.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('orderSearch').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#ordersTableBody tr');
+
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    });
+</script>

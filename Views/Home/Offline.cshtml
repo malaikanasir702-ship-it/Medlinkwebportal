@@ -1,0 +1,58 @@
+@{
+    ViewData["Title"] = "You're Offline";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Disconnected | MedLink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Outfit', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-md w-full text-center space-y-8">
+        <!-- Animated Icon Container -->
+        <div class="relative inline-block">
+            <div class="absolute inset-0 bg-blue-100 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+            <div class="relative w-24 h-24 bg-white rounded-[32px] shadow-2xl flex items-center justify-center border border-blue-50">
+                <i data-lucide="wifi-off" class="w-10 h-10 text-blue-600"></i>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <h1 class="text-4xl font-black text-slate-900 tracking-tight">You're Offline</h1>
+            <p class="text-slate-500 font-medium leading-relaxed">
+                It looks like you've lost your connection. Don't worry, some features are still available offline.
+            </p>
+        </div>
+
+        <div class="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl space-y-4">
+            <div class="flex items-center gap-4 text-left p-4 bg-slate-50 rounded-2xl border border-slate-100 italic text-slate-600 text-sm">
+                 <i data-lucide="info" class="w-5 h-5 text-blue-600 shrink-0"></i>
+                 Previously visited health records and appointment details remain accessible.
+            </div>
+            
+            <button onclick="window.location.reload()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:scale-[1.02] transition-all flex items-center justify-center gap-3">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                Retry Connection
+            </button>
+        </div>
+
+        <p class="text-[10px] uppercase font-black tracking-[0.3em] text-slate-300">MedLink Health Portal</p>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

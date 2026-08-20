@@ -1,0 +1,232 @@
+﻿<div id="bookingModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 animate-in fade-in duration-300">
+    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="toggleModal('bookingModal')"></div>
+
+    <div class="relative w-full max-w-xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-300">
+        <form id="bookingForm" method="post" action="/Home/BookAppointment">
+            <input type="hidden" id="doctorId" name="doctorId" value="" />
+
+            <div class="flex flex-col h-full max-h-[90vh]">
+                <div class="p-8 pb-4">
+                    <button type="button" onclick="toggleModal('bookingModal')"
+                            class="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-100 transition-colors z-10">
+                        <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+                    </button>
+
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Book an Appointment</h2>
+                    <p class="text-gray-500 text-sm">Fill in the details below to schedule your consultation.</p>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-8 pt-2">
+                    <div id="bookingStep1">
+                        <div class="space-y-6">
+                            <div id="selectedDoctorInfo" class="hidden flex items-center gap-4 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                                <img id="selectedDoctorImage" class="w-14 h-14 rounded-xl object-cover" alt="Doctor">
+                                <div>
+                                    <p class="text-xs font-bold text-blue-600 uppercase tracking-wider">Consulting with</p>
+                                    <h4 id="selectedDoctorName" class="font-bold text-gray-900"></h4>
+                                    <p id="selectedDoctorSpecialty" class="text-xs text-gray-500"></p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Consultation Type</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button type="button" onclick="setConsultationType('video')"
+                                                class="flex items-center justify-center gap-2 p-3 rounded-xl border font-medium transition-all bg-white border-gray-200 text-gray-600 hover:border-blue-200 consultation-type-btn" data-type="video">
+                                            <i data-lucide="video" class="w-4.5 h-4.5"></i> Video Call
+                                        </button>
+                                        <button type="button" onclick="setConsultationType('chat')"
+                                                class="flex items-center justify-center gap-2 p-3 rounded-xl border font-medium transition-all bg-white border-gray-200 text-gray-600 hover:border-blue-200 consultation-type-btn" data-type="chat">
+                                            <i data-lucide="message-circle" class="w-4.5 h-4.5"></i> Secure Chat
+                                        </button>
+                                        <input type="hidden" id="consultationType" name="type" value="video" />
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">Full Name *</label>
+                                        <div class="relative">
+                                            <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4.5 h-4.5"></i>
+                                            <input type="text" name="name" placeholder="John Doe" required
+                                                   class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">Email Address *</label>
+                                        <div class="relative">
+                                            <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4.5 h-4.5"></i>
+                                            <input type="email" name="email" placeholder="john@example.com" required
+                                                   class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" onclick="nextBookingStep()"
+                                        class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed group">
+                                    Next Step
+                                    <i data-lucide="chevron-right" class="w-4.5 h-4.5 group-hover:translate-x-1 transition-transform"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="bookingStep2" class="hidden">
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Select Date *</label>
+                                <div class="relative">
+                                    <i data-lucide="calendar" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4.5 h-4.5"></i>
+                                    <input type="date" name="date" required
+                                           class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Available Time Slots *</label>
+                                <div id="dynamicSlotsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    <p class="col-span-full text-xs text-gray-400 italic py-4 text-center">Please select a date first...</p>
+                                </div>
+                                <input type="hidden" id="appointmentTime" name="time" value="" />
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Additional Notes (Optional)</label>
+                                <div class="relative">
+                                    <i data-lucide="message-square" class="absolute left-4 top-4 text-gray-400 w-4.5 h-4.5"></i>
+                                    <textarea name="note" placeholder="Briefly describe your symptoms..." rows="3"
+                                              class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <button type="button" onclick="prevBookingStep()"
+                                        class="flex-1 bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold hover:bg-gray-200 transition-all">
+                                    Back
+                                </button>
+                                <button type="submit"
+                                        class="flex-[2] bg-blue-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 active:scale-95">
+                                    Confirm Appointment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="bookingSuccess" class="hidden text-center py-10">
+                        <div class="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
+                            <i data-lucide="check-circle-2" class="w-12 h-12"></i>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900 mb-4">Appointment Confirmed!</h3>
+                        <p class="text-gray-500 mb-8 max-w-sm mx-auto">
+                            A confirmation email has been sent to <span id="userEmail" class="text-gray-900 font-bold"></span> with meeting instructions.
+                        </p>
+                        <div class="bg-gray-50 rounded-2xl p-6 text-left space-y-3 mb-10">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500 text-sm">Date</span>
+                                <span id="confirmedDate" class="font-bold text-gray-900"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500 text-sm">Time</span>
+                                <span id="confirmedTime" class="font-bold text-gray-900"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500 text-sm">Doctor</span>
+                                <span id="confirmedDoctor" class="font-bold text-gray-900"></span>
+                            </div>
+                        </div>
+                        <button type="button" onclick="toggleModal('bookingModal')"
+                                class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold hover:bg-black transition-all">
+                            Close & Done
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let currentBookingStep = 1;
+    let selectedConsultationType = 'video';
+    let selectedTimeSlot = '';
+
+    function setConsultationType(type) {
+        selectedConsultationType = type;
+        document.getElementById('consultationType').value = type;
+
+        document.querySelectorAll('.consultation-type-btn').forEach(btn => {
+            if (btn.dataset.type === type) {
+                btn.classList.add('bg-blue-600', 'border-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-200');
+                btn.classList.remove('bg-white', 'border-gray-200', 'text-gray-600');
+            } else {
+                btn.classList.remove('bg-blue-600', 'border-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-200');
+                btn.classList.add('bg-white', 'border-gray-200', 'text-gray-600');
+            }
+        });
+    }
+
+    function setAppointmentTime(time) {
+        selectedTimeSlot = time;
+        document.getElementById('appointmentTime').value = time;
+
+        document.querySelectorAll('.time-slot-btn').forEach(btn => {
+            if (btn.dataset.time === time) {
+                btn.classList.add('bg-blue-600', 'border-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-200');
+                btn.classList.remove('bg-white', 'border-gray-200', 'text-gray-600');
+            } else {
+                btn.classList.remove('bg-blue-600', 'border-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-200');
+                btn.classList.add('bg-white', 'border-gray-200', 'text-gray-600');
+            }
+        });
+    }
+
+    function nextBookingStep() {
+        document.getElementById('bookingStep1').classList.add('hidden');
+        document.getElementById('bookingStep2').classList.remove('hidden');
+        currentBookingStep = 2;
+    }
+
+    function prevBookingStep() {
+        document.getElementById('bookingStep2').classList.add('hidden');
+        document.getElementById('bookingStep1').classList.remove('hidden');
+        currentBookingStep = 1;
+    }
+
+    // Dynamic Slot Fetching
+    document.querySelector('input[name="date"]')?.addEventListener('change', async function() {
+        const date = this.value;
+        const doctorId = document.getElementById('doctorId').value;
+        const container = document.getElementById('dynamicSlotsContainer');
+
+        if (!date || !doctorId) return;
+
+        container.innerHTML = '<div class="col-span-full flex justify-center py-4"><div class="w-5 h-5 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div></div>';
+
+        try {
+            const response = await fetch(`/Home/GetAvailableSlotsForDoctor?doctorId=${doctorId}&date=${date}`);
+            const result = await response.json();
+
+            if (result.success && result.slots.length > 0) {
+                container.innerHTML = result.slots.map(s => `
+                    <button type="button" onclick="setAppointmentTime('${s.time}')"
+                            class="p-3 rounded-xl border text-sm font-bold transition-all bg-white border-gray-200 text-gray-600 hover:border-blue-200 time-slot-btn" data-time="${s.time}">
+                        ${s.time}
+                    </button>
+                `).join('');
+                lucide.createIcons();
+            } else {
+                container.innerHTML = '<p class="col-span-full text-xs text-rose-500 font-bold py-4 text-center">No availability for this date.</p>';
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            container.innerHTML = '<p class="col-span-full text-xs text-rose-500 font-bold py-4 text-center">Failed to load slots.</p>';
+        }
+    });
+
+    // Initialize form
+    document.addEventListener('DOMContentLoaded', function() {
+        setConsultationType('video');
+        // ... (rest of search/logic remains)
+    });
+</script>

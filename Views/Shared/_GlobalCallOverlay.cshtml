@@ -1,0 +1,345 @@
+@* Global Premium WebRTC Call Overlay - Modernized & Unified *@
+@* Replaces legacy small widgets with the full-screen professional overlay *@
+
+<div x-data="globalCallApp()" 
+     @@call-initiated.window="initiateCall($event.detail.targetId, $event.detail.targetName, $event.detail.type)"
+     x-cloak>
+    
+    <!-- Professional WhatsApp Style Call Overlay -->
+    <div x-show="callState.active || callState.status === 'ended'" 
+         class="fixed inset-0 z-[3000] flex items-center justify-center p-0 lg:p-6 overflow-hidden transition-all duration-500 ease-in-out"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         :class="callState.active ? 'opacity-100' : 'opacity-0 pointer-events-none'">
+        
+        <!-- Background Blur Overlay -->
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-2xl transition-opacity duration-700"
+             :class="callState.active ? 'opacity-100' : 'opacity-0'"></div>
+
+        <!-- Main Call Container -->
+        <div class="w-full h-full lg:max-w-5xl lg:h-[85vh] lg:rounded-[3.5rem] relative overflow-hidden flex flex-col bg-[#050505] border border-white/5 shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-transform duration-500"
+             :class="callState.active ? 'scale-100' : 'scale-95'">
+            
+            <!-- Video Grid / Stage -->
+            <div class="flex-1 relative bg-black">
+                <!-- Remote Video (Full Screen) -->
+                <video x-ref="remoteVideo" autoplay playsinline 
+                       class="w-full h-full object-cover transition-all duration-1000 ease-in-out"
+                       :class="callState.type === 'video' && callState.status === 'connected' ? 'opacity-100' : 'opacity-0'"></video>
+                
+                <!-- Audio Placeholder UI -->
+                <div x-show="callState.type === 'audio' || callState.status !== 'connected'" 
+                     class="absolute inset-0 flex flex-col items-center justify-center pb-32 sm:pb-40 z-10 animate-in fade-in zoom-in duration-1000">
+                    
+                    <!-- Dynamic Blur Ring -->
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-blue-500/30 blur-[100px] rounded-full scale-150 transition-all duration-1000"
+                             :class="callState.status === 'ringing' || callState.status === 'connecting' ? 'animate-pulse' : ''"></div>
+                        
+                        <!-- Professional Avatar Display -->
+                        <div class="relative z-10 w-32 h-32 xs:w-40 xs:h-40 lg:w-56 lg:h-56 p-1 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 shadow-2xl overflow-hidden">
+                            <template x-if="callerAvatar">
+                                <img :src="callerAvatar" class="w-full h-full rounded-full object-cover shadow-inner ring-2 ring-white/5">
+                            </template>
+                            <template x-if="!callerAvatar">
+                                <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center">
+                                    <i data-lucide="user" class="w-12 h-12 lg:w-20 lg:h-20 text-white/20"></i>
+                                </div>
+                            </template>
+                            
+                            <!-- Status Badge (iOS Style) -->
+                            <div x-show="callState.status === 'ringing' || callState.status === 'connecting'" 
+                                 class="absolute -bottom-1 left-1/2 -translate-x-1/2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 animate-bounce">
+                                <span class="text-[9px] font-black text-white uppercase tracking-wider whitespace-nowrap" 
+                                      x-text="callState.status === 'ringing' ? 'Incoming' : 'Linking...'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 md:mt-12 text-center px-4 flex flex-col items-center w-full">
+                        <h3 class="text-xl sm:text-2xl lg:text-4xl font-black text-white tracking-tight mb-2 truncate max-w-[90%] sm:max-w-md lg:max-w-2xl" x-text="callerName || 'Connected User'"></h3>
+                        <p class="text-slate-400 font-bold uppercase tracking-widest text-[9px] lg:text-xs">
+                            <span x-show="callState.status === 'connected'" class="text-emerald-400" x-text="callState.duration">00:00</span>
+                            <span x-show="callState.status !== 'connected'" x-text="callState.status === 'ringing' ? 'Secure Audio Link' : 'Establishing Secure Node'"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Local PiP Video -->
+                <div id="draggablePiP_Global" x-show="callState.status === 'connected' && callState.type === 'video'" 
+                     class="absolute top-8 right-8 w-36 h-52 lg:w-56 lg:h-72 bg-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 z-[100] group cursor-grab active:cursor-grabbing select-none hover:shadow-blue-500/20"
+                     style="touch-action: none;">
+                    <video x-ref="localVideo" autoplay playsinline muted class="w-full h-full object-cover -scale-x-100"></video>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+
+                <!-- System Information (iOS Style) -->
+                <div class="absolute top-8 left-8 z-40 bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-3">
+                     <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                     <span class="text-[10px] font-black text-white/80 uppercase tracking-widest">E2E Secure</span>
+                </div>
+            </div>
+
+            <!-- Ended Screen State -->
+            <template x-if="callState.status === 'ended'">
+                <div class="absolute inset-0 z-50 bg-black/90 backdrop-blur-3xl flex flex-col items-center justify-center text-white p-6 animate-in fade-in duration-500">
+                    <div class="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mb-8 border border-white/10">
+                        <i data-lucide="award" class="w-10 h-10 text-slate-400"></i>
+                    </div>
+                    <h2 class="text-4xl font-black mb-3">Session Summary</h2>
+                    <div class="flex items-center gap-4 text-slate-400 font-bold uppercase tracking-widest text-xs mb-12">
+                         <span>Duration: <span class="text-white" x-text="callState.duration"></span></span>
+                         <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+                         <span>Connection: <span class="text-white">Secure</span></span>
+                    </div>
+                    <button type="button" @@click="closeCallScreen()" class="px-12 py-5 bg-white text-black rounded-full font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all hover:scale-105 active:scale-95 shadow-xl">
+                        Return to Hub
+                    </button>
+                </div>
+            </template>
+
+            <!-- Floating Controls Dock (Apple Dynamic Style) -->
+            <div class="absolute bottom-10 left-0 right-0 z-50 px-6 pointer-events-none">
+                
+                <!-- Incoming Call Actions -->
+                <div x-show="callState.status === 'ringing'" class="flex items-center justify-center gap-10 sm:gap-16 pointer-events-auto animate-in slide-in-from-bottom-12 duration-700">
+                    <div class="flex flex-col items-center gap-3 group">
+                        <button @@click="rejectCall()" class="w-16 h-16 sm:w-20 sm:h-20 bg-red-600 text-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.4)] hover:bg-red-700 transition-all hover:scale-110 active:scale-90">
+                            <i data-lucide="phone-off" class="w-7 h-7 sm:w-9 sm:h-9"></i>
+                        </button>
+                        <span class="text-[9px] sm:text-[10px] font-black text-white/40 uppercase tracking-widest group-hover:text-white transition-colors">Decline</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-3 group">
+                        <button @@click="acceptCall()" class="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:bg-emerald-600 transition-all hover:scale-110 active:scale-90 ring-4 ring-emerald-500/20">
+                            <i data-lucide="phone" class="w-7 h-7 sm:w-9 sm:h-9"></i>
+                        </button>
+                        <span class="text-[9px] sm:text-[10px] font-black text-white/40 uppercase tracking-widest group-hover:text-white transition-colors">Accept</span>
+                    </div>
+                </div>
+
+                <!-- Active In-Call Dock -->
+                <div x-show="callState.status === 'connected' || callState.status === 'connecting'" 
+                     class="max-w-fit mx-auto flex items-center gap-4 sm:gap-8 bg-white/10 backdrop-blur-3xl px-6 py-4 sm:px-10 sm:py-5 rounded-[2.5rem] sm:rounded-[3rem] border border-white/10 shadow-2xl pointer-events-auto animate-in slide-in-from-bottom-10 duration-700">
+                    
+                    <button @@click="toggleMute()" 
+                            class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all border border-white/5"
+                            :class="callState.muted ? 'bg-white text-black' : 'bg-white/5 text-slate-300 hover:bg-white/10'">
+                        <i :data-lucide="callState.muted ? 'mic-off' : 'mic'" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Centered End Call (Focus) -->
+                    <button @@click="endCall()" 
+                            class="w-16 h-12 sm:w-20 sm:h-16 bg-red-600 text-white rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center shadow-xl hover:bg-red-700 active:scale-90 transition-all transform hover:-translate-y-1">
+                        <i data-lucide="phone-off" class="w-6 h-6 sm:w-8 sm:h-8"></i>
+                    </button>
+
+                    <button @@click="toggleVideo()" 
+                            class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all border border-white/5"
+                            x-show="callState.type === 'video'"
+                            :class="callState.videoOff ? 'bg-white text-black' : 'bg-white/5 text-slate-300 hover:bg-white/10'">
+                        <i :data-lucide="callState.videoOff ? 'video-off' : 'video'" class="w-5 h-5"></i>
+                    </button>
+
+                    <template x-if="callState.type === 'audio'">
+                        <button class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center bg-white/5 text-slate-300 border border-white/5 hover:bg-white/10 transition-all">
+                            <i data-lucide="speaker" class="w-5 h-5"></i>
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden global audio for WebRTC audio calls -->
+    <audio id="globalRemoteAudio" autoplay></audio>
+</div>
+
+<script>
+    function globalCallApp() {
+        return {
+            callState: {
+                active: false,
+                type: null,
+                status: 'idle', 
+                muted: false,
+                videoOff: false,
+                duration: '00:00'
+            },
+            callerName: '',
+            callerAvatar: null,
+            rtc: null,
+            callTimer: null,
+            secondsElapsed: 0,
+
+            async init() {
+                console.log("GlobalCall: Initializing...");
+                
+                // Wait for layout's hub connection
+                let checkHub = setInterval(() => {
+                    if (window.chatHubConnection) {
+                        clearInterval(checkHub);
+                        this.setupRTC(window.chatHubConnection);
+                    }
+                }, 500);
+
+                this.$watch('callState.status', (val) => {
+                    this.$nextTick(() => lucide && lucide.createIcons());
+                });
+            },
+
+            setupRTC(hubConn) {
+                this.rtc = new WebRTCHandler(hubConn);
+
+                this.rtc.onCallIncoming = (callerId, type, callerName) => {
+                    this.callerName = callerName || callerId.split('@@')[0] || 'Incoming Call';
+                    this.callState.active = true;
+                    this.callState.type = type;
+                    this.callState.status = 'ringing';
+                };
+
+                this.rtc.onStatusChange = (status) => {
+                    this.callState.status = status;
+                    if (status === 'connected') {
+                        this.callState.active = true;
+                        this.startCallTimer();
+                    }
+                };
+
+                this.rtc.onLocalStream = (stream) => {
+                    this.$nextTick(() => {
+                        if (this.$refs.localVideo) {
+                            this.$refs.localVideo.srcObject = stream;
+                            this.$refs.localVideo.muted = true; // Always mute local to prevent recursive feedback
+                        }
+                    });
+                };
+
+                this.rtc.onRemoteStream = (stream) => {
+                    this.$nextTick(() => {
+                        console.log("GlobalCall: Binding remote stream to elements");
+                        const audio = document.getElementById('globalRemoteAudio');
+                        if (audio) {
+                            audio.srcObject = stream;
+                            audio.play().catch(e => console.warn("Audio play blocked", e));
+                        }
+                        
+                        if (this.$refs.remoteVideo) {
+                            this.$refs.remoteVideo.srcObject = stream;
+                            this.$refs.remoteVideo.play().catch(e => console.warn("Video play blocked", e));
+                        }
+                    });
+                };
+
+                this.rtc.onCallEnded = () => {
+                    this.callState.status = 'ended';
+                    this.stopCallTimer();
+                    window.dispatchEvent(new CustomEvent('call-ended', { 
+                        detail: { 
+                            duration: this.callState.duration,
+                            type: this.callState.type
+                        } 
+                    }));
+                };
+
+                this.rtc.onCallRejected = () => {
+                    this.callState.active = false;
+                    this.callState.status = 'idle';
+                    window.dispatchEvent(new CustomEvent('call-rejected'));
+                };
+
+                window.globalCallHandler = this; // Backward compatibility if needed
+            },
+
+            async initiateCall(targetId, targetName, type) {
+                if (!this.rtc) return;
+                this.callerName = targetName;
+                this.callState.active = true;
+                this.callState.type = type;
+                this.callState.status = 'connecting';
+                try {
+                    await this.rtc.initiateCall(targetId, type);
+                } catch (e) {
+                    console.error("Call init failed", e);
+                    this.callState.active = false;
+                }
+            },
+
+            acceptCall() { this.rtc?.acceptCall(); },
+            rejectCall() { this.rtc?.rejectCall(); this.callState.active = false; },
+            endCall() { this.rtc?.endCall(); },
+            
+            toggleMute() { 
+                this.rtc?.toggleMute(); 
+                this.callState.muted = this.rtc?.currentCall.muted;
+            },
+            toggleVideo() { 
+                this.rtc?.toggleVideo(); 
+                this.callState.videoOff = this.rtc?.currentCall.videoOff;
+            },
+
+            closeCallScreen() {
+                this.callState.active = false;
+                this.callState.status = 'idle';
+                this.stopCallTimer();
+            },
+
+            startCallTimer() {
+                this.secondsElapsed = 0;
+                if (this.callTimer) clearInterval(this.callTimer);
+                this.callTimer = setInterval(() => {
+                    this.secondsElapsed++;
+                    const m = Math.floor(this.secondsElapsed / 60);
+                    const s = this.secondsElapsed % 60;
+                    this.callState.duration = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                }, 1000);
+            },
+
+            stopCallTimer() {
+                if (this.callTimer) clearInterval(this.callTimer);
+                this.callTimer = null;
+            }
+        };
+    }
+
+    // Global initializer for Draggable PiP (Shared)
+    document.addEventListener("DOMContentLoaded", function() {
+        let pip = null;
+        let isDragging = false;
+        let startX, startY, currentX = 0, currentY = 0, savedX = 0, savedY = 0;
+
+        const initDrag = () => {
+            pip = document.getElementById('draggablePiP_Global');
+            if (!pip) return setTimeout(initDrag, 1000);
+
+            pip.onmousedown = (e) => {
+                isDragging = true;
+                startX = e.clientX; startY = e.clientY;
+                e.preventDefault();
+            };
+
+            window.onmousemove = (e) => {
+                if (!isDragging) return;
+                let dx = e.clientX - startX;
+                let dy = e.clientY - startY;
+                currentX = savedX + dx;
+                currentY = savedY + dy;
+                pip.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+            };
+
+            window.onmouseup = () => {
+                if (isDragging) {
+                    isDragging = false;
+                    savedX = currentX; savedY = currentY;
+                }
+            };
+        };
+        initDrag();
+    });
+</script>
+
+<style>
+    [x-cloak] { display: none !important; }
+    .animate-bounce { animation: bounce 1s infinite; }
+    @@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+</style>

@@ -1,0 +1,142 @@
+@model MedLinkPortal.Models.Hospital
+
+@{
+    ViewData["Title"] = "Add Hospital";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Lucide Icons Script -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<div class="p-8 max-w-4xl mx-auto animate-in slide-in-from-bottom-4 duration-700">
+    <div class="mb-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                    <i data-lucide="hospital" class="w-6 h-6"></i>
+                </div>
+                <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">Add Hospital</h1>
+            </div>
+            <p class="text-slate-500 font-medium">Register a new flagship partner hospital for our tourism network.</p>
+        </div>
+        <a asp-action="Index" class="group flex items-center gap-2 text-slate-400 hover:text-slate-900 font-bold transition-all px-4 py-2 rounded-xl hover:bg-slate-50">
+            <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
+            <span>Back to Directory</span>
+        </a>
+    </div>
+
+    <div class="bg-white rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.06)] border border-slate-100 overflow-hidden">
+        <form asp-action="Create" class="p-8 md:p-12">
+            <div asp-validation-summary="ModelOnly" class="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-2xl mb-8 text-sm font-bold flex items-center gap-3">
+                <i data-lucide="alert-circle" class="w-5 h-5 grow-0 shrink-0"></i>
+                <span>Please correct the errors below to continue.</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+                <!-- Basic Information Section -->
+                <div class="col-span-2">
+                    <h3 class="text-[11px] uppercase tracking-[0.2em] font-semibold text-slate-400 mb-6">General Information</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label asp-for="Name" class="block text-sm font-bold text-slate-700 mb-2.5 ml-1">Hospital Name</label>
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-500 transition-colors">
+                                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                                </div>
+                                <input asp-for="Name" class="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-900 group-hover:border-slate-300 shadow-sm" placeholder="e.g. Aga Khan University Hospital" />
+                            </div>
+                            <span asp-validation-for="Name" class="text-rose-500 text-xs font-bold mt-2 inline-block ml-1"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location Section -->
+                <div>
+                    <label asp-for="City" class="block text-sm font-bold text-slate-700 mb-2.5 ml-1">City</label>
+                    <input asp-for="City" class="w-full px-4 py-4 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-900 hover:border-slate-300 shadow-sm" placeholder="e.g. Karachi" />
+                    <span asp-validation-for="City" class="text-rose-500 text-xs font-bold mt-2 inline-block ml-1"></span>
+                </div>
+                <div>
+                    <label asp-for="Country" class="block text-sm font-bold text-slate-700 mb-2.5 ml-1">Country</label>
+                    <div class="relative">
+                        <select asp-for="Country" class="w-full px-4 py-4 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-900 hover:border-slate-300 shadow-sm appearance-none bg-white">
+                            <option value="Pakistan">Pakistan</option>
+                            <option value="USA">USA</option>
+                            <option value="UK">UK</option>
+                            <option value="Malaysia">Malaysia</option>
+                            <option value="Turkey">Turkey</option>
+                            <option value="UAE">UAE</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <span asp-validation-for="Country" class="text-rose-500 text-xs font-bold mt-2 inline-block ml-1"></span>
+                </div>
+
+                <!-- Specialized Info Section -->
+                <div class="col-span-2 mt-2">
+                    <h3 class="text-[11px] uppercase tracking-[0.2em] font-semibold text-slate-400 mb-6">Expertise & Media</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label asp-for="Specialties" class="block text-sm font-bold text-slate-700 mb-2.5 ml-1">Specialties (Comma Separated)</label>
+                            <input asp-for="Specialties" class="w-full px-4 py-4 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-900 hover:border-slate-300 shadow-sm" placeholder="e.g. Cardiology, Orthopedics, Oncology" />
+                            <span asp-validation-for="Specialties" class="text-rose-500 text-xs font-bold mt-2 inline-block ml-1"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="ImageUrl" class="block text-sm font-bold text-slate-700 mb-2.5 ml-1">Cover Image URL</label>
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-500 transition-colors">
+                                    <i data-lucide="image" class="w-5 h-5"></i>
+                                </div>
+                                <input asp-for="ImageUrl" class="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-900 group-hover:border-slate-300 shadow-sm" placeholder="https://images.unsplash.com/..." />
+                            </div>
+                            <span asp-validation-for="ImageUrl" class="text-rose-500 text-xs font-bold mt-2 inline-block ml-1"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Description" class="block text-sm font-bold text-slate-700 mb-2.5 ml-1">Detailed Profile</label>
+                            <textarea asp-for="Description" rows="5" class="w-full px-4 py-4 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-900 hover:border-slate-300 shadow-sm resize-none" placeholder="Provide a brief overview of the hospital's history, facilities, and patient care philosophy..."></textarea>
+                            <span asp-validation-for="Description" class="text-rose-500 text-xs font-bold mt-2 inline-block ml-1"></span>
+                        </div>
+
+                        <!-- Verification Checkbox -->
+                        <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 flex items-center justify-between group cursor-pointer hover:bg-blue-50 transition-colors">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-white rounded-xl shadow-sm border border-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                                    <i data-lucide="verified" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Verified Partnership</p>
+                                    <p class="text-xs text-slate-500 font-medium">Mark as a verified premier partner</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input asp-for="IsVerified" type="checkbox" value="" class="sr-only peer">
+                                <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none ring-4 ring-transparent rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-4 mt-12 pt-8 border-t border-slate-50">
+                <a asp-action="Index" class="px-8 py-4 rounded-2xl border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all font-bold">
+                    Cancel
+                </a>
+                <button type="submit" class="px-10 py-4 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 transition-all font-bold shadow-xl shadow-blue-200 hover:shadow-2xl hover:-translate-y-1 active:scale-95 flex items-center gap-3">
+                    <i data-lucide="save" class="w-5 h-5"></i>
+                    <span>Register Hospital</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        lucide.createIcons();
+    </script>
+}

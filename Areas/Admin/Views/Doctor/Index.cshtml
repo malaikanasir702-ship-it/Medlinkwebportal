@@ -1,0 +1,650 @@
+@model IEnumerable<MedLinkPortal.Areas.Admin.Models.Physician>
+@{}
+<div class="skeleton-container space-y-12 pb-20">
+    <div class="flex flex-col flex-md-row md:items-center justify-between gap-10 py-6">
+        <div class="w-full max-w-xl">
+            <div class="skeleton skeleton-title w-full h-16 md:h-24"></div>
+            <div class="skeleton skeleton-text w-3/4 h-6"></div>
+        </div>
+        <div class="skeleton w-48 h-16 rounded-[24px]"></div>
+    </div>
+    <div class="skeleton-card p-5 md:p-12">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12">
+            <div class="skeleton w-full max-w-2xl h-16 rounded-[28px]"></div>
+            <div class="skeleton w-40 h-14 rounded-[20px]"></div>
+        </div>
+        <div class="space-y-4">
+            @for(int i=0; i<5; i++) {
+                <div class="flex items-center gap-6 p-6 border-b border-slate-50">
+                    <div class="skeleton w-16 h-16 rounded-[24px]"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="skeleton skeleton-text w-48 h-6"></div>
+                        <div class="skeleton skeleton-text w-32"></div>
+                    </div>
+                    <div class="skeleton w-24 h-8 rounded-full"></div>
+                    <div class="skeleton w-32 h-10"></div>
+                    <div class="flex gap-2">
+                        <div class="skeleton w-10 h-10 rounded-xl"></div>
+                        <div class="skeleton w-10 h-10 rounded-xl"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="main-content-actual content-hidden space-y-12 pb-20">
+    <div class="flex flex-col flex-md-row md:items-center justify-between gap-10 py-6">
+        <div class="animate-in fade-in slide-in-from-left-8 duration-1000">
+            <h1 class="text-6xl md:text-7xl font-semibold text-slate-900 tracking-tighter mb-4">
+                Medical <span class="text-blue-600">Doctors</span>
+            </h1>
+            <p class="text-slate-500 text-xl font-medium leading-relaxed max-w-2xl">
+                Credential verification and departmental distribution of specialized doctors.
+            </p>
+        </div>
+        <button id="btnOpenRegisterModal" class="flex items-center gap-3 px-10 py-5 bg-[#0F172A] text-white rounded-[24px] text-sm font-semibold hover:bg-black transition-all shadow-xl active:scale-95 group">
+            <i class="fas fa-plus group-hover:rotate-90 transition-transform"></i> Register Doctor
+        </button>
+    </div>
+    <div class="bento-card p-5 md:p-12">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12">
+            <div class="relative flex-grow max-w-2xl">
+                <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="physicianSearch" placeholder="Search by name, specialty, or registry ID..." 
+                       class="w-full pl-14 pr-8 py-5 bg-slate-50 border-slate-100 rounded-[28px] text-base focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium placeholder:text-slate-400 border" />
+            </div>
+            <div class="flex gap-4">
+                <div class="relative">
+                    <select id="physicianFilter" class="appearance-none flex items-center gap-3 px-8 py-5 bg-white border border-slate-200 rounded-[20px] text-[10px] font-semibold text-slate-600 hover:bg-slate-50 transition-all uppercase tracking-widest shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10 cursor-pointer pr-12">
+                        <option value="ALL">Global Filters</option>
+                        <option value="Cardiology">Cardiology</option>
+                        <option value="Neurology">Neurology</option>
+                        <option value="Pediatrics">Pediatrics</option>
+                        <option value="Diagnostics">Diagnostics</option>
+                        <option value="Oncology">Oncology</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-6 top-1/2 -translate-y-1/2 text-blue-500 pointer-events-none text-[10px]"></i>
+                </div>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="text-slate-400 text-[10px] font-semibold uppercase tracking-[0.3em]">
+                        <th class="px-6 py-8 border-b border-slate-50 text-left">Physician Identity</th>
+                        <th class="px-6 py-8 border-b border-slate-50 text-left">Core Specialty</th>
+                        <th class="px-6 py-8 border-b border-slate-50 text-left">Professional Standing</th>
+                        <th class="px-6 py-8 border-b border-slate-50 text-left">Verification Status</th>
+                        <th class="px-6 py-8 border-b border-slate-50 text-left">Contact Protocol</th>
+                        <th class="px-6 py-8 border-b border-slate-50 text-right">Settings</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    @foreach (var doc in Model) {
+                        <tr class="group hover:bg-slate-50/80 transition-all duration-500 physician-row" data-id="@doc.Id">
+                            <td class="px-6 py-10">
+                                <div class="flex items-center gap-6">
+                                    <div class="relative">
+                                        <div class="w-16 h-16 rounded-[24px] bg-slate-900 border-4 border-white shadow-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-700 overflow-hidden">
+                                            @if (!string.IsNullOrEmpty(doc.ProfileImage))
+                                            {
+                                                <img src="@doc.ProfileImage" class="w-full h-full object-cover" />
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-user-md text-2xl"></i>
+                                            }
+                                        </div>
+                                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 border-2 border-white rounded-full"></div>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <p class="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors doc-name">@doc.Name</p>
+                                            <i class="fas fa-certificate text-blue-500 text-xs"></i>
+                                        </div>
+                                        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1 doc-id">REG-ID: @doc.Id.ToUpper()</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-10">
+                                <span class="inline-flex items-center px-4 py-2 bg-blue-500/10 text-blue-600 rounded-full text-[10px] font-semibold uppercase tracking-[0.15em] border border-blue-500/20 doc-spec">
+                                    @doc.Specialty
+                                </span>
+                            </td>
+                            <td class="px-6 py-10 text-sm font-semibold text-slate-700">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:shadow-xl transition-all duration-500">
+                                        <i class="fas fa-briefcase"></i>
+                                    </div>
+                                    <span class="doc-exp">@doc.Experience Years Tenure</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-10">
+                                @{
+                                    var statusClass = doc.ApprovalStatus?.ToLower() switch
+                                    {
+                                        "approved" => "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+                                        "rejected" => "bg-rose-500/10 text-rose-600 border-rose-500/20",
+                                        _ => "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                    };
+                                }
+                                <div class="flex items-center gap-3">
+                                    <span class="inline-flex items-center px-3 py-1.5 @statusClass rounded-full text-[9px] font-semibold uppercase tracking-wider border doc-status">
+                                        @doc.ApprovalStatus
+                                    </span>
+                                    @if(doc.ApprovalStatus != "Approved") {
+                                        <button class="w-8 h-8 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-500 hover:text-white transition-all btn-approve" data-userid="@doc.UserId" title="Approve">
+                                            <i class="fas fa-check text-[10px]"></i>
+                                        </button>
+                                    }
+                                    @if(doc.ApprovalStatus != "Rejected") {
+                                        <button class="w-8 h-8 flex items-center justify-center bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-500 hover:text-white transition-all btn-reject" data-userid="@doc.UserId" title="Reject">
+                                            <i class="fas fa-times text-[10px]"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                            <td class="px-6 py-10">
+                                <div class="flex flex-col gap-1.5">
+                                    <div class="flex items-center gap-3 text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors cursor-pointer group/item">
+                                        <i class="fas fa-envelope text-blue-400/80 group-hover/item:scale-110 transition-transform"></i> <span class="doc-email">@doc.Email</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors cursor-pointer group/item">
+                                        <i class="fas fa-phone text-blue-400/80 group-hover/item:scale-110 transition-transform"></i> <span class="doc-phone">@doc.Phone</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors cursor-pointer group/item">
+                                        <i class="fas fa-building text-blue-400/80 group-hover/item:scale-110 transition-transform"></i> <span class="doc-office">@doc.Office</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-10 text-right">
+                                <div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0">
+                                    <a href="/Admin/Doctor/Details/@doc.UserId" class="w-12 h-12 flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:text-emerald-600 hover:shadow-xl hover:scale-110 rounded-2xl transition-all" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="w-12 h-12 flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:text-blue-600 hover:shadow-xl hover:scale-110 rounded-2xl transition-all btn-edit"
+                                            data-id="@doc.Id" data-name="@doc.Name" data-spec="@doc.Specialty" 
+                                            data-exp="@doc.Experience" data-email="@doc.Email" data-phone="@doc.Phone" 
+                                            data-office="@doc.Office" data-bio="@doc.Bio" data-img="@doc.ProfileImage"
+                                            data-pmdc="@doc.PmdcRegistrationNumber">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="w-12 h-12 flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:text-red-500 hover:shadow-xl hover:scale-110 rounded-2xl transition-all btn-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div id="registerModal" class="fixed inset-0 hidden items-center justify-center modal-overlay p-4 z-[100]">
+    <div class="modal-content w-full max-w-sm max-h-[90vh] overflow-hidden relative flex flex-col bg-white rounded-2xl shadow-2xl" style="background-color: #ffffff !important;">
+        <div class="p-4 md:p-5 pb-2 flex justify-between items-start flex-shrink-0 border-b border-slate-100">
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900 tracking-tight">Doctor <span class="text-blue-600">Registry</span></h3>
+                <p class="text-slate-500 text-[9px] font-medium mt-0.5">Enter secure network credentials.</p>
+            </div>
+            <button id="btnCloseModal" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:text-slate-900 transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="docRegistrationForm" class="p-4 md:p-5 space-y-3 overflow-y-auto flex-1">
+            <div class="flex items-center gap-4 mb-2 p-3 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <div id="regImagePreview" class="w-12 h-12 rounded-lg bg-slate-200 flex items-center justify-center text-slate-400 overflow-hidden text-lg">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div>
+                    <label class="text-[8px] font-semibold text-slate-400 uppercase tracking-widest block mb-0.5">Profile Photo</label>
+                    <button type="button" onclick="$('#regImageInput').click()" class="text-[9px] font-semibold text-blue-600 uppercase tracking-widest hover:text-blue-700">Upload Image</button>
+                    <input type="file" id="regImageInput" class="hidden" accept="image/*" />
+                    <input type="hidden" id="regImageBase64" />
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Full Identity</label>
+                    <input type="text" name="Name" data-val="true" data-val-required="Name is required" data-val-length="Name cannot exceed 200 characters" data-val-length-max="200" placeholder="Dr. Jane Doe" 
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 placeholder:text-slate-300 transition-all text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Name" data-valmsg-replace="true"></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Medical Unit</label>
+                        <select name="Specialty" data-val="true" data-val-required="Specialty is required" data-val-length="Specialty cannot exceed 100 characters" data-val-length-max="100" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs">
+                            <option value="">Select Specialty</option>
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="Neurology">Neurology</option>
+                            <option value="Pediatrics">Pediatrics</option>
+                            <option value="Diagnostics">Diagnostics</option>
+                            <option value="Oncology">Oncology</option>
+                        </select>
+                        <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Specialty" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Tenure (Y)</label>
+                        <input type="number" name="Experience" data-val="true" data-val-required="Experience is required" data-val-range="Experience must be between 0 and 100 years" data-val-range-min="0" data-val-range-max="100" placeholder="10" 
+                               class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                        <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Experience" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Network ID</label>
+                    <input type="text" name="Id" data-val="true" data-val-required="Physician ID is required" data-val-length="Physician ID cannot exceed 50 characters" data-val-length-max="50" placeholder="DOC-99" 
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 uppercase text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Id" data-valmsg-replace="true"></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Contact Number</label>
+                        <input type="text" name="Phone" data-val="true" data-val-required="Phone is required" data-val-length="Phone cannot exceed 20 characters" data-val-length-max="20" placeholder="+1 (555) 000-0000" 
+                               class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                        <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Phone" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">PMDC Registration</label>
+                        <input type="text" name="PmdcRegistrationNumber" placeholder="PMDC-123456" 
+                               class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                    </div>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Office Location</label>
+                    <input type="text" name="Office" data-val="true" data-val-required="Office location is required" data-val-length="Office location cannot exceed 200 characters" data-val-length-max="200" placeholder="Building 3, Room 201" 
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Office" data-valmsg-replace="true"></span>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Electronic Mail</label>
+                    <input type="email" name="Email" data-val="true" data-val-required="Email is required" data-val-email="Invalid email address" data-val-length="Email cannot exceed 200 characters" data-val-length-max="200" placeholder="j.doe@medical.io" 
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Email" data-valmsg-replace="true"></span>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Access Password</label>
+                    <input type="password" name="Password" data-val="true" data-val-required="Password is required" data-val-length="Minimum 6 characters" data-val-length-min="6" placeholder="••••••••" 
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Password" data-valmsg-replace="true"></span>
+                </div>
+            </div>
+            <div class="pt-2 flex-shrink-0 border-t border-slate-100 mt-3">
+                <button type="submit" class="w-full py-3 bg-[#0F172A] text-white rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-95">
+                    Authorize Onboarding
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="editModal" class="fixed inset-0 hidden items-center justify-center modal-overlay p-4 z-[100]">
+    <div class="modal-content w-full max-w-sm max-h-[90vh] overflow-hidden relative flex flex-col bg-white rounded-2xl shadow-2xl" style="background-color: #ffffff !important;">
+        <div class="p-4 md:p-5 pb-2 flex justify-between items-start flex-shrink-0 border-b border-slate-100">
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900 tracking-tight">Edit <span class="text-blue-600">Doctor</span></h3>
+                <p class="text-slate-500 text-[9px] font-medium mt-0.5">Update network credentials.</p>
+            </div>
+            <button id="btnCloseEditModal" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:text-slate-900 transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="docEditForm" class="p-4 md:p-5 space-y-3 overflow-y-auto flex-1">
+            <input type="hidden" name="Id" />
+            <div class="flex items-center gap-4 mb-2 p-3 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <div id="editImagePreview" class="w-12 h-12 rounded-lg bg-slate-200 flex items-center justify-center text-slate-400 overflow-hidden text-lg">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div>
+                    <label class="text-[8px] font-semibold text-slate-400 uppercase tracking-widest block mb-0.5">Profile Photo</label>
+                    <button type="button" onclick="$('#editImageInput').click()" class="text-[9px] font-semibold text-blue-600 uppercase tracking-widest hover:text-blue-700">Update Photo</button>
+                    <input type="file" id="editImageInput" class="hidden" accept="image/*" />
+                    <input type="hidden" id="editImageBase64" />
+                </div>
+            </div>
+            <div class="space-y-3">
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Full Identity</label>
+                    <input type="text" name="Name" data-val="true" data-val-required="Name is required" data-val-length="Name cannot exceed 200 characters" data-val-length-max="200" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 transition-all text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Name" data-valmsg-replace="true"></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Medical Unit</label>
+                        <select name="Specialty" data-val="true" data-val-required="Specialty is required" data-val-length="Specialty cannot exceed 100 characters" data-val-length-max="100" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs">
+                            <option value="">Select Specialty</option>
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="Neurology">Neurology</option>
+                            <option value="Pediatrics">Pediatrics</option>
+                            <option value="Diagnostics">Diagnostics</option>
+                            <option value="Oncology">Oncology</option>
+                        </select>
+                        <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Specialty" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Tenure (Y)</label>
+                        <input type="number" name="Experience" data-val="true" data-val-required="Experience is required" data-val-range="Experience must be between 0 and 100 years" data-val-range-min="0" data-val-range-max="100" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                        <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Experience" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Contact Number</label>
+                        <input type="text" name="Phone" data-val="true" data-val-required="Phone is required" data-val-length="Phone cannot exceed 20 characters" data-val-length-max="20" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                        <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Phone" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">PMDC Registration</label>
+                        <input type="text" name="PmdcRegistrationNumber" placeholder="PMDC-123456" 
+                               class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                    </div>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Office Location</label>
+                    <input type="text" name="Office" data-val="true" data-val-required="Office location is required" data-val-length="Office location cannot exceed 200 characters" data-val-length-max="200" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Office" data-valmsg-replace="true"></span>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Electronic Mail</label>
+                    <input type="email" name="Email" data-val="true" data-val-required="Email is required" data-val-email="Invalid email address" data-val-length="Email cannot exceed 200 characters" data-val-length-max="200" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Email" data-valmsg-replace="true"></span>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Professional Bio</label>
+                    <textarea name="Bio" data-val="true" data-val-length="Bio cannot exceed 1000 characters" data-val-length-max="1000" rows="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs resize-none"></textarea>
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Bio" data-valmsg-replace="true"></span>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Update Password (Optional)</label>
+                    <input type="password" name="Password" data-val="true" data-val-length="Minimum 6 characters" data-val-length-min="6" placeholder="Leave blank to keep current" 
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Password" data-valmsg-replace="true"></span>
+                </div>
+            </div>
+            <div class="pt-2 flex-shrink-0 border-t border-slate-100 mt-3">
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg active:scale-95">
+                    Update Credentials
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="deleteModal" class="fixed inset-0 hidden items-center justify-center modal-overlay transition-opacity duration-300 p-4">
+    <div class="modal-content w-full max-w-sm overflow-hidden relative p-8 md:p-10 text-center">
+        <div class="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-trash-alt text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-semibold text-slate-900 tracking-tight mb-2">Are you sure?</h3>
+        <p class="text-slate-500 font-medium mb-8">This action will permanently remove the physician from the network registry.</p>
+        <div class="flex gap-4">
+            <button id="btnCancelDelete" class="flex-1 py-4 bg-slate-50 text-slate-500 rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-slate-100 transition-all">Cancel</button>
+            <button id="btnConfirmDelete" class="flex-1 py-4 bg-red-500 text-white rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg active:scale-95">Confirm</button>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Initialize jQuery validation for forms
+            $('#docRegistrationForm').validate({
+                errorClass: 'input-validation-error',
+                errorElement: 'span',
+                errorPlacement: function(error, element) {
+                    error.addClass('text-red-500 text-xs');
+                    error.insertAfter(element);
+                },
+                highlight: function(element) {
+                    $(element).addClass('border-red-500');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('border-red-500');
+                }
+            });
+            
+            $('#docEditForm').validate({
+                errorClass: 'input-validation-error',
+                errorElement: 'span',
+                errorPlacement: function(error, element) {
+                    error.addClass('text-red-500 text-xs');
+                    error.insertAfter(element);
+                },
+                highlight: function(element) {
+                    $(element).addClass('border-red-500');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('border-red-500');
+                }
+            });
+            const $body = $('body');
+            let deleteId = null;
+            // Search & Filter Logic
+            function filterTable() {
+                const searchTerm = $('#physicianSearch').val().toLowerCase();
+                const filterVal = $('#physicianFilter').val();
+                $('.physician-row').each(function() {
+                    const $row = $(this);
+                    const name = $row.find('.doc-name').text().toLowerCase();
+                    const spec = $row.find('.doc-spec').text().trim();
+                    const id = $row.data('id').toString().toLowerCase();
+                    const matchesSearch = name.includes(searchTerm) || spec.toLowerCase().includes(searchTerm) || id.includes(searchTerm);
+                    const matchesFilter = filterVal === 'ALL' || spec === filterVal;
+                    if (matchesSearch && matchesFilter) {
+                        $row.removeClass('hidden');
+                    } else {
+                        $row.addClass('hidden');
+                    }
+                });
+            }
+            $('#physicianSearch').on('input', filterTable);
+            $('#physicianFilter').on('change', filterTable);
+            // Image Preview logic
+            function setupImagePreview(inputId, previewId, base64Id) {
+                $(`#${inputId}`).on('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            $(`#${previewId}`).html(`<img src="${e.target.result}" class="w-full h-full object-cover" />`);
+                            $(`#${base64Id}`).val(e.target.result);
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            setupImagePreview('regImageInput', 'regImagePreview', 'regImageBase64');
+            setupImagePreview('editImageInput', 'editImagePreview', 'editImageBase64');
+            // Generic Modal Toggle
+            function toggleModal($modal, show) {
+                if (show) {
+                    $modal.removeClass('hidden').addClass('flex');
+                    setTimeout(() => $modal.addClass('modal-open'), 10);
+                    $body.addClass('overflow-hidden');
+                } else {
+                    $modal.removeClass('modal-open');
+                    // Immediate close - no delay
+                    $modal.removeClass('flex').addClass('hidden');
+                    $body.removeClass('overflow-hidden');
+                    // Reset forms and previews on close
+                    if($modal.attr('id') === 'registerModal') {
+                        $('#docRegistrationForm')[0].reset();
+                        $('#regImagePreview').html('<i class="fas fa-user-md"></i>');
+                        $('#regImageBase64').val('');
+                    }
+                }
+            }
+            // Create Modal
+            $('#btnOpenRegisterModal').on('click', () => toggleModal($('#registerModal'), true));
+            $('#btnCloseModal').on('click', () => toggleModal($('#registerModal'), false));
+            $('#registerModal').on('click', function(e) { if (e.target === this) toggleModal($('#registerModal'), false); });
+            // Create Handler
+            $('#docRegistrationForm').on('submit', function(e) {
+                e.preventDefault();
+                const $form = $(this);
+                if (!$form.valid()) {
+                    return false;
+                }
+                const data = Object.fromEntries(new FormData(this).entries());
+                const doc = {
+                    Id: data.Id,
+                    Name: data.Name,
+                    Specialty: data.Specialty,
+                    Experience: parseInt(data.Experience),
+                    Email: data.Email,
+                    Phone: data.Phone,
+                    Office: data.Office,
+                    PmdcRegistrationNumber: data.PmdcRegistrationNumber,
+                    Password: data.Password,
+                    ProfileImage: $('#regImageBase64').val()
+                };
+                const $btn = $(this).find('button[type="submit"]');
+                $btn.text('Processing...').prop('disabled', true);
+                $.ajax({
+                    url: '/Admin/Doctor/Create',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(doc),
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            Object.keys(errors).forEach(function(key) {
+                                const errorMsg = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+                                $form.find('[data-valmsg-for="' + key + '"]').text(errorMsg).removeClass('field-validation-valid').addClass('field-validation-error');
+                            });
+                        } else {
+                            alert(xhr.responseJSON?.message || 'An error occurred');
+                        }
+                        $btn.text('Authorize Onboarding').prop('disabled', false);
+                    }
+                });
+            });
+            // Edit Modal & Fill
+            $(document).off('click', '.btn-edit').on('click', '.btn-edit', function() {
+                const $btn = $(this);
+                const $row = $btn.closest('tr');
+                const id = $row.data('id');
+                const name = $row.find('.doc-name').text();
+                const spec = $row.find('.doc-spec').text().trim();
+                const exp = parseInt($row.find('.doc-exp').text());
+                const email = $row.find('.doc-email').text().trim();
+                const phone = $row.find('.doc-phone').text().trim();
+                const office = $row.find('.doc-office').text().trim();
+                const $form = $('#docEditForm');
+                $form.find('[name="Id"]').val(id);
+                $form.find('[name="Name"]').val(name);
+                $form.find('[name="Specialty"]').val(spec);
+                $form.find('[name="Experience"]').val(exp);
+                $form.find('[name="Email"]').val(email);
+                $form.find('[name="Phone"]').val(phone);
+                $form.find('[name="Office"]').val(office);
+                $form.find('[name="PmdcRegistrationNumber"]').val($btn.data('pmdc'));
+                $form.find('[name="Bio"]').val($btn.data('bio'));
+                const img = $btn.data('img');
+                $('#editImageBase64').val(img);
+                if(img) {
+                    $('#editImagePreview').html(`<img src="${img}" class="w-full h-full object-cover" />`);
+                } else {
+                    $('#editImagePreview').html('<i class="fas fa-user-md"></i>');
+                }
+                toggleModal($('#editModal'), true);
+            });
+            $('#btnCloseEditModal').on('click', () => toggleModal($('#editModal'), false));
+            $('#editModal').on('click', function(e) { if (e.target === this) toggleModal($('#editModal'), false); });
+            // Edit Handler
+            $('#docEditForm').on('submit', function(e) {
+                e.preventDefault();
+                const $form = $(this);
+                if (!$form.valid()) {
+                    return false;
+                }
+                const data = Object.fromEntries(new FormData(this).entries());
+                const doc = {
+                    Id: data.Id,
+                    Name: data.Name,
+                    Specialty: data.Specialty,
+                    Experience: parseInt(data.Experience),
+                    Email: data.Email,
+                    Phone: data.Phone,
+                    Office: data.Office,
+                    Bio: data.Bio,
+                    PmdcRegistrationNumber: data.PmdcRegistrationNumber,
+                    Password: data.Password,
+                    ProfileImage: $('#editImageBase64').val()
+                };
+                $.ajax({
+                    url: '/Admin/Doctor/Edit',
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(doc),
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            Object.keys(errors).forEach(function(key) {
+                                const errorMsg = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+                                $form.find('[data-valmsg-for="' + key + '"]').text(errorMsg).removeClass('field-validation-valid').addClass('field-validation-error');
+                            });
+                        } else {
+                            alert(xhr.responseJSON?.message || 'An error occurred');
+                        }
+                    }
+                });
+            });
+            // Delete Logic
+            $(document).off('click', '.btn-delete').on('click', '.btn-delete', function() {
+                deleteId = $(this).closest('tr').data('id');
+                toggleModal($('#deleteModal'), true);
+            });
+            $('#btnCancelDelete, #deleteModal').on('click', function(e) { if (e.target === this) toggleModal($('#deleteModal'), false); });
+            $('#btnConfirmDelete').on('click', function() {
+                const $btn = $(this);
+                $btn.text('Deleting...').prop('disabled', true);
+                $.ajax({
+                    url: `/Admin/Doctor/Delete?id=${deleteId}`,
+                    type: 'DELETE',
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseJSON?.message || 'Failed to delete doctor');
+                        $btn.text('Confirm').prop('disabled', false);
+                    }
+                });
+            });
+            // Approve/Reject Logic
+            $('.btn-approve').on('click', function() {
+                const userId = $(this).data('userid');
+                $.ajax({
+                    url: '/Admin/Doctor/Approve',
+                    type: 'POST',
+                    data: { userId: userId },
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseJSON?.message || 'Failed to approve doctor');
+                    }
+                });
+            });
+
+            $('.btn-reject').on('click', function() {
+                const userId = $(this).data('userid');
+                $.ajax({
+                    url: '/Admin/Doctor/Reject',
+                    type: 'POST',
+                    data: { userId: userId },
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseJSON?.message || 'Failed to reject doctor');
+                    }
+                });
+            });
+        });
+    </script>
+}

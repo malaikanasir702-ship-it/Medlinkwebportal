@@ -1,0 +1,91 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "My Lab Bookings";
+    var bookings = ViewBag.Bookings as List<MedLinkPortal.Models.LabBooking>;
+}
+
+<div class="max-w-5xl mx-auto py-12 px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+        <div class="flex items-center gap-6">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
+                <i data-lucide="clipboard-list" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight">Lab Diagnostics Hub</h1>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Track your bookings and access reports</p>
+            </div>
+        </div>
+        
+        <a href="@Url.Action("Index", "LabDiagnostics")" class="px-6 py-3 bg-white text-blue-600 font-bold text-xs rounded-xl hover:bg-slate-50 transition-all border border-slate-100 shadow-sm flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i> New Booking
+        </a>
+    </div>
+
+    <!-- Bookings List -->
+    <div class="space-y-6">
+        @if (bookings == null || !bookings.Any())
+        {
+            <div class="bg-white/40 backdrop-blur-xl rounded-[2.5rem] p-20 border border-white shadow-2xl text-center">
+                <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+                    <i data-lucide="flask-conical" class="w-10 h-10"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-2">No Bookings Found</h3>
+                <p class="text-slate-500 font-medium mb-8">You haven't booked any lab diagnostics yet.</p>
+                <a href="@Url.Action("Index", "LabDiagnostics")" class="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-blue-600/20 hover:scale-105 transition-all">
+                    Start Your First Booking
+                </a>
+            </div>
+        }
+        else
+        {
+            @foreach (var booking in bookings)
+            {
+                <div class="group relative">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[2rem] blur opacity-0 group-hover:opacity-10 transition duration-500"></div>
+                    <div class="relative bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-6 md:p-8 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 transition-all group-hover:translate-y-[-2px]">
+                        <div class="flex items-center gap-6 w-full md:w-auto">
+                            <div class="w-14 h-14 bg-slate-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-blue-50 transition-colors">
+                                <i data-lucide="building-2" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-3 mb-1">
+                                    <h4 class="font-black text-slate-900 text-lg">@booking.Laboratory.Name</h4>
+                                    <span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-blue-100/50">#@booking.Id.ToString("D6")</span>
+                                </div>
+                                <div class="flex items-center gap-4 text-xs font-bold text-slate-400">
+                                    <span class="flex items-center gap-1.5"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> @booking.BookingDate.ToString("MMM dd, yyyy")</span>
+                                    <span class="flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Home Collection</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                            <div class="text-right">
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Status</p>
+                                <div class="flex items-center gap-3">
+                                    <span class="w-2 h-2 rounded-full @(booking.Status == MedLinkPortal.Models.LabBookingStatus.Ready ? "bg-emerald-500" : "bg-blue-500 animate-pulse")"></span>
+                                    <span class="text-sm font-black text-slate-900">@booking.Status</span>
+                                </div>
+                            </div>
+
+                            <a href="@Url.Action("Tracking", "LabDiagnostics", new { bookingId = booking.Id })" class="px-6 py-3 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg flex items-center gap-2">
+                                Track Session
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    });
+</script>

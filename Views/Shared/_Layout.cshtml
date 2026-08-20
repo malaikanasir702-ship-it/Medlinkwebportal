@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MedLink</title>
+
+    <!-- Tailwind CSS (Local Build) -->
+    <link rel="stylesheet" href="~/css/output.css" />
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="~/css/animations.css" />
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Hide scrollbar but keep functionality */
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+            .hide-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+
+        /* Selection color */
+        ::selection {
+            background-color: rgba(37, 99, 235, 0.2);
+            color: #1f2937;
+        }
+
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* Ensure images don't overflow */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Better focus styles */
+        :focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+    </style>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>??</text></svg>">
+</head>
+<body class="bg-[#F9FAFB] text-gray-900 relative overflow-x-hidden min-h-screen">
+    <!-- Background Blobs -->
+    <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-50 rounded-full blur-[120px] -z-10 opacity-60"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-green-50 rounded-full blur-[150px] -z-10 opacity-40"></div>
+
+    <!-- Render Body -->
+    @RenderBody()
+
+    <!-- Lucide Icons Initialization and Global Functions -->
+    <script>
+        // Initialize icons
+        lucide.createIcons();
+
+        // Global functions
+        window.medLink = {
+            // Toggle any modal
+            toggleModal: function(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.toggle('hidden');
+                    document.body.classList.toggle('overflow-hidden');
+
+                    // Reset form if modal is closing
+                    if (modal.classList.contains('hidden')) {
+                        const form = modal.querySelector('form');
+                        if (form) form.reset();
+                    }
+                }
+            },
+
+            // Close modal when clicking outside
+            closeModalOnOutsideClick: function(event, modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal && event.target === modal) {
+                    this.toggleModal(modalId);
+                }
+            },
+
+            // Handle booking form submission
+            handleBooking: async function(formId) {
+                const form = document.getElementById(formId);
+                if (!form) return;
+
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>';
+                submitBtn.disabled = true;
+
+                try {
+                    const formData = new FormData(form);
+                    const data = Object.fromEntries(formData.entries());
+
+                    const response = await fetch('/Home/BookAppointment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Show success message
+                        this.showNotification('Appointment booked successfully!', 'success');
+                        this.toggleModal('bookingModal');
+
+                        // Reset form
+                        form.reset();
+                    } else {
+                        this.showNotification('Error: ' + result.message, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.showNotification('An error occurred. Please try again.', 'error');
+                } finally {
+                    // Restore button state
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            },
+
+            // Show notification
+            showNotification: function(message, type = 'info') {
+                // Remove existing notifications
+                const existing = document.getElementById('global-notification');
+                if (existing) existing.remove();
+
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.id = 'global-notification';
+                notification.className = `fixed top-4 right-4 z-[9999] px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-0 ${
+                    type === 'success' ? 'bg-green-500 text-white' :
+                    type === 'error' ? 'bg-red-500 text-white' :
+                    'bg-blue-500 text-white'
+                }`;
+                notification.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="${
+                            type === 'success' ? 'check-circle' :
+                            type === 'error' ? 'alert-circle' :
+                            'info'
+                        }" class="w-5 h-5"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+                lucide.createIcons();
+
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            },
+
+            // Smooth scroll to element
+            scrollToElement: function(elementId, offset = 80) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    window.scrollTo({
+                        top: element.offsetTop - offset,
+                        behavior: 'smooth'
+                    });
+                }
+            },
+
+            // Set active tab
+            setActiveTab: function(tabIndex, containerClass = 'capability-tab') {
+                document.querySelectorAll(`.${containerClass}`).forEach((tab, i) => {
+                    if (i === tabIndex) {
+                        tab.classList.add('bg-blue-600/10', 'border-blue-500/30');
+                        tab.classList.remove('bg-white/5', 'border-white/5');
+                    } else {
+                        tab.classList.remove('bg-blue-600/10', 'border-blue-500/30');
+                        tab.classList.add('bg-white/5', 'border-white/5');
+                    }
+                });
+            },
+
+            // Toggle FAQ
+            toggleFaq: function(faqIndex) {
+                const allFaqItems = document.querySelectorAll('.faq-item');
+                const allFaqContents = document.querySelectorAll('.faq-content');
+                const allFaqIcons = document.querySelectorAll('.faq-icon');
+
+                allFaqItems.forEach((item, index) => {
+                    if (index === faqIndex) {
+                        // Toggle current FAQ
+                        const content = item.querySelector('.faq-content');
+                        const icon = item.querySelector('.faq-icon');
+
+                        if (content.classList.contains('hidden')) {
+                            content.classList.remove('hidden');
+                            icon.setAttribute('data-lucide', 'chevron-up');
+                            item.classList.add('bg-blue-50/50', 'border-blue-100');
+                        } else {
+                            content.classList.add('hidden');
+                            icon.setAttribute('data-lucide', 'chevron-down');
+                            item.classList.remove('bg-blue-50/50', 'border-blue-100');
+                        }
+                    } else {
+                        // Close other FAQs
+                        const content = item.querySelector('.faq-content');
+                        const icon = item.querySelector('.faq-icon');
+                        content.classList.add('hidden');
+                        icon.setAttribute('data-lucide', 'chevron-down');
+                        item.classList.remove('bg-blue-50/50', 'border-blue-100');
+                    }
+                });
+
+                lucide.createIcons();
+            },
+
+            // Handle doctor hover
+            handleDoctorHover: function(doctorId, isHovered) {
+                const actions = document.getElementById(`doctor-actions-${doctorId}`);
+                const availability = document.getElementById(`doctor-availability-${doctorId}`);
+                const quickAction = document.getElementById(`quick-action-${doctorId}`);
+
+                if (actions && availability && quickAction) {
+                    if (isHovered) {
+                        actions.classList.remove('opacity-0', 'translate-y-4');
+                        actions.classList.add('opacity-100', 'translate-y-0');
+                        availability.classList.add('opacity-0');
+                        quickAction.classList.remove('opacity-0', 'translate-x-4');
+                        quickAction.classList.add('opacity-100', 'translate-x-0');
+                    } else {
+                        actions.classList.remove('opacity-100', 'translate-y-0');
+                        actions.classList.add('opacity-0', 'translate-y-4');
+                        availability.classList.remove('opacity-0');
+                        quickAction.classList.remove('opacity-100', 'translate-x-0');
+                        quickAction.classList.add('opacity-0', 'translate-x-4');
+                    }
+                }
+            },
+
+            // Open booking for specific doctor
+            openBookingForDoctor: async function(doctorId) {
+                try {
+                    const response = await fetch(`/Home/GetDoctor?id=${doctorId}`);
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Set doctor data in modal
+                        document.getElementById('selectedDoctorName').innerText = result.doctor.name;
+                        document.getElementById('selectedDoctorSpecialty').innerText = result.doctor.specialty;
+                        document.getElementById('selectedDoctorImage').src = result.doctor.image;
+
+                        // Show doctor info section
+                        document.getElementById('selectedDoctorInfo').classList.remove('hidden');
+
+                        // Store doctor ID
+                        document.getElementById('doctorId').value = result.doctor.id;
+
+                        // Open modal
+                        this.toggleModal('bookingModal');
+                    }
+                } catch (error) {
+                    console.error('Error fetching doctor:', error);
+                    this.showNotification('Could not load doctor information', 'error');
+                }
+            }
+        };
+
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Reinitialize icons
+            lucide.createIcons();
+
+            // Add smooth scroll to anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#' || targetId === '#!') return;
+
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.medLink.scrollToElement(targetId.replace('#', ''), 80);
+                    }
+                });
+            });
+
+            // Add intersection observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                        // Optional: Stop observing once animated
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            // Observe elements with data-animate attribute
+            document.querySelectorAll('[data-animate]').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Initialize tooltips
+            document.querySelectorAll('[data-tooltip]').forEach(el => {
+                el.addEventListener('mouseenter', function() {
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'absolute z-50 px-2 py-1 text-xs bg-gray-900 text-white rounded-md whitespace-nowrap';
+                    tooltip.textContent = this.getAttribute('data-tooltip');
+                    tooltip.style.top = `${this.offsetTop - 30}px`;
+                    tooltip.style.left = `${this.offsetLeft + this.offsetWidth / 2}px`;
+                    tooltip.style.transform = 'translateX(-50%)';
+                    tooltip.id = 'tooltip-' + Date.now();
+
+                    document.body.appendChild(tooltip);
+
+                    this.addEventListener('mouseleave', () => {
+                        tooltip.remove();
+                    });
+                });
+            });
+        });
+
+        // Reinitialize icons on AJAX content load
+        document.addEventListener('ajaxComplete', function() {
+            setTimeout(() => {
+                lucide.createIcons();
+            }, 100);
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+</body>
+</html>

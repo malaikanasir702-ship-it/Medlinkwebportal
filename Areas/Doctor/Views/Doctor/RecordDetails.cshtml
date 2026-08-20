@@ -1,0 +1,249 @@
+@model MedLinkPortal.Areas.Doctor.Models.PatientRecord
+
+@{
+    ViewData["Title"] = "Record Details";
+    Layout = "~/Areas/Doctor/Views/Shared/_DocDash.cshtml";
+}
+
+<div class="max-w-4xl mx-auto py-6 md:py-12 space-y-6 md:space-y-12 reveal">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8">
+        <div>
+            <div class="inline-flex items-center px-3 py-1 bg-blue-600/10 text-blue-600 rounded-full text-[10px] font-semibold uppercase tracking-widest mb-4">
+                Clinical Record Analysis
+            </div>
+            <h1 class="text-3xl md:text-4xl font-semibold text-slate-900 dark:text-white tracking-tight">Medical Record</h1>
+            <p class="text-slate-500 font-bold mt-2 flex items-center">
+                <i class="fas fa-barcode mr-3 opacity-50"></i>
+                Hash: <span class="font-mono text-blue-500 ml-2">DATA_P_@Model.Id.ToString("D5")</span>
+            </p>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="window.print()" class="w-14 h-14 flex shrink-0 items-center justify-center bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-2xl text-slate-400 hover:text-blue-500 transition-all shadow-sm">
+                <i class="fas fa-print"></i>
+            </button>
+            <a asp-action="ViewHistory" asp-route-patientId="@Model.PatientId" 
+               class="px-6 md:px-8 py-4 bg-slate-900 text-white rounded-[20px] text-[10px] md:text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl flex items-center whitespace-nowrap">
+                <i class="fas fa-arrow-left mr-3"></i> Go Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Data Nexus Card -->
+    <div class="premium-card overflow-hidden">
+        <!-- Metadata Ribbon -->
+        <div class="bg-slate-950 px-6 py-6 md:px-10 md:py-6 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 relative">
+            <div class="absolute inset-0 bg-blue-600/5 backdrop-blur-3xl"></div>
+            
+            <div class="relative flex items-center gap-5">
+                <div class="w-12 h-12 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-white">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div>
+                    <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Patient Name</span>
+                    <div class="text-sm font-semibold text-white">@(Model.Patient?.Name ?? Model.Patient?.UserName ?? "Patient")</div>
+                </div>
+            </div>
+            
+            <div class="relative flex items-center gap-5">
+                <div class="w-12 h-12 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-white">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div>
+                    <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Assigned Physician</span>
+                    <div class="text-sm font-semibold text-white">@Model.Doctor?.Name</div>
+                </div>
+            </div>
+            
+            <div class="relative flex items-center gap-5">
+                <div class="w-12 h-12 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-white">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Created At</span>
+                    <div class="text-sm font-semibold text-white">@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-12 space-y-12">
+            <!-- Core Findings -->
+            <div class="grid lg:grid-cols-12 gap-10">
+                <div class="lg:col-span-4">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] sticky top-24">Diagnosis Matrix</h3>
+                </div>
+                <div class="lg:col-span-8">
+                    <div class="p-10 bg-blue-50/50 dark:bg-white/5 rounded-[32px] border border-blue-100/50 dark:border-white/5 relative">
+                        <i class="fas fa-quote-left absolute top-10 right-10 text-4xl text-blue-600/10"></i>
+                        <p class="text-2xl font-semibold text-slate-900 dark:text-white leading-tight">@Model.Diagnosis</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Biometrics Matrix -->
+            <div class="grid lg:grid-cols-12 gap-10 pt-12 border-t border-slate-100 dark:border-white/5">
+                <div class="lg:col-span-4">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] sticky top-24">Biometric Anchors</h3>
+                </div>
+                <div class="lg:col-span-8">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-xs shadow-lg shadow-emerald-500/20">
+                                <i class="fas fa-heart-pulse"></i>
+                            </div>
+                            <div>
+                                <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Recorded Vitals</span>
+                                <div class="text-sm font-semibold text-slate-900 dark:text-white mt-0.5">@(string.IsNullOrEmpty(Model.Vitals) ? "System Neutral" : Model.Vitals)</div>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-red-500/5 border border-red-500/10 rounded-2xl flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-red-500 text-white flex items-center justify-center text-xs shadow-lg shadow-red-500/20">
+                                <i class="fas fa-shield-virus"></i>
+                            </div>
+                            <div>
+                                <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Allergen Deck</span>
+                                <div class="text-sm font-semibold text-slate-900 dark:text-white mt-0.5">@(string.IsNullOrEmpty(Model.Allergies) ? "No Active Threats" : Model.Allergies)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vector Analysis -->
+            <div class="grid lg:grid-cols-12 gap-10 pt-12 border-t border-slate-100 dark:border-white/5">
+                <div class="lg:col-span-4">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] sticky top-24">Pharmacological Deck</h3>
+                </div>
+                <div class="lg:col-span-8">
+                    <div class="space-y-6">
+                        @if (!string.IsNullOrEmpty(Model.Prescription))
+                        {
+                            <div class="flex items-start gap-6 p-8 bg-slate-50 dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/5">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                    <i class="fas fa-capsules"></i>
+                                </div>
+                                <p class="text-sm font-bold text-slate-700 dark:text-slate-300 leading-loose whitespace-pre-line">@Model.Prescription</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="flex items-center gap-4 text-slate-400 py-4 font-bold italic">
+                                <i class="fas fa-minus-circle mr-2 opacity-30"></i> Void Prescription Deck
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Narrative Logs -->
+            <div class="grid lg:grid-cols-12 gap-10 pt-12 border-t border-slate-100 dark:border-white/5">
+                <div class="lg:col-span-4">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] sticky top-24">Clinical Narrative</h3>
+                </div>
+                <div class="lg:col-span-8">
+                    <div class="space-y-6">
+                        @if (!string.IsNullOrEmpty(Model.Notes))
+                        {
+                            <div class="p-8 border border-slate-200 dark:border-white/10 rounded-3xl relative overflow-hidden">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+                                <p class="text-sm font-bold text-slate-500 dark:text-slate-400 leading-relaxed">@Model.Notes</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="flex items-center gap-4 text-slate-400 py-4 font-bold italic">
+                                <i class="fas fa-sticky-note mr-2 opacity-30"></i> No additional narratives logged.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signature & Actions -->
+            <div class="pt-12 border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-slate-400 text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Verification Status</p>
+                        <p class="text-[11px] font-bold text-emerald-500 flex items-center">
+                            <i class="fas fa-check-circle mr-2"></i> Integrity Verified
+                        </p>
+                    </div>
+                </div>
+                <div class="flex gap-4 w-full md:w-auto">
+                    <button onclick="printPrescription()" class="flex-1 md:flex-none px-8 py-5 bg-slate-900 text-white rounded-2xl text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-800 transition-all text-center">
+                        <i class="fas fa-file-pdf mr-3"></i> Generate PDF
+                    </button>
+                    <a asp-action="EditRecord" asp-route-id="@Model.Id" 
+                       class="flex-1 md:flex-none px-10 py-5 bg-blue-600 text-white rounded-2xl text-[11px] font-semibold uppercase tracking-widest hover:bg-blue-700 shadow-xl shadow-blue-500/20 transition-all text-center">
+                        Modify Intelligence
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Print Layout -->
+    <div id="printArea" class="hidden print:block p-12 bg-white text-slate-900 min-h-screen">
+        <div class="flex justify-between items-start border-b-2 border-slate-900 pb-10 mb-10">
+            <div>
+                <h1 class="text-3xl font-semibold uppercase tracking-tighter">DR. @Model.Doctor?.Name</h1>
+                <p class="text-sm font-bold text-slate-500 mt-1">@Model.Doctor?.Specialist</p>
+                <p class="text-xs font-medium text-slate-400">@Model.Doctor?.Experience Experience</p>
+            </div>
+            <div class="text-right">
+                <div class="text-lg font-semibold text-blue-600">MEDICO</div>
+                <p class="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-widest">Digital Prescription Protocol</p>
+                <p class="text-xs font-bold mt-4">Date: @Model.CreatedAt.ToString("MMM dd, yyyy")</p>
+            </div>
+        </div>
+
+        <div class="space-y-12">
+            <div class="grid grid-cols-2 gap-10">
+                <div>
+                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block mb-1">Patient Name</span>
+                    <p class="text-sm font-semibold border-b border-slate-200 pb-2">@(Model.Patient?.Name ?? Model.Patient?.UserName ?? "Patient")</p>
+                </div>
+                <div>
+                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block mb-1">Diagnosis</span>
+                    <p class="text-sm font-semibold border-b border-slate-200 pb-2">@Model.Diagnosis</p>
+                </div>
+            </div>
+
+            <div class="pt-10">
+                <span class="text-4xl font-serif text-slate-300 mb-6 block">Rx</span>
+                <div class="pl-10 text-sm font-bold leading-relaxed whitespace-pre-line border-l-2 border-slate-100">
+                    @Model.Prescription
+                </div>
+            </div>
+
+            <div class="pt-20 mt-20 border-t border-slate-100 flex justify-between items-end">
+                <div class="text-[10px] font-bold text-slate-400">
+                    ID: DATA_P_@Model.Id.ToString("D5")<br/>
+                    Verified via MedLink Secure Network
+                </div>
+                <div class="text-center">
+                    <div class="w-48 border-b border-slate-900 mb-2"></div>
+                    <span class="text-[10px] font-semibold uppercase tracking-widest">Authorized Signature</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function printPrescription() {
+        window.print();
+    }
+</script>
+
+<style>
+    @@media print {
+        body * { visibility: hidden; }
+        #printArea, #printArea * { visibility: visible; }
+        #printArea { position: absolute; left: 0; top: 0; width: 100%; }
+        .reveal { animation: none !important; opacity: 1 !important; transform: none !important; }
+    }
+</style>

@@ -1,0 +1,173 @@
+@model List<MedLinkPortal.Models.WalletTransaction>
+
+@{
+    ViewData["Title"] = "Payment Requests";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-6 animate-in fade-in duration-700">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-semibold text-slate-800 tracking-tight">Payment Requests</h1>
+            <p class="text-slate-500 font-medium mt-1">Manage and approve doctor withdrawal requests.</p>
+        </div>
+        <div class="flex items-center gap-3">
+             <div class="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm border border-blue-100 shadow-sm">
+                Total Shown: @Model.Count
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="bento-card p-6 lg:p-8">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-slate-100">
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Ref ID</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Doctor</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Fee (2%)</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Net Payable</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100" id="requestsTableBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr id="row-@item.Id" class="group hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4 text-sm font-bold text-slate-500">#@item.Id.ToString("D5")</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-md mr-3">
+                                            @((item.Doctor?.UserName?.FirstOrDefault() ?? 'D').ToString().ToUpper())
+                                        </div>
+                                        <div>
+                                            <span class="block text-sm font-bold text-slate-800">@(item.Doctor?.UserName ?? "Doctor")</span>
+                                            <span class="block text-[10px] font-medium text-slate-400">@item.Doctor?.Email</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-sm font-bold text-slate-700">@item.TransactionDate.ToString("MMM dd, yyyy")</span>
+                                    <span class="block text-[10px] font-medium text-slate-400">@item.TransactionDate.ToString("hh:mm tt")</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm font-bold text-slate-900">PKR @item.Amount.ToString("N2")</td>
+                                <td class="px-6 py-4 text-sm font-medium text-slate-500">PKR @item.PlatformFee.ToString("N2")</td>
+                                <td class="px-6 py-4 text-sm font-semibold text-emerald-600">PKR @item.NetAmount.ToString("N2")</td>
+                                <td class="px-6 py-4">
+                                    @if (item.Status == "Pending" || item.Status == "pending")
+                                    {
+                                        <button onclick="approvePayment(@item.Id)" class="group/btn relative overflow-hidden bg-slate-900 hover:bg-emerald-600 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-emerald-500/30 active:scale-95 flex items-center gap-2">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>Approve</span>
+                                        </button>
+                                    }
+                                    else if (item.Status == "Approved")
+                                    {
+                                        <span class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-xl font-semibold uppercase tracking-widest text-[10px]">
+                                            <i class="fas fa-check text-emerald-600"></i>
+                                            Approved
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center px-4 py-2 bg-slate-100 text-slate-500 rounded-xl font-bold italic">
+                                            @item.Status
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="px-6 py-20 text-center">
+                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-check text-slate-300 text-2xl"></i>
+                                </div>
+                                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-widest">All Caught Up</h3>
+                                <p class="text-xs font-medium text-slate-400 mt-1">No pending withdrawal requests found.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Debug Info Container -->
+<div class="mt-12 p-6 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
+    <div class="flex items-center gap-3 mb-4">
+        <div class="p-2 bg-slate-200 rounded-lg">
+            <i data-lucide="terminal" class="w-4 h-4 text-slate-600"></i>
+        </div>
+        <h2 class="text-sm font-semibold text-slate-800 uppercase tracking-widest">Debug Console</h2>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <span class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Total DB Transactions</span>
+            <span class="text-2xl font-semibold text-slate-800">@ViewBag.DebugTotalCount</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <span class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Total Recorded Withdrawals</span>
+            <span class="text-2xl font-semibold text-emerald-600">@ViewBag.DebugPendingCount</span>
+        </div>
+    </div>
+    
+    <div class="mt-4 p-4 bg-slate-900 rounded-2xl">
+        <code class="text-xs text-slate-300 font-mono">
+            // Current SQL Filter<br/>
+            SELECT * FROM WalletTransactions WHERE TransactionType = 'WITHDRAWAL' AND (Status = 'Pending' OR Status = 'pending' OR Status = 'Approved')
+        </code>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+
+    async function approvePayment(id) {
+        if (!confirm('Are you sure you want to approve this payment? This action cannot be undone.')) return;
+
+        const row = document.getElementById(`row-${id}`);
+        // Optimistic UI interaction
+        row.classList.add('opacity-50', 'pointer-events-none');
+        
+        try {
+            const formData = new FormData();
+            formData.append('id', id);
+
+            const response = await fetch('@Url.Action("ApproveWithdrawal", "Admin")', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                // Success State
+                row.classList.remove('opacity-50', 'pointer-events-none');
+                row.classList.add('bg-emerald-50/50', 'transition-all', 'duration-500');
+                
+                // Refresh to show updated statuses
+                location.reload(); 
+            } else {
+                alert('Failed to approve payment. Please try again.');
+                row.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred.');
+            row.classList.remove('opacity-50', 'pointer-events-none');
+        }
+    }
+</script>

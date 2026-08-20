@@ -1,0 +1,48 @@
+﻿<section class="py-24 px-6 bg-white">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div class="fade-right" data-animate>
+                <h2 class="text-sm font-bold text-blue-600 uppercase tracking-widest mb-4">The Challenge</h2>
+                <h3 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                    Modern healthcare is <br />
+                    <span class="text-gray-400">fundamentally broken.</span>
+                </h3>
+                <p class="text-lg text-gray-600 mb-8 max-w-lg">
+                    Despite technological leaps, the average patient still faces barriers that shouldn't exist in the 21st century.
+                    Fragmented data and distance shouldn't dictate your health outcomes.
+                </p>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <div class="bg-white p-2 rounded-lg shadow-sm">
+                            <i data-lucide="clock" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <p class="text-gray-700 font-medium italic">"Average wait time for a specialist is currently 26 days."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 stagger-children" data-animate>
+                @{
+                    var problems = new[]
+                    {
+                                new { Icon = "clock", Title = "Long Wait Times", Desc = "Traditional healthcare often involves agonizingly long wait times for even the simplest consultations.", Color = "text-orange-500" },
+                                new { Icon = "map-pin", Title = "Geographical Constraints", Desc = "Patients in remote or underserved locations struggle to access top-tier specialists and medical expertise.", Color = "text-red-500" },
+                                new { Icon = "database", Title = "Fragmented Records", Desc = "Scattered health histories across multiple institutions hinder efficient and personalized treatment.", Color = "text-blue-500" },
+                                new { Icon = "user-round-x", Title = "Limited Mobility", Desc = "For those with restricted mobility, a simple clinic visit can be an insurmountable physical hurdle.", Color = "text-purple-500" }
+                                };
+                }
+
+                @foreach (var problem in problems)
+                {
+                    <div class="p-8 rounded-3xl bg-gray-50 border border-gray-100 hover:shadow-xl transition-all hover:-translate-y-1 fade-left" data-animate>
+                        <div class="bg-white w-12 h-12 flex items-center justify-center rounded-xl shadow-sm mb-6">
+                            <i data-lucide="@problem.Icon" class="w-6 h-6 @problem.Color"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900 mb-3">@problem.Title</h4>
+                        <p class="text-gray-600 text-sm leading-relaxed">@problem.Desc</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

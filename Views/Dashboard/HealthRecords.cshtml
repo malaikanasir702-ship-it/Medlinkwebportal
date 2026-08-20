@@ -1,0 +1,544 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Health Records";
+    ViewData["HeaderTitle"] = "Medical Records";
+    ViewData["HeaderSubtitle"] = "Access and manage your medical history.";
+}
+
+<div id="health-records-container" 
+     class="bg-white rounded-3xl p-6 border border-gray-50 shadow-sm min-h-[600px]" 
+     x-data="{ showUploadModal: false, showShareModal: false, showDeleteModal: false, selectedRecordId: null }"
+     x-on:open-share-modal.window="selectedRecordId = $event.detail.id; showShareModal = true"
+     x-on:open-delete-modal.window="selectedRecordId = $event.detail.id; showDeleteModal = true"
+     x-on:close-upload-modal.window="showUploadModal = false">
+    <!-- Toolbar -->
+    <div class="flex flex-col gap-4 mb-6 md:mb-8">
+        <!-- Tabs - Horizontally Scrollable on Mobile -->
+        <div class="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0">
+            <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-xl w-max md:w-auto min-w-full md:min-w-0">
+                <button onclick="filterByTab('All')" id="tab-All" class="tab-btn px-4 py-2 bg-white text-gray-900 shadow-sm rounded-lg text-sm font-bold transition-all whitespace-nowrap">All Records</button>
+                <button onclick="filterByTab('Laboratory')" id="tab-Laboratory" class="tab-btn px-4 py-2 text-gray-500 hover:text-gray-900 rounded-lg text-sm font-bold transition-all whitespace-nowrap">Labs</button>
+                <button onclick="filterByTab('Radiology')" id="tab-Radiology" class="tab-btn px-4 py-2 text-gray-500 hover:text-gray-900 rounded-lg text-sm font-bold transition-all whitespace-nowrap">Imaging</button>
+                <button onclick="filterByTab('Prescription')" id="tab-Prescription" class="tab-btn px-4 py-2 text-gray-500 hover:text-gray-900 rounded-lg text-sm font-bold transition-all whitespace-nowrap">Prescriptions</button>
+            </div>
+        </div>
+        
+        <!-- Search & Upload -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div class="relative flex-1">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                <input type="text" id="searchInput" onkeyup="applyFilters()" placeholder="Search records..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500">
+            </div>
+            <button x-on:click="showUploadModal = true" class="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:shadow-blue-600/30 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="upload-cloud" class="w-4 h-4"></i> Upload
+            </button>
+        </div>
+    </div>
+
+    <!-- Records - Table on Desktop, Cards on Mobile -->
+    <div>
+        <!-- Desktop Table View (hidden on mobile) -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-gray-100">
+                        <th class="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Document Name</th>
+                        <th class="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Category</th>
+                        <th class="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Date</th>
+                        <th class="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Provider</th>
+                        <th class="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @for (int i = 0; i < 3; i++)
+                    {
+                        <tr class="skeleton-loader">
+                            <td class="py-4 px-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="animate-pulse bg-gray-200 rounded-xl w-10 h-10"></div>
+                                    <div class="space-y-1.5">
+                                        <div class="animate-pulse bg-gray-200 rounded-lg h-4 w-32"></div>
+                                        <div class="animate-pulse bg-gray-200 rounded-lg h-3 w-20"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4"><div class="animate-pulse bg-gray-200 rounded-lg h-4 w-20"></div></td>
+                            <td class="py-4 px-4"><div class="animate-pulse bg-gray-200 rounded-lg h-4 w-24"></div></td>
+                            <td class="py-4 px-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="animate-pulse bg-gray-200 rounded-full w-6 h-6"></div>
+                                    <div class="animate-pulse bg-gray-200 rounded-lg h-4 w-20"></div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-right"><div class="animate-pulse bg-gray-200 rounded-lg h-6 w-6 ml-auto"></div></td>
+                        </tr>
+                    }
+                    
+                    @foreach(var record in Model.HealthRecords)
+                    {
+                        var iconClass = record.Category == "Laboratory" ? "file-text" : record.Category == "Radiology" ? "image" : record.Category == "Prescription" ? "pill" : "file-check";
+                        var bgColor = record.Category == "Laboratory" ? "bg-blue-100 text-blue-600" : record.Category == "Radiology" ? "bg-purple-100 text-purple-600" : record.Category == "Prescription" ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-600";
+                        var badgeColor = record.Category == "Laboratory" ? "bg-blue-50 text-blue-600" : record.Category == "Radiology" ? "bg-purple-50 text-purple-600" : record.Category == "Prescription" ? "bg-emerald-50 text-emerald-600" : "bg-gray-50 text-gray-600";
+                        
+                        <tr class="page-content hidden record-row group hover:bg-blue-50/30 transition-colors" 
+                            data-category="@record.Category" 
+                            data-name="@record.Name.ToLower()" 
+                            data-provider="@record.Provider.ToLower()"
+                            data-id="@record.Id">
+                            <td class="py-4 px-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl @bgColor flex items-center justify-center">
+                                        <i data-lucide="@iconClass" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-gray-900 text-sm">@record.Name</div>
+                                        <div class="text-xs text-gray-500 font-medium">@record.FileType • @record.FileSize</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-bold @badgeColor">
+                                    @record.Type
+                                </span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm font-semibold text-gray-600">@record.Date.ToString("MMM dd, yyyy")</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
+                                         <img src="https://ui-avatars.com/api/?name=@record.Provider&background=random" class="w-full h-full object-cover">
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-600">@record.Provider</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onclick="downloadRecord(@record.Id)" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Download">
+                                        <i data-lucide="download" class="w-4 h-4"></i>
+                                    </button>
+                                    <button x-on:click="selectedRecordId = @record.Id; showShareModal = true" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Share">
+                                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                                    </button>
+                                    <button x-on:click="selectedRecordId = @record.Id; showDeleteModal = true" class="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="md:hidden space-y-3">
+            @for (int i = 0; i < 3; i++)
+            {
+                <div class="skeleton-loader bg-white rounded-2xl p-4 border border-gray-100">
+                    <div class="flex items-start gap-3 mb-3">
+                        <div class="animate-pulse bg-gray-200 rounded-xl w-12 h-12"></div>
+                        <div class="flex-1 space-y-2">
+                            <div class="animate-pulse bg-gray-200 rounded-lg h-4 w-3/4"></div>
+                            <div class="animate-pulse bg-gray-200 rounded-lg h-3 w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="animate-pulse bg-gray-200 rounded-lg h-8 flex-1"></div>
+                        <div class="animate-pulse bg-gray-200 rounded-lg h-8 w-8"></div>
+                    </div>
+                </div>
+            }
+            
+            @foreach(var record in Model.HealthRecords)
+            {
+                var iconClass = record.Category == "Laboratory" ? "file-text" : record.Category == "Radiology" ? "image" : record.Category == "Prescription" ? "pill" : "file-check";
+                var bgColor = record.Category == "Laboratory" ? "bg-blue-100 text-blue-600" : record.Category == "Radiology" ? "bg-purple-100 text-purple-600" : record.Category == "Prescription" ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-600";
+                var badgeColor = record.Category == "Laboratory" ? "bg-blue-50 text-blue-600 border-blue-200" : record.Category == "Radiology" ? "bg-purple-50 text-purple-600 border-purple-200" : record.Category == "Prescription" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-gray-50 text-gray-600 border-gray-200";
+                
+                <div class="page-content hidden record-row bg-white rounded-2xl p-4 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all" 
+                     data-category="@record.Category" 
+                     data-name="@record.Name.ToLower()" 
+                     data-provider="@record.Provider.ToLower()"
+                     data-id="@record.Id">
+                    
+                    <!-- Header -->
+                    <div class="flex items-start gap-3 mb-3">
+                        <div class="w-12 h-12 rounded-xl @bgColor flex items-center justify-center shrink-0">
+                            <i data-lucide="@iconClass" class="w-6 h-6"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-gray-900 text-sm mb-1 truncate">@record.Name</h4>
+                            <p class="text-xs text-gray-500 font-medium mb-2">@record.FileType • @record.FileSize</p>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold @badgeColor border">@record.Type</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Info Grid -->
+                    <div class="grid grid-cols-2 gap-3 mb-3 pb-3 border-b border-gray-100">
+                        <div>
+                            <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Date</div>
+                            <div class="text-xs font-bold text-gray-900">@record.Date.ToString("MMM dd, yyyy")</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Provider</div>
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-5 h-5 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                                    <img src="https://ui-avatars.com/api/?name=@record.Provider&background=random" class="w-full h-full object-cover">
+                                </div>
+                                <span class="text-xs font-bold text-gray-900 truncate">@record.Provider</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="flex gap-2">
+                        <button onclick="downloadRecord(@record.Id)" class="flex-1 py-2.5 px-3 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i> Download
+                        </button>
+                        <button x-on:click="selectedRecordId = @record.Id; showShareModal = true" class="p-2.5 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-100 transition-all">
+                            <i data-lucide="share-2" class="w-4 h-4"></i>
+                        </button>
+                        <button x-on:click="selectedRecordId = @record.Id; showDeleteModal = true" class="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-all">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div x-show="showUploadModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
+        <div x-on:click.outside="showUploadModal = false" class="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-semibold text-gray-900">Upload Health Record</h3>
+                <button x-on:click="showUploadModal = false" class="p-2 text-gray-400 hover:text-gray-900 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="uploadForm" enctype="multipart/form-data" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Category</label>
+                    <select name="category" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                        <option value="">Select Category</option>
+                        <option value="Laboratory">Laboratory</option>
+                        <option value="Radiology">Radiology/Imaging</option>
+                        <option value="Prescription">Prescription</option>
+                        <option value="Certification">Certification</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Provider (Optional)</label>
+                    <input type="text" name="provider" placeholder="e.g., Dr. Smith" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">File</label>
+                    <input type="file" name="file" required accept=".pdf,.jpg,.jpeg,.png,.dicom" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                    <p class="text-xs text-gray-500 mt-2">Supported: PDF, JPG, PNG, DICOM</p>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" x-on:click="showUploadModal = false" class="flex-1 py-3 border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20">
+                        Upload
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div x-show="showShareModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
+        <div x-on:click.outside="showShareModal = false" class="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-semibold text-gray-900">Share with Doctor</h3>
+                <button x-on:click="showShareModal = false" class="p-2 text-gray-400 hover:text-gray-900 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 max-h-[400px] overflow-y-auto">
+                @foreach(var doc in Model.AvailableDoctors)
+                {
+                    <button x-on:click="shareRecord(@doc.Id, $data)" class="w-full p-4 border-2 border-gray-100 rounded-2xl hover:border-blue-500 hover:bg-blue-50/50 transition-all flex items-center gap-4 text-left">
+                        <img src="@doc.Image" class="w-12 h-12 rounded-xl object-cover">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-gray-900">@doc.Name</h4>
+                            <p class="text-xs text-blue-600 font-bold uppercase">@doc.Specialty</p>
+                        </div>
+                        <i data-lucide="send" class="w-5 h-5 text-gray-400"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
+        <div x-on:click.outside="showDeleteModal = false" class="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center">
+            <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="alert-triangle" class="w-10 h-10"></i>
+            </div>
+            <h3 class="text-2xl font-semibold text-gray-900 mb-3">Are you sure?</h3>
+            <p class="text-sm text-gray-500 font-medium leading-relaxed mb-8">
+                This action will permanently delete the health record. This cannot be undone.
+            </p>
+            <div class="flex gap-3">
+                <button type="button" x-on:click="showDeleteModal = false" class="flex-1 py-3 border border-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-50 transition-all">
+                    Cancel
+                </button>
+                <button type="button" x-on:click="confirmDeletion($data, $event)" class="flex-1 py-3 bg-rose-600 text-white rounded-2xl font-bold hover:bg-rose-700 transition-all shadow-lg shadow-rose-500/20">
+                    Confirm Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let activeTab = 'All';
+
+    // Initialize after AJAX load
+    (function initializeHealthRecords() {
+        applyFilters();
+        setupUploadForm();
+    })();
+
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-8 right-8 px-6 py-4 rounded-2xl shadow-2xl z-[200] transform transition-all duration-500 translate-y-20 flex items-center gap-3 font-bold text-sm ${type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`;
+        toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5"></i> ${message}`;
+        document.body.appendChild(toast);
+        lucide.createIcons();
+        
+        setTimeout(() => toast.classList.remove('translate-y-20'), 100);
+        setTimeout(() => {
+            toast.classList.add('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+
+    function filterByTab(category) {
+        activeTab = category;
+        
+        // Update tab UI
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+            btn.classList.add('text-gray-500');
+        });
+        
+        const activeBtn = document.getElementById('tab-' + category);
+        activeBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+        activeBtn.classList.remove('text-gray-500');
+        
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('.record-row');
+        
+        rows.forEach(row => {
+            const category = row.dataset.category;
+            const name = row.dataset.name;
+            const provider = row.dataset.provider;
+            
+            let show = true;
+            
+            // Tab filter
+            if (activeTab !== 'All' && category !== activeTab) {
+                show = false;
+            }
+            
+            // Search filter
+            if (searchTerm && !(name.includes(searchTerm) || provider.includes(searchTerm))) {
+                show = false;
+            }
+            
+            if (show) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+    }
+
+    function setupUploadForm() {
+        const form = document.getElementById('uploadForm');
+        if (!form) return;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = 'Uploading...';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/Dashboard/UploadHealthRecord', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast('File uploaded successfully!');
+                    
+                    // Close Alpine.js modal via Event
+                    window.dispatchEvent(new CustomEvent('close-upload-modal'));
+                    
+                    form.reset();
+                    
+                    // Add new row to table
+                    const record = result.record;
+                    const date = new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                    const iconClass = record.category === "Laboratory" ? "file-text" : record.category === "Radiology" ? "image" : record.category === "Prescription" ? "pill" : "file-check";
+                    const bgColor = record.category === "Laboratory" ? "bg-blue-100 text-blue-600" : record.category === "Radiology" ? "bg-purple-100 text-purple-600" : record.category === "Prescription" ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-600";
+                    const badgeColor = record.category === "Laboratory" ? "bg-blue-50 text-blue-600" : record.category === "Radiology" ? "bg-purple-50 text-purple-600" : record.category === "Prescription" ? "bg-emerald-50 text-emerald-600" : "bg-gray-50 text-gray-600";
+
+                    const newRow = `
+                        <tr class="record-row group hover:bg-blue-50/30 transition-colors" 
+                            data-category="${record.category}" 
+                            data-name="${record.name.toLowerCase()}" 
+                            data-provider="${record.provider.toLowerCase()}"
+                            data-id="${record.id}">
+                            <td class="py-4 px-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl ${bgColor} flex items-center justify-center">
+                                        <i data-lucide="${iconClass}" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-gray-900 text-sm">${record.name}</div>
+                                        <div class="text-xs text-gray-500 font-medium">${record.fileType} • ${record.fileSize}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-bold ${badgeColor}">
+                                    ${record.type}
+                                </span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm font-semibold text-gray-600">${date}</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
+                                         <img src="https://ui-avatars.com/api/?name=${record.provider}&background=random" class="w-full h-full object-cover">
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-600">${record.provider}</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onclick="downloadRecord(${record.id})" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Download">
+                                        <i data-lucide="download" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="openShareModal(${record.id})" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Share">
+                                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="openDeleteModal(${record.id})" class="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    document.querySelector('tbody').insertAdjacentHTML('afterbegin', newRow);
+                    lucide.createIcons();
+                    applyFilters();
+                } else {
+                    showToast('Upload failed: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showToast('Upload failed. Please try again.', 'error');
+            } finally {
+                submitBtn.innerText = originalBtnText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
+
+    // Helper to open modal for dynamically added rows
+    function openShareModal(id) {
+        window.dispatchEvent(new CustomEvent('open-share-modal', { detail: { id: id } }));
+    }
+    
+    // Helper to open modal for dynamically added rows
+    function openDeleteModal(id) {
+        window.dispatchEvent(new CustomEvent('open-delete-modal', { detail: { id: id } }));
+    }
+
+    async function downloadRecord(id) {
+        window.location.href = `/Dashboard/DownloadHealthRecord?id=${id}`;
+    }
+
+    async function confirmDeletion(alpineData, event) {
+        if (event) event.preventDefault();
+        const id = alpineData.selectedRecordId;
+        if (!id) return;
+
+        try {
+            const response = await fetch('/Dashboard/DeleteHealthRecord', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${id}`
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                showToast('Record deleted successfully!');
+                const row = document.querySelector(`.record-row[data-id="${id}"]`);
+                if (row) {
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(20px)';
+                    setTimeout(() => row.remove(), 300);
+                }
+                alpineData.showDeleteModal = false;
+            } else {
+                showToast('Delete failed: ' + result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            showToast('Delete failed. Please try again.', 'error');
+        }
+    }
+
+    async function shareRecord(doctorId, alpineData) {
+        const recordId = alpineData.selectedRecordId;
+        if (!recordId) return;
+
+        try {
+            const response = await fetch('/Dashboard/ShareHealthRecord', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `recordId=${recordId}&doctorId=${doctorId}`
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                showToast(result.message);
+                alpineData.showShareModal = false;
+            } else {
+                showToast('Share failed: ' + result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Share error:', error);
+            showToast('Share failed. Please try again.', 'error');
+        }
+    }
+</script>
+
+<style>
+    [x-cloak] { display: none !important; }
+</style>

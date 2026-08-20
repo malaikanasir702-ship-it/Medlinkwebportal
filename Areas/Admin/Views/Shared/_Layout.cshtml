@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MedLink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --accent: #0ea5e9;
+            --bg: #f8fafc;
+        }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: #1e293b;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        .mesh-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(217,100%,97%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(215,100%,95%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(210,100%,92%,1) 0, transparent 50%),
+                radial-gradient(at 0% 100%, hsla(190,100%,96%,1) 0, transparent 50%);
+            background-attachment: fixed;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+        }
+        .bento-card {
+            background: #ffffff;
+            border-radius: 32px;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .bento-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.08), 0 18px 36px -18px rgba(0, 0, 0, 0.05);
+            border-color: rgba(37, 99, 235, 0.1);
+        }
+        .glow-pulse {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            animation: pulse-glow 2s infinite;
+        }
+        @@keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .skeleton {
+            background-color: #e2e8f0;
+            background-image: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0,
+                rgba(255, 255, 255, 0.2) 20%,
+                rgba(255, 255, 255, 0.5) 60%,
+                rgba(255, 255, 255, 0)
+            );
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+        }
+        @@keyframes shimmer {
+            to {
+                background-position-x: -200%;
+            }
+        }
+        .skeleton-text {
+            height: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.25rem;
+            width: 100%;
+        }
+        .skeleton-title {
+            height: 2rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            width: 60%;
+        }
+        .skeleton-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+        }
+        .skeleton-card {
+            background: white;
+            border-radius: 32px;
+            padding: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+        .content-hidden {
+            display: none !important;
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --primary: #3b82f6;
+            background-color: var(--bg);
+            color: #e2e8f0;
+        }
+        [data-theme="dark"] .bg-white { background-color: #1e293b !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+        [data-theme="dark"] .bg-slate-50 { background-color: #334155 !important; } 
+        [data-theme="dark"] .bg-slate-100 { background-color: #334155 !important; border-color: #475569 !important; }
+        [data-theme="dark"] .bg-[#0F172A] { background-color: #3b82f6 !important; color: #ffffff !important; } 
+        [data-theme="dark"] .text-slate-900 { color: #f8fafc !important; }
+        [data-theme="dark"] .text-slate-700 { color: #e2e8f0 !important; } 
+        [data-theme="dark"] .text-slate-600 { color: #cbd5e1 !important; }
+        [data-theme="dark"] .text-slate-500 { color: #94a3b8 !important; }
+        [data-theme="dark"] .text-slate-400 { color: #cbd5e1 !important; }
+        [data-theme="dark"] .border-slate-100, [data-theme="dark"] .border-slate-200 { border-color: #334155 !important; }
+        [data-theme="dark"] .border-white { border-color: #1e293b !important; } 
+        [data-theme="dark"] .bg-white { background-color: #1e293b !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+        [data-theme="dark"] .group:hover .group-hover\:bg-white { background-color: #334155 !important; } 
+        [data-theme="dark"] .shadow-slate-200 { --tw-shadow-color: #000000 !important; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important; } 
+        [data-theme="dark"] #sidebar { background-color: #020617; border-color: #1e293b; }
+        [data-theme="dark"] .bento-card { background-color: #1e293b; border-color: #334155; }
+        [data-theme="dark"] input, [data-theme="dark"] textarea, [data-theme="dark"] select { 
+            background-color: #0f172a !important; 
+            border-color: #334155 !important; 
+            color: white !important; 
+        }
+        [data-theme="dark"] .skeleton {
+            background-color: #1e293b !important;
+            background-image: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0,
+                rgba(255, 255, 255, 0.05) 20%,
+                rgba(255, 255, 255, 0.1) 60%,
+                rgba(255, 255, 255, 0)
+            ) !important;
+        }
+        [data-theme="dark"] .skeleton-card {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        [data-theme="dark"] .hover\:bg-slate-50:hover { background-color: #1e293b !important; }
+        [data-theme="dark"] .hover\:bg-slate-50\/80:hover { background-color: #1e293b !important; } 
+        [data-theme="dark"] .hover\:bg-blue-50:hover { background-color: #1e293b !important; }
+        [data-theme="dark"] .group:hover .group-hover\:bg-white { background-color: #1e293b !important; }
+        [data-theme="dark"] .group:hover .group-hover\:text-white { color: #ffffff !important; }
+        [data-theme="dark"] .notification-item { border-color: #334155 !important; }
+        
+        .modal-content {
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+        }
+        
+        [data-theme="light"] .modal-content,
+        .modal-content.bg-white {
+            background-color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] .modal-content { 
+            background-color: #1e293b !important; 
+            border: 1px solid #334155 !important; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+        }
+        [data-theme="blue"] {
+            --bg: #f0f9ff;
+            background-color: var(--bg);
+            color: #0c4a6e;
+        }
+        [data-theme="blue"] #sidebar { background-color: #0c4a6e; border-color: #075985; }
+        [data-theme="blue"] .bg-slate-50 { background-color: #e0f2fe !important; }
+        [data-theme="blue"] .text-slate-500 { color: #0369a1 !important; }
+        [data-theme="blue"] .text-slate-900 { color: #0c4a6e !important; }
+        .modal-overlay {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+    </style>
+    <script>
+        // Apply theme immediately to prevent flash
+        (function() {
+            const savedTheme = localStorage.getItem('medidash_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.documentElement.className = savedTheme; // For simple selectors if needed
+        })();
+        window.setTheme = function(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('medidash_theme', theme);
+        };
+    </script>
+</head>
+<body class="selection:bg-blue-100 selection:text-blue-600">
+    <div class="mesh-bg"></div>
+    <div class="min-h-screen flex flex-col lg:flex-row relative">
+        <div id="sidebarBackdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity duration-500"></div>
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] transform -translate-x-full lg:translate-x-0 lg:static lg:w-72 bg-[#0A0F1E] border-r border-white/5 flex flex-col shrink-0 min-h-screen">
+            <div class="flex flex-col h-full relative flex-grow">
+                <div class="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                <div class="p-8 lg:p-10 flex items-center justify-between relative z-10">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(37,99,235,0.4)] flex-shrink-0">
+                            <img src="/images/medlink-logo.png" alt="MedLink Logo" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <span class="text-lg lg:text-xl font-semibold tracking-tight text-white block">MedLink</span>
+                            <span class="text-[9px] lg:text-[10px] font-bold text-blue-400/80 uppercase tracking-[0.3em]">Admin Portal</span>
+                        </div>
+                    </div>
+                    <button id="sidebarClose" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white transition-all">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                <div class="px-6 py-4 flex-1 relative z-10 overflow-y-auto">
+                    <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.25em] mb-6 px-4">Workspace</p>
+                    <nav class="space-y-3">
+                        <a href="@Url.Action("Index", "Admin")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-chart-line w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110"></i>
+                            <span class="font-semibold text-sm tracking-tight">Analytics</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <a href="@Url.Action("Index", "Doctor")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Doctor" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-user-md w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Doctor" ? "group-hover:text-blue-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Doctors</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Doctor") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <a href="@Url.Action("Index", "Reports")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Reports" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-flag w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Reports" ? "group-hover:text-red-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Reports</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Reports") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <a href="@Url.Action("Index", "Hospital")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Hospital" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-hospital w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Hospital" ? "group-hover:text-blue-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Hospitals</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Hospital") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <a href="@Url.Action("Index", "MedicalTourismManager")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "MedicalTourismManager" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-globe-americas w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "MedicalTourismManager" ? "group-hover:text-blue-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Tourism Requests</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "MedicalTourismManager") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <a href="@Url.Action("Index", "Laboratories")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Laboratories" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-flask w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Laboratories" ? "group-hover:text-blue-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Laboratories</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Laboratories") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <!-- Rider Tracking -->
+                        <a href="@Url.Action("Index", "Rider")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Rider" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-motorcycle w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Rider" ? "group-hover:text-blue-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Riders</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Rider") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <a href="@Url.Action("Index", "Patient")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Patient" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-users w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Patient" ? "group-hover:text-blue-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Patients</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Patient") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <a href="@Url.Action("Messages", "Chat")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Chat" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-comment-dots w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Chat" ? "group-hover:text-blue-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Messages</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Chat") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <a href="@Url.Action("Index", "Appointment")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Appointment" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-calendar-alt w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Appointment" ? "group-hover:text-blue-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Scheduling</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Appointment") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <a href="@Url.Action("Index", "Prescription")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Prescription" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-file-prescription w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Prescription" ? "group-hover:text-blue-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Repository</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Prescription") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                    <a href="@Url.Action("Index", "Billing")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Billing" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-file-invoice-dollar w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Billing" ? "group-hover:text-blue-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Billing</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Billing") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <a href="@Url.Action("Index", "Subscription")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Subscription" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-crown w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Subscription" ? "group-hover:text-amber-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Subscriptions</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Subscription") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                        <!-- Payment Requests Link -->
+                        <a href="@Url.Action("PaymentRequests", "Admin")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Action"]?.ToString() == "PaymentRequests" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-money-bill-wave w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Action"]?.ToString() != "PaymentRequests" ? "group-hover:text-emerald-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Withdrawals</span>
+                            @if (ViewContext.RouteData.Values["Action"]?.ToString() == "PaymentRequests") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+                    </nav>
+                    <div class="mt-12 space-y-3">
+                        <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.25em] mb-6 px-4">System</p>
+                        <a href="@Url.Action("Index", "Settings")" 
+                           class="flex items-center gap-4 w-full px-5 py-3 rounded-2xl transition-all @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Settings" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-cog text-sm"></i>
+                            <span class="text-sm font-semibold">Settings</span>
+                        </a>
+                        <a href="/Admin/Sitemap" 
+                           class="flex items-center gap-4 w-full px-5 py-3 rounded-2xl transition-all @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["Action"]?.ToString() == "Sitemap" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-sitemap text-sm"></i>
+                            <span class="text-sm font-semibold">Sitemap</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="p-8 relative z-10 mt-auto">
+                    <a href="@Url.Action("Logout", "Account")" class="flex items-center gap-3 w-full px-5 py-4 text-slate-500 hover:text-red-400 hover:bg-red-400/5 rounded-2xl transition-all group">
+                        <i class="fas fa-sign-out-alt w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
+                        <span class="text-sm font-bold">Sign Out</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+        <div class="flex-1 flex flex-col min-w-0">
+            <header id="mainHeader" class="h-16 lg:h-20 flex items-center justify-between px-6 lg:px-14 sticky top-0 z-40 transition-all duration-500">
+                <div class="flex items-center gap-4 lg:gap-8 max-w-[60%] lg:max-w-none">
+                    <button id="sidebarToggle" class="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-500 shadow-sm hover:text-blue-600 lg:hidden">
+                        <i class="fas fa-bars text-base"></i>
+                    </button>
+                </div>
+                <div class="flex items-center gap-3 lg:gap-8 header-actions animate-in fade-in slide-in-from-right-8 duration-1000">
+                    <!-- Notification Bell -->
+                    <div class="relative dropdown">
+                        <button id="notificationToggle" class="w-9 h-9 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/10 transition-all relative group">
+                            <i class="fas fa-bell text-base group-hover:block transition-all"></i>
+                            <span id="unreadDot" class="absolute top-2 right-2 w-2 h-2 bg-red-500 border-2 border-white rounded-full glow-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]"></span>
+                        </button>
+
+                        <div id="notificationDropdown" class="hidden absolute right-0 mt-6 w-[320px] bg-white rounded-[32px] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.2)] border border-slate-100 overflow-hidden transform origin-top-right transition-all z-[100] animate-in slide-in-from-top-4 duration-500">
+                            <!-- List View -->
+                            <div id="notificationListContainer">
+                                <div class="px-6 py-4 flex items-center justify-between border-b border-slate-50">
+                                    <div>
+                                        <h4 class="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em]">Alerts</h4>
+                                    </div>
+                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[8px] font-semibold rounded-lg uppercase tracking-wider" id="notifCount">2 New</span>
+                                </div>
+                                <div class="max-h-[350px] overflow-y-auto px-3 py-2 custom-scrollbar">
+                                    <!-- Consultation -->
+                                    <div class="notification-item flex gap-4 p-3.5 rounded-[20px] hover:bg-slate-50 transition-all cursor-pointer group mb-1 unread" 
+                                         data-title="Consultation Pending" 
+                                         data-msg="Dr. Miller has requested a review for Patient-774 regarding surgical clearance."
+                                         data-time="Just Now" data-icon="fa-stethoscope" data-color="bg-blue-600">
+                                        <div class="w-10 h-10 bg-blue-600 rounded-[14px] flex items-center justify-center text-white text-base shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                                            <i class="fas fa-stethoscope"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center justify-between mb-0.5">
+                                                <p class="text-[12px] font-semibold text-slate-800">Consultation Pending</p>
+                                                <div class="w-1.5 h-1.5 bg-blue-600 rounded-full unread-mark shadow-[0_0_8px_rgba(37,99,235,0.4)]"></div>
+                                            </div>
+                                            <p class="text-[10px] font-medium text-slate-500 mb-1 leading-relaxed line-clamp-1">Dr. Miller has requested a review for P...</p>
+                                            <p class="text-[8px] font-semibold text-blue-600 uppercase tracking-widest">Just Now</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Critical Status -->
+                                    <div class="notification-item flex gap-4 p-3.5 rounded-[20px] hover:bg-slate-50 transition-all cursor-pointer group unread" 
+                                         data-title="Critical Status Alert" 
+                                         data-msg="Patient ID: P-1024 vital sensors reporting irregular cardiac rhythm. Immediate review advised."
+                                         data-time="12 Mins Ago" data-icon="fa-exclamation-triangle" data-color="bg-amber-500">
+                                        <div class="w-10 h-10 bg-amber-500 rounded-[14px] flex items-center justify-center text-white text-base shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center justify-between mb-0.5">
+                                                <p class="text-[12px] font-semibold text-slate-800">Critical Status Alert</p>
+                                                <div class="w-1.5 h-1.5 bg-blue-600 rounded-full unread-mark shadow-[0_0_8px_rgba(37,99,235,0.4)]"></div>
+                                            </div>
+                                            <p class="text-[10px] font-medium text-slate-500 mb-1 leading-relaxed line-clamp-1">Patient ID: P-1024 vital sensors report...</p>
+                                            <p class="text-[8px] font-semibold text-slate-400 uppercase tracking-widest">12 Mins Ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-5 border-t border-slate-50 bg-slate-50/50">
+                                    <button id="btnClearAllNotifs" class="w-full py-3.5 text-[9px] font-semibold text-blue-600 uppercase tracking-[0.2em] hover:bg-white hover:shadow-lg rounded-xl transition-all">Clear All History</button>
+                                </div>
+                            </div>
+
+                            <!-- Detail View -->
+                            <div id="notificationDetailContainer" class="hidden">
+                                <div class="p-6">
+                                    <button id="btnBackToNotifications" class="flex items-center gap-2 text-[9px] font-semibold text-slate-400 uppercase tracking-widest hover:text-blue-600 transition-all mb-6">
+                                        <i class="fas fa-arrow-left"></i> Back to Alerts
+                                    </button>
+                                    <div id="notifDetailHeader" class="w-12 h-12 rounded-[18px] flex items-center justify-center text-white text-xl mb-4 shadow-2xl">
+                                        <i class="fas"></i>
+                                    </div>
+                                    <h4 id="notifDetailTitle" class="text-lg font-semibold text-slate-900 mb-2 tracking-tight"></h4>
+                                    <p id="notifDetailTime" class="text-[9px] font-semibold text-blue-600 uppercase tracking-widest mb-4"></p>
+                                    <p id="notifDetailMsg" class="text-[12px] font-medium text-slate-500 leading-relaxed mb-6"></p>
+                                    <button class="w-full py-3.5 bg-[#0F172A] text-white rounded-[18px] text-[10px] font-semibold uppercase tracking-widest hover:bg-black hover:shadow-2xl transition-all shadow-xl active:scale-95">Exec Action: Review Record</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @await Component.InvokeAsync("AdminProfile")
+                </div>
+            </header>
+            <main class="flex-1 overflow-y-auto px-10 lg:px-14 pb-20 scroll-smooth">
+                <div id="app-content" class="max-w-[1600px] mx-auto pt-6">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const $sidebar = $('#sidebar');
+            const $sidebarToggle = $('#sidebarToggle');
+            const $sidebarClose = $('#sidebarClose');
+            const $header = $('#mainHeader');
+            const $sidebarBackdrop = $('#sidebarBackdrop');
+            const $body = $('body');
+            const $profileToggle = $('#profileToggle');
+            const $profileDropdown = $('#profileDropdown');
+            const $notificationToggle = $('#notificationToggle');
+            const $notificationDropdown = $('#notificationDropdown');
+            // Sidebar Toggle
+            function toggleSidebar(open) {
+                if (open) {
+                    $sidebar.removeClass('-translate-x-full');
+                    $sidebarBackdrop.removeClass('hidden').addClass('block');
+                    $body.addClass('overflow-hidden lg:overflow-auto');
+                } else {
+                    $sidebar.addClass('-translate-x-full');
+                    $sidebarBackdrop.removeClass('block').addClass('hidden');
+                    $body.removeClass('overflow-hidden lg:overflow-auto');
+                }
+            }
+            $sidebarToggle.on('click', function(e) {
+                e.stopPropagation();
+                toggleSidebar(true);
+            });
+            $sidebarClose.on('click', function(e) {
+                e.stopPropagation();
+                toggleSidebar(false);
+            });
+            $sidebarBackdrop.on('click', function() {
+                toggleSidebar(false);
+            });
+            // Handle resize
+            $(window).on('resize', function() {
+                if ($(window).width() >= 1024) {
+                    toggleSidebar(false); 
+                }
+            });
+            // Header scroll effect
+            $(window).on('scroll', function() {
+                if ($(window).scrollTop() > 20) {
+                    $header.addClass('bg-white border-b shadow-sm');
+                } else {
+                    $header.removeClass('bg-white border-b shadow-sm');
+                }
+            });
+            // Profile Dropdown Toggle
+            $profileToggle.on('click', function(e) {
+                e.stopPropagation();
+                $notificationDropdown.addClass('hidden');
+                $profileDropdown.toggleClass('hidden');
+            });
+            // Notification Dropdown Toggle
+            $notificationToggle.on('click', function(e) {
+                e.stopPropagation();
+                $profileDropdown.addClass('hidden');
+                $notificationDropdown.toggleClass('hidden');
+                // Reset to list view when opening
+                $('#notificationListContainer').removeClass('hidden');
+                $('#notificationDetailContainer').addClass('hidden');
+            });
+            // Notification Item Click
+            $('#notificationDropdown').on('click', '.notification-item', function(e) {
+                e.stopPropagation();
+                const $item = $(this);
+                const title = $item.data('title');
+                const msg = $item.data('msg');
+                const time = $item.data('time');
+                const icon = $item.data('icon');
+                const color = $item.data('color');
+                // Mark as read
+                $item.find('.unread-mark').remove();
+                // Update Badge & Globe Dot
+                const unreadCount = $('.unread-mark').length;
+                if (unreadCount > 0) {
+                    $('#notifCount').text(`${unreadCount} New`);
+                } else {
+                    $('#notifCount').text('No New Alerts');
+                    $('#unreadDot').fadeOut();
+                }
+                // Populate Detail View
+                $('#notifDetailTitle').text(title);
+                $('#notifDetailMsg').text(msg);
+                $('#notifDetailTime').text(`Received ${time}`);
+                $('#notifDetailHeader').removeClass().addClass(`w-16 h-16 rounded-[24px] flex items-center justify-center text-white text-2xl mb-6 shadow-2xl ${color}`);
+                $('#notifDetailHeader i').removeClass().addClass(`fas ${icon}`);
+                // Switch Views
+                $('#notificationListContainer').addClass('hidden');
+                $('#notificationDetailContainer').removeClass('hidden').addClass('animate-in slide-in-from-right-8 duration-500');
+            });
+            $('#notificationDropdown').on('click', '#btnBackToNotifications', function(e) {
+                e.stopPropagation();
+                $('#notificationDetailContainer').addClass('hidden');
+                $('#notificationListContainer').removeClass('hidden').addClass('animate-in slide-in-from-left-8 duration-500');
+            });
+            // Clear All Notifications
+            $('#notificationDropdown').on('click', '#btnClearAllNotifs', function(e) {
+                e.stopPropagation();
+                // Add removal animation
+                $('.notification-item').addClass('scale-95 opacity-0 transition-all duration-300');
+                setTimeout(() => {
+                    $('.notification-item').remove();
+                    $('#notifCount').text('No New Alerts');
+                    $('#unreadDot').fadeOut();
+                    // Show Empty State
+                    $('#notificationListContainer .px-4').html(`
+                        <div class="py-12 text-center animate-in fade-in zoom-in duration-700">
+                            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-bell-slash text-slate-300 text-xl"></i>
+                            </div>
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">Registry is Clear</p>
+                            <p class="text-[10px] font-medium text-slate-400 mt-1">No pending administrative alerts.</p>
+                        </div>
+                    `);
+                    $(this).parent().fadeOut(); // Hide Clear All button
+                }, 300);
+            });
+            // Header Clock Functionality
+            function updateHeaderClock() {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { 
+                    hour12: false, 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+                $('#headerClock').text(timeStr);
+            }
+            setInterval(updateHeaderClock, 1000);
+            updateHeaderClock();
+            $(document).on('click', function() {
+                $profileDropdown.addClass('hidden');
+                $notificationDropdown.addClass('hidden');
+            });
+            $profileDropdown.on('click', function(e) { e.stopPropagation(); });
+            $notificationDropdown.on('click', function(e) { e.stopPropagation(); });
+            $sidebar.on('click', function(e) { e.stopPropagation(); });
+            // Global Skeleton Loader Handler
+            window.showContent = function() {
+                $('.skeleton-container').fadeOut(400, function() {
+                    $(this).addClass('content-hidden');
+                    $('.main-content-actual').removeClass('content-hidden').addClass('animate-in fade-in duration-700');
+                });
+            };
+            // Simulate loading (Remove this in production or trigger when data is ready)
+            setTimeout(window.showContent, 1500);
+        });
+    </script>
+    <div id="app-scripts">
+        @await RenderSectionAsync("Scripts", required: false)
+    </div>
+    <script>
+        $(document).ready(function() {
+            // Intercept internal links
+            $(document).on('click', 'a.nav-link', function(e) {
+                const url = $(this).attr('href');
+                // Allow control/cmd click or external links or empty links
+                if (e.ctrlKey || e.metaKey || !url || url === '#' || url.startsWith('http')) return;
+                e.preventDefault();
+                // Visual Feedback & Optimization
+                $('.nav-link').removeClass('text-white bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.1)] border-white/10').addClass('text-slate-400 border-transparent');
+                $(this).addClass('text-white bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.1)] border-white/10').removeClass('text-slate-400 border-transparent');
+                // Show Skeleton
+                $('.main-content-actual').addClass('hidden');
+                $('.skeleton-container').removeClass('hidden').show();
+                // Fetch Content
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        const $res = $(response);
+                        const newContent = $res.find('#app-content').html();
+                        const newScripts = $res.find('#app-scripts').html();
+                        const newTitle = $res.filter('title').text();
+                        if (newContent) {
+                            // Update DOM
+                            $('#app-content').html(newContent);
+                            $('#app-scripts').html(newScripts); // This re-executes page specific scripts
+                            // Update Browser History
+                            history.pushState(null, newTitle, url);
+                            document.title = newTitle;
+                            // Re-trigger global showContent logic if it exists in the new view or fallback
+                            if (typeof window.showContent === 'function') {
+                                setTimeout(window.showContent, 600); // Shorter delay for SPA feel
+                            } else {
+                                // Fallback reveal just in case
+                                $('.skeleton-container').fadeOut(200);
+                                $('.main-content-actual').removeClass('hidden').addClass('animate-in fade-in duration-500');
+                            }
+                        } else {
+                            // Fallback if parsing fails
+                            window.location.href = url;
+                        }
+                    },
+                    error: function() {
+                        window.location.href = url; // Fallback to full reload on error
+                    }
+                });
+            });
+            // Handle Back/Forward Browser Buttons
+            window.addEventListener('popstate', function() {
+                window.location.reload(); // Simplest way to handle history traversal without complex cache logic
+            });
+        });
+    </script>
+</body>
+</html>

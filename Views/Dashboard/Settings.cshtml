@@ -1,0 +1,602 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Account Settings";
+    ViewData["HeaderTitle"] = "Account Settings";
+    ViewData["HeaderSubtitle"] = "Manage your profile, security, and preferences.";
+}
+
+@section Scripts {
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+             // Alpine 2 doesn't have alpine:init like Alpine 3, but this is safe
+        });
+
+
+
+        const VAPID_PUBLIC_KEY = '@Model.VapidPublicKey';
+        console.log('MedLink Notification System: VAPID Public Key Loaded');
+
+        function urlBase64ToUint8Array(base64String) {
+            if (!base64String || base64String === '') return new Uint8Array(0);
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        async function subscribeToPushNotifications() {
+            if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === '') {
+                console.error('VAPID Public Key is missing');
+                return;
+            }
+
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                console.warn('Push notifications not supported');
+                return;
+            }
+
+            try {
+                console.log('Registering Service Worker (Busting Cache)...');
+                const registration = await navigator.serviceWorker.register('/sw.js?v=' + Date.now());
+                
+                console.log('Clearing existing subscriptions...');
+                const existing = await registration.pushManager.getSubscription();
+                if (existing) {
+                    await existing.unsubscribe();
+                }
+
+                console.log('Subscribing to Push Manager...');
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                });
+
+                console.log('Push Subscription successful:', subscription.endpoint);
+
+                // Post subscription to server
+                const res = await fetch('/Dashboard/SubscribeToPush', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        endpoint: subscription.endpoint,
+                        p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))),
+                        auth: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))))
+                    })
+                });
+                
+                const data = await res.json();
+                console.log('Server response for subscription:', data);
+                await checkSubscriptionStatus();
+            } catch (err) {
+                console.error('Push Subscription Error Details:', err);
+                await PremiumModal.error('Could not enable desktop notifications: ' + err.message, 'Push Protocol Error');
+                document.getElementById('notifPush').checked = false;
+            }
+        }
+
+        async function checkSubscriptionStatus() {
+            try {
+                if (!('serviceWorker' in navigator)) return;
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription();
+                
+                const statusEl = document.getElementById('subscriptionStatus');
+                const pushToggle = document.getElementById('notifPush');
+                
+                if (statusEl) {
+                    if (subscription) {
+                        statusEl.innerHTML = '<span class="flex items-center gap-1.5 text-emerald-600"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> REGISTERED</span>';
+                        if (pushToggle) pushToggle.checked = true;
+                    } else {
+                        statusEl.innerHTML = '<span class="flex items-center gap-1.5 text-rose-600"><span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span> NOT REGISTERED</span>';
+                        if (pushToggle) pushToggle.checked = false;
+                    }
+                }
+            } catch (e) { console.error('Error checking subscription status:', e); }
+        }
+
+        // Check on load
+        document.addEventListener('DOMContentLoaded', checkSubscriptionStatus);
+
+
+        async function saveGenericSettings() {
+            // Check if push just enabled
+            const pushCheckbox = document.getElementById('notifPush');
+            if (pushCheckbox.checked) {
+                if (Notification.permission !== 'granted') {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        await subscribeToPushNotifications();
+                    } else {
+                        pushCheckbox.checked = false;
+                    }
+                } else {
+                    // Permission already granted, but let's ensure subscription is active on server
+                    await subscribeToPushNotifications();
+                }
+            }
+
+            const fd = new FormData();
+            fd.append('fullName', document.getElementById('setFullName')?.value);
+            fd.append('phone', document.getElementById('setPhone')?.value);
+            fd.append('dob', document.getElementById('setDOB')?.value);
+            fd.append('emailNotifications', document.getElementById('notifEmail')?.checked);
+            fd.append('pushNotifications', document.getElementById('notifPush')?.checked);
+            
+            const btn = document.querySelector('.save-btn');
+            const originalText = btn.innerText;
+            btn.innerText = 'Saving...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/Dashboard/UpdateSettings', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    btn.innerText = 'Saved ✓';
+                    btn.classList.add('bg-emerald-600');
+                    setTimeout(() => {
+                        btn.innerText = originalText;
+                        btn.classList.remove('bg-emerald-600');
+                        btn.disabled = false;
+                    }, 2000);
+                }
+            } catch (e) { 
+                console.error(e); 
+                btn.innerText = 'Error';
+                btn.disabled = false;
+            }
+        }
+
+        async function uploadProfilePhoto(input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            const fd = new FormData();
+            fd.append('file', file);
+
+            // Preview instantly
+            const reader = new FileReader();
+            reader.onload = e => document.getElementById('profilePreview').src = e.target.result;
+            reader.readAsDataURL(file);
+
+            try {
+                const res = await fetch('/Dashboard/UpdateProfilePicture', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    // Success
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function updatePassword() {
+            const current = document.getElementById('currentPass').value;
+            const next = document.getElementById('newPass').value;
+            
+            if (!current || !next) {
+                await PremiumModal.alert('Please fill both fields to proceed with password rotation.', 'Missing Credentials');
+                return;
+            }
+
+            const fd = new FormData();
+            fd.append('currentPassword', current);
+            fd.append('newPassword', next);
+
+            try {
+                const res = await fetch('/Dashboard/ChangePassword', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    await PremiumModal.success('Your security credentials have been updated successfully!', 'Security Updated');
+                    document.getElementById('currentPass').value = '';
+                    document.getElementById('newPass').value = '';
+                } else {
+                    await PremiumModal.error('Security update failed: ' + data.errors.join(', '), 'Commit Rejected');
+                }
+            } catch (e) { console.error(e); }
+        }
+    </script>
+}
+
+<div class="grid grid-cols-12 gap-6" x-data="{ 
+    activeTab: 'profile', 
+    show2FAModal: false, 
+    targetSessionId: null, 
+    targetSessionName: '', 
+    verificationCode: '', 
+    error2FA: '',
+    async startSessionRevoke(id, name) {
+        this.targetSessionId = id;
+        this.targetSessionName = name;
+        this.error2FA = '';
+        this.verificationCode = '';
+
+        try {
+            const res = await fetch('/Dashboard/RequestSessionRevoke', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                this.show2FAModal = true;
+            } else {
+                await PremiumModal.error('Transmission failure: Error sending verification code.', 'Mail Protocol Error');
+            }
+        } catch (e) { console.error(e); }
+    },
+    async confirmRevoke() {
+        if (this.verificationCode.length < 6) {
+            this.error2FA = 'Please enter the 6-digit code';
+            return;
+        }
+
+        const fd = new FormData();
+        fd.append('code', this.verificationCode);
+        fd.append('sessionId', this.targetSessionId);
+
+        const url = this.targetSessionId === 'all' 
+            ? '/Dashboard/RevokeAllSessions' 
+            : '/Dashboard/VerifyAndRevokeSession';
+
+        try {
+            const res = await fetch(url, { method: 'POST', body: fd });
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                this.error2FA = data.message || 'Invalid verification code';
+            }
+        } catch (e) { 
+            console.error(e);
+            this.error2FA = 'Server error occurred';
+        }
+    }
+}">
+    <!-- Sidebar Navigation -->
+    <div class="col-span-12 lg:col-span-3">
+        <div class="bg-white/90 backdrop-blur-xl rounded-[1.5rem] border border-gray-100 p-2 sticky top-6 shadow-sm">
+            <nav class="space-y-1">
+                <button 
+                    x-on:click="activeTab = 'profile'"
+                    x-bind:class="activeTab === 'profile' ? 'bg-indigo-50 text-indigo-600 shadow-sm shadow-indigo-100/50' : 'text-gray-500 hover:bg-gray-50'"
+                    class="w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center justify-between transition-all duration-300 group">
+                    <div class="flex items-center gap-3">
+                        <div x-bind:class="activeTab === 'profile' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'" class="w-8 h-8 rounded-lg flex items-center justify-center transition-all">
+                            <i data-lucide="user" class="w-4 h-4"></i>
+                        </div>
+                        Profile
+                    </div>
+                    <i data-lucide="chevron-right" x-show="activeTab === 'profile'" class="w-3.5 h-3.5 opacity-50"></i>
+                </button>
+                <button 
+                    x-on:click="activeTab = 'security'"
+                    x-bind:class="activeTab === 'security' ? 'bg-rose-50 text-rose-600 shadow-sm shadow-rose-100/50' : 'text-gray-500 hover:bg-gray-50'"
+                    class="w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center justify-between transition-all duration-300 group">
+                    <div class="flex items-center gap-3">
+                        <div x-bind:class="activeTab === 'security' ? 'bg-rose-600 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'" class="w-8 h-8 rounded-lg flex items-center justify-center transition-all">
+                            <i data-lucide="shield" class="w-4 h-4"></i>
+                        </div>
+                        Security
+                    </div>
+                    <i data-lucide="chevron-right" x-show="activeTab === 'security'" class="w-3.5 h-3.5 opacity-50"></i>
+                </button>
+                <button 
+                    x-on:click="activeTab = 'notifications'"
+                    x-bind:class="activeTab === 'notifications' ? 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-100/50' : 'text-gray-500 hover:bg-gray-50'"
+                    class="w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center justify-between transition-all duration-300 group">
+                    <div class="flex items-center gap-3">
+                        <div x-bind:class="activeTab === 'notifications' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'" class="w-8 h-8 rounded-lg flex items-center justify-center transition-all">
+                            <i data-lucide="bell" class="w-4 h-4"></i>
+                        </div>
+                        Notifications
+                    </div>
+                    <i data-lucide="chevron-right" x-show="activeTab === 'notifications'" class="w-3.5 h-3.5 opacity-50"></i>
+                </button>
+                <button 
+                    x-on:click="activeTab = 'billing'"
+                    x-bind:class="activeTab === 'billing' ? 'bg-amber-50 text-amber-600 shadow-sm shadow-amber-100/50' : 'text-gray-500 hover:bg-gray-50'"
+                    class="w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center justify-between transition-all duration-300 group">
+                    <div class="flex items-center gap-3">
+                        <div x-bind:class="activeTab === 'billing' ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'" class="w-8 h-8 rounded-lg flex items-center justify-center transition-all">
+                            <i data-lucide="credit-card" class="w-4 h-4"></i>
+                        </div>
+                        Billing
+                    </div>
+                    <i data-lucide="chevron-right" x-show="activeTab === 'billing'" class="w-3.5 h-3.5 opacity-50"></i>
+                </button>
+                <button 
+                    x-on:click="activeTab = 'devices'"
+                    x-bind:class="activeTab === 'devices' ? 'bg-emerald-50 text-emerald-600 shadow-sm shadow-emerald-100/50' : 'text-gray-500 hover:bg-gray-50'"
+                    class="w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center justify-between transition-all duration-300 group">
+                    <div class="flex items-center gap-3">
+                        <div x-bind:class="activeTab === 'devices' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'" class="w-8 h-8 rounded-lg flex items-center justify-center transition-all">
+                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                        </div>
+                        Devices
+                    </div>
+                    <i data-lucide="chevron-right" x-show="activeTab === 'devices'" class="w-3.5 h-3.5 opacity-50"></i>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="col-span-12 lg:col-span-9 space-y-6">
+        <!-- Profile Tab -->
+        <div x-show="activeTab === 'profile'" class="animate-fade-in space-y-6">
+            <div class="bg-white rounded-[1.5rem] p-8 border border-gray-100 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-40"></div>
+                
+                <div class="flex flex-col md:flex-row items-center gap-8 mb-10 relative z-10">
+                    <div class="relative group">
+                        <div class="w-28 h-28 rounded-3xl overflow-hidden border-4 border-white shadow-xl bg-gray-100">
+                            <img id="profilePreview" src="@Model.ProfileImage" class="w-full h-full object-cover">
+                        </div>
+                        <label for="profileUpload" class="absolute inset-0 bg-black/40 rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-[2px]">
+                            <i data-lucide="camera" class="w-6 h-6 text-white transform hover:scale-110 transition-transform"></i>
+                        </label>
+                        <input type="file" id="profileUpload" class="hidden" accept="image/*" onchange="uploadProfilePhoto(this)">
+                    </div>
+                    <div class="text-center md:text-left">
+                        <h4 class="text-xl font-semibold text-gray-900 leading-tight">@Model.PatientName</h4>
+                        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">Patient ID: <span class="text-indigo-600">#MED-8839201</span></p>
+                        <div class="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
+                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-semibold uppercase tracking-widest rounded-lg border border-emerald-100">Verified Account</span>
+                            <span class="px-2.5 py-1 bg-blue-50 text-blue-600 text-[9px] font-semibold uppercase tracking-widest rounded-lg border border-blue-100">Premium Member</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+                        <input type="text" id="setFullName" value="@Model.PatientName" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:bg-white focus:border-indigo-500 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
+                        <input type="email" value="@Model.PatientEmail" readonly class="w-full px-5 py-3.5 bg-gray-100 border border-gray-100 rounded-2xl text-sm font-bold text-gray-400 cursor-not-allowed">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Phone Number</label>
+                        <input type="tel" id="setPhone" value="@Model.Phone" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:bg-white focus:border-indigo-500 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Date of Birth</label>
+                        <input type="date" id="setDOB" value="@(Model.DateOfBirth?.ToString("yyyy-MM-dd"))" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:bg-white focus:border-indigo-500 transition-all">
+                    </div>
+                </div>
+
+                <div class="mt-10 pt-6 border-t border-gray-50 flex justify-end gap-4 relative z-10">
+                    <button x-on:click="location.reload()" class="px-6 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-all">Discard Changes</button>
+                    <button onclick="saveGenericSettings()" class="save-btn px-8 py-3.5 bg-indigo-600 text-white rounded-2xl font-semibold text-sm shadow-xl shadow-indigo-100 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest">Save Profile</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Tab -->
+        <div x-show="activeTab === 'security'" class="animate-fade-in space-y-6">
+            <div class="bg-white rounded-[1.5rem] p-8 border border-gray-100 shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-900 mb-8">Security & Access</h3>
+                
+                <div class="space-y-10">
+                    <div>
+                        <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-6">Password Management</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest ml-1">Current Password</label>
+                                <input type="password" id="currentPass" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 focus:outline-none focus:border-rose-500 transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest ml-1">New Password</label>
+                                <input type="password" id="newPass" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 focus:outline-none focus:border-emerald-500 transition-all">
+                            </div>
+                        </div>
+                        <button onclick="updatePassword()" class="mt-6 px-8 py-3.5 bg-gray-900 text-white rounded-2xl font-semibold text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-gray-200">Update Password</button>
+                    </div>
+
+                    <div class="pt-10 border-t border-gray-50">
+                        <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-6">Enhanced Security</h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-6 bg-gray-50/50 rounded-3xl border border-gray-100/50 group hover:bg-white hover:border-emerald-100 transition-all">
+                                <div class="flex items-center gap-5">
+                                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm group-hover:scale-110 transition-transform">
+                                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-sm font-bold text-gray-900">Two-Factor Authentication</h5>
+                                        <p class="text-[11px] text-gray-500 font-medium mt-0.5">Protect your account with an extra verification layer.</p>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div x-show="activeTab === 'notifications'" class="animate-fade-in space-y-6">
+            <div class="bg-white rounded-[1.5rem] p-8 border border-gray-100 shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Notifications</h3>
+                <p class="text-gray-500 text-xs font-medium mb-8">Manage how you receive updates and reminders.</p>
+
+                <div class="space-y-4">
+                    <div class="bg-gray-50/50 border border-gray-100/50 hover:border-blue-100 hover:bg-white p-6 rounded-3xl transition-all group shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 bg-white text-blue-600 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                    <i data-lucide="mail" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-sm font-bold text-gray-900">Email Alerts</h5>
+                                    <p class="text-[11px] text-gray-500 font-medium">Appointments and medical report alerts.</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="notifEmail" class="sr-only peer" @(Model.EmailNotificationsEnabled ? "checked" : "") onchange="saveGenericSettings()">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50/50 border border-gray-100/50 hover:border-indigo-100 hover:bg-white p-6 rounded-3xl transition-all group shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 bg-white text-indigo-600 rounded-2xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                                    <i data-lucide="smartphone-nfc" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-sm font-bold text-gray-900">Push Notifications</h5>
+                                    <p class="text-[11px] text-gray-500 font-medium">Real-time alerts on your mobile devices.</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="notifPush" class="sr-only peer" @(Model.PushNotificationsEnabled ? "checked" : "") onchange="saveGenericSettings()">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </label>
+                        </div>
+                        <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
+                            <div id="subscriptionStatus" class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Checking Status...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Billing Tab -->
+        <div x-show="activeTab === 'billing'" class="animate-fade-in space-y-6">
+            <div class="bg-white rounded-[1.5rem] p-8 border border-gray-100 shadow-sm">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-xl font-semibold text-gray-900">Billing History</h3>
+                    <button class="px-4 py-2 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-semibold uppercase tracking-widest border border-amber-100">Add Method</button>
+                </div>
+                <div class="space-y-3">
+                    @foreach(var inv in Model.BillingHistory) {
+                        <div class="flex items-center justify-between p-5 bg-gray-50/30 rounded-2xl border border-gray-100 group hover:bg-white hover:border-amber-200 transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-amber-500 shadow-sm group-hover:scale-105 transition-transform">
+                                    <i data-lucide="file-check" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-sm font-bold text-gray-900">@inv.Id</h6>
+                                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">@inv.Date</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <span class="text-sm font-semibold text-gray-900">@inv.Amount</span>
+                                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-[9px] font-semibold rounded-lg uppercase tracking-widest">Paid</span>
+                                <a href="@Url.Action("DownloadInvoice", "Dashboard", new { id = inv.AppointmentId })" target="_blank" class="w-9 h-9 rounded-xl hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Devices Tab -->
+        <div x-show="activeTab === 'devices'" class="animate-fade-in space-y-6">
+            <div class="bg-white rounded-[1.5rem] p-8 border border-gray-100 shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Active Sessions</h3>
+                <p class="text-gray-500 text-xs font-medium mb-8">Real-time tracking of devices logged into your account.</p>
+
+                <div class="space-y-5">
+                    @foreach(var dev in Model.RecentDevices) {
+                        bool isCurrent = dev.Location == "Current Device";
+                        string icon = "monitor";
+                        if(dev.DeviceName.Contains("iPhone") || dev.DeviceName.Contains("Android")) icon = "smartphone";
+                        if(dev.DeviceName.Contains("MacBook") || dev.DeviceName.Contains("Mac")) icon = "laptop";
+
+                        <div class="flex items-center justify-between p-6 rounded-3xl border @(isCurrent ? "border-indigo-100 bg-indigo-50/40" : "border-gray-50 bg-gray-50/50") group transition-all hover:bg-white hover:shadow-md">
+                             <div class="flex items-center gap-6">
+                                <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-gray-900 shadow-sm group-hover:scale-110 transition-transform">
+                                    <i data-lucide="@icon" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <h5 class="text-base font-bold text-gray-900">@dev.DeviceName</h5>
+                                        @if(isCurrent) {
+                                            <span class="px-2 py-0.5 bg-indigo-600 text-[8px] text-white font-semibold rounded-md uppercase tracking-widest whitespace-nowrap shadow-sm">Active Now</span>
+                                        }
+                                    </div>
+                                    <div class="flex items-center gap-2 text-[11px] text-gray-500 font-medium">
+                                        <span>@dev.IPAddress</span>
+                                        <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                        <span class="text-indigo-500">Last active: @dev.LastSeen.ToString("MMM dd, HH:mm")</span>
+                                    </div>
+                                </div>
+                             </div>
+                             @if(!isCurrent) {
+                                <button x-on:click="startSessionRevoke('@dev.Id', '@dev.DeviceName')" class="px-5 py-2.5 bg-white border border-rose-100 text-rose-600 text-[10px] font-semibold uppercase tracking-widest rounded-xl hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all shadow-sm">Sign Out</button>
+                             }
+                        </div>
+                    }
+                </div>
+
+                <div class="mt-12 p-8 bg-rose-50 rounded-[2rem] border border-rose-100 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="text-center md:text-left">
+                        <h4 class="text-rose-900 text-base font-semibold">Security Protocol</h4>
+                        <p class="text-xs text-rose-600 font-bold mt-1 uppercase tracking-tight">Remote sign-out requires email confirmation for your protection.</p>
+                    </div>
+                    <button x-on:click="startSessionRevoke('all', 'All Other Devices')" class="px-8 py-3.5 bg-rose-600 text-white rounded-2xl text-xs font-semibold shadow-xl shadow-rose-200 hover:bg-rose-700 hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest">Sign Out All Others</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2FA Verification Modal -->
+    <div x-show="show2FAModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+        <div class="bg-white rounded-[2.5rem] p-10 max-w-md w-full shadow-2xl relative overflow-hidden transform transition-all scale-100">
+            <div class="absolute top-0 left-0 w-full h-3 bg-rose-600"></div>
+            
+            <button x-on:click="show2FAModal = false" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 bg-rose-50 text-rose-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+                    <i data-lucide="mail-warning" class="w-10 h-10"></i>
+                </div>
+                <h3 class="text-2xl font-semibold text-gray-900 mb-3">Security Verification</h3>
+                <p class="text-sm text-gray-500 font-medium leading-relaxed">Enter the 6-digit code sent to your email to authorize sign-out of <span class="font-bold text-gray-900 italic" x-text="targetSessionName"></span>.</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="relative">
+                    <input type="text" x-model="verificationCode" maxlength="6" placeholder="000 000" class="w-full px-6 py-5 bg-gray-50 border-2 border-gray-100 rounded-3xl text-center text-3xl font-semibold tracking-[0.4em] text-gray-900 focus:outline-none focus:border-rose-600 transition-all placeholder:text-gray-200 shadow-inner">
+                </div>
+                
+                <p x-show="error2FA" x-text="error2FA" class="text-xs text-rose-600 font-semibold text-center animate-pulse">Invalid code</p>
+
+                <div class="flex gap-4 pt-6">
+                    <button x-on:click="show2FAModal = false" class="flex-1 py-4.5 rounded-2xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-all">Cancel</button>
+                    <button x-on:click="confirmRevoke()" class="flex-[2] py-4.5 bg-gray-900 text-white rounded-2xl font-semibold text-sm hover:bg-black transition-all shadow-2xl shadow-gray-300 uppercase tracking-widest">Verify & Terminate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    [x-cloak] { display: none !important; }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        opacity: 0.5;
+        cursor: pointer;
+    }
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    /* Custom Scrollbar for the sidebar sticky */
+    .sticky::-webkit-scrollbar { width: 4px; }
+    .sticky::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+</style>

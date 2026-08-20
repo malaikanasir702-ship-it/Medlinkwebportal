@@ -1,0 +1,100 @@
+﻿@{
+    ViewData["Title"] = "Tracking Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen bg-slate-50 pb-20">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">📊 Live Tracking Dashboard</h1>
+                <p class="text-sm text-slate-500 mt-1">All active rider sessions — auto-refreshes every 30 seconds</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="/Admin/Rider/LiveMapDashboard"
+                   class="px-4 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 transition-all">
+                    🗺️ Live Map
+                </a>
+                <a href="/Admin/Rider"
+                   class="px-4 py-2.5 bg-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-300 transition-all">
+                    ← Riders
+                </a>
+            </div>
+        </div>
+
+        <!-- Last updated indicator -->
+        <p class="text-xs text-slate-400 mb-4">Last updated: <span id="lastUpdated">—</span></p>
+
+        <!-- Sessions Table -->
+        <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rider</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Order</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Last Update</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Heartbeat</th>
+                    </tr>
+                </thead>
+                <tbody id="sessionsTableBody" class="divide-y divide-slate-50">
+                    <tr>
+                        <td colspan="5" class="px-6 py-10 text-center text-slate-400 text-sm">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadSessions() {
+    try {
+        const res = await fetch('/Admin/Rider/GetActiveSessions');
+        const sessions = await res.json();
+        const tbody = document.getElementById('sessionsTableBody');
+
+        if (!sessions.length) {
+            tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-slate-400 text-sm">No active sessions</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = sessions.map(s => {
+            const stale = s.isHeartbeatStale;
+            const elapsed = s.elapsedSecondsSinceUpdate;
+            const elapsedLabel = elapsed < 60 ? `${elapsed}s ago` : `${Math.floor(elapsed/60)}m ago`;
+            const rowBg = stale ? 'bg-rose-50' : '';
+            const heartbeatBadge = stale
+                ? `<span class="px-2 py-1 bg-rose-100 text-rose-600 text-[9px] font-black rounded-full">⚠️ Offline</span>`
+                : `<span class="px-2 py-1 bg-emerald-100 text-emerald-600 text-[9px] font-black rounded-full">● Online</span>`;
+
+            return `
+                <tr class="${rowBg} hover:bg-slate-50/50 transition-colors">
+                    <td class="px-6 py-4">
+                        <p class="font-bold text-slate-900 text-sm">${s.riderName}</p>
+                        <p class="text-xs text-slate-400">ID: ${s.riderId}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="font-bold text-slate-700 text-sm">#${s.orderId}</p>
+                        <p class="text-xs text-slate-400">${s.orderType}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black rounded-full">${s.statusLabel}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="text-sm font-medium text-slate-700">${elapsedLabel}</p>
+                    </td>
+                    <td class="px-6 py-4">${heartbeatBadge}</td>
+                </tr>`;
+        }).join('');
+
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+    } catch (e) {
+        console.error('Failed to load sessions', e);
+    }
+}
+
+loadSessions();
+setInterval(loadSessions, 30000);
+</script>

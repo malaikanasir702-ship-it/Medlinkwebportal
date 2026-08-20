@@ -1,0 +1,93 @@
+﻿<section id="health-records" class="py-32 px-6 bg-[#F8FAFC]">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div class="order-2 lg:order-1">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 stagger-children" data-animate>
+                    @{
+                        var benefits = new[]
+                        {
+                                        new { Icon = "database", Title = "Lifetime Maintenance", Color = "text-blue-600",
+                                        Description = "We maintain your complete medical history from day one. Every consultation, prescription, and lab result is logged and stored indefinitely." },
+                                        new { Icon = "lock", Title = "End-to-End Encryption", Color = "text-emerald-600",
+                                        Description = "Your records are protected with military-grade 256-bit encryption. Even we cannot access your data without your explicit permission." },
+                                        new { Icon = "share-2", Title = "One-Click Sharing", Color = "text-purple-600",
+                                        Description = "Instantly share your relevant health data with new specialists or clinics anywhere in the world, ensuring continuity of care." },
+                                        new { Icon = "cloud-lightning", Title = "Instant Updates", Color = "text-orange-600",
+                                        Description = "As soon as a doctor finishes a consultation, your records are updated in real-time. No more waiting for paper reports or emails." }
+                                        };
+                    }
+
+                    @foreach (var benefit in benefits)
+                    {
+                        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 fade-up" data-animate>
+                            <div class="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-6">
+                                <i data-lucide="@benefit.Icon" class="w-6 h-6 @benefit.Color"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-gray-900 mb-3">@benefit.Title</h4>
+                            <p class="text-gray-500 text-sm leading-relaxed">@benefit.Description</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="order-1 lg:order-2 max-w-xl fade-left" data-animate>
+                <div class="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                    Unified Record Management
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-tight mb-8">
+                    Your medical history, <br />
+                    <span class="text-blue-600">permanently organized.</span>
+                </h2>
+                <p class="text-lg text-gray-600 mb-10 leading-relaxed">
+                    Stop carrying around physical files or digging through emails. MedLink acts as your
+                    digital medical custodian, ensuring your entire health journey is preserved in a
+                    highly secure, easily accessible, and doctor-verified vault.
+                </p>
+
+                <div class="space-y-6 mb-12">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                            <i data-lucide="file-search" class="w-6 h-6 text-blue-500"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-gray-900">Searchable Database</h5>
+                            <p class="text-sm text-gray-500">Quickly find past diagnoses or medication names using our smart search.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                            <i data-lucide="clock" class="w-6 h-6 text-blue-500"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-gray-900">Timeline View</h5>
+                            <p class="text-sm text-gray-500">See your health progress over years with our intuitive chronological timeline.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="@Url.Action("VaultSecurity", "Home")" class="flex items-center gap-3 bg-gray-900 text-white px-10 py-5 rounded-full font-bold hover:bg-black transition-all shadow-xl hover:shadow-gray-200 group">
+                    Learn about our Vault Security
+                    <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-24 p-10 bg-white rounded-[3rem] border border-gray-100 shadow-sm flex flex-col md:flex-row items-center justify-around gap-12 fade-up delay-300" data-animate>
+            <div class="text-center">
+                <div class="text-4xl font-black text-gray-900 mb-1">100%</div>
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Data Privacy</div>
+            </div>
+            <div class="w-[1px] h-12 bg-gray-100 hidden md:block"></div>
+            <div class="text-center">
+                <div class="text-4xl font-black text-gray-900 mb-1">256-bit</div>
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">AES Encryption</div>
+            </div>
+            <div class="w-[1px] h-12 bg-gray-100 hidden md:block"></div>
+            <div class="text-center">
+                <div class="text-4xl font-black text-gray-900 mb-1">Global</div>
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Record Mobility</div>
+            </div>
+        </div>
+    </div>
+</section>

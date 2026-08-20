@@ -1,0 +1,263 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    ViewData["Title"] = "Support Intelligence";
+    Layout = "_DashboardLayout";
+    var order = Model.CurrentOrder;
+    var currentUserId = Model.PatientId;
+}
+
+<div class="min-h-screen bg-slate-50 pb-20">
+    <div class="max-w-7xl mx-auto px-4 py-6 lg:py-8 h-[calc(100vh-100px)]">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+            
+            <!-- Order Context Sidebar -->
+            <div class="lg:col-span-1 h-full overflow-y-auto hidden lg:block">
+                <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm h-full flex flex-col">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                            <i data-lucide="package" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-black text-slate-900 tracking-tight">Order #@order.Id.ToString("D5")</h2>
+                            <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest">@order.Status</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                        <div>
+                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Items</h3>
+                            <div class="space-y-3">
+                                @foreach (var item in order.OrderItems)
+                                {
+                                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                                        @if(!string.IsNullOrEmpty(item.Medicine.ImageUrl))
+                                        {
+                                            <img src="@item.Medicine.ImageUrl" class="w-10 h-10 rounded-xl object-cover" />
+                                        }
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-bold text-slate-900 truncate">@item.Medicine.Name</p>
+                                            <p class="text-[10px] text-slate-500 font-medium">Qty: @item.Quantity</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Delivery To</h3>
+                            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div class="flex gap-3">
+                                    <i data-lucide="map-pin" class="w-4 h-4 text-emerald-500 mt-1 shrink-0"></i>
+                                    <p class="text-xs font-bold text-slate-600 leading-relaxed">@order.ShippingAddress</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="/Pharmacy/OrderTracking/@order.Id" class="mt-6 flex items-center justify-center gap-2 w-full py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-2xl font-bold text-xs transition-colors">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Tracking
+                    </a>
+                </div>
+            </div>
+
+            <!-- Chat Interface -->
+            <div class="lg:col-span-2 h-full">
+                <div class="bg-white rounded-[2rem] shadow-xl h-full flex flex-col relative overflow-hidden border border-slate-100">
+                    
+                    <!-- Chat Header -->
+                    <div class="p-6 border-b border-slate-100 bg-white/80 backdrop-blur-md relative z-10 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                                    <i data-lucide="headphones" class="w-6 h-6"></i>
+                                </div>
+                                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                            </div>
+                            <div>
+                                <h1 class="text-lg font-black text-slate-900 tracking-tight">Customer Care</h1>
+                                <p class="text-xs font-bold text-slate-400 flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> @(order.PharmacistId != null ? "Pharmacist Connected" : "Support Team Online")
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all">
+                                <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Messages Area -->
+                    <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-slate-50/50" id="chatMessages">
+                        <!-- Initial System Message -->
+                        <div class="flex justify-center">
+                            <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">Today</span>
+                        </div>
+                        
+                         <!-- Initial Greeting -->
+                        <div class="flex gap-4 max-w-[80%]">
+                            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex shrink-0 items-center justify-center text-white text-[10px]">CC</div>
+                            <div class="space-y-2">
+                                <div class="p-4 bg-white rounded-2xl rounded-tl-none text-sm text-slate-600 leading-relaxed border border-slate-100 shadow-sm">
+                                    Hello! How can we help you with Order #@order.Id today?
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-400 pl-1">Just now</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="p-6 bg-white border-t border-slate-100 relative z-10">
+                        <form id="chatForm" onsubmit="handleChatSubmit(event)" class="relative">
+                            <input type="text" id="chatInput" 
+                                class="w-full pl-6 pr-14 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-sm"
+                                placeholder="Type your message..." autocomplete="off">
+                            <button type="submit" class="absolute right-2 top-2 bottom-2 w-10 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl flex items-center justify-center transition-all shadow-lg shadow-emerald-500/20">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+<script>
+    const currentUserId = "@currentUserId";
+    let targetPharmacistId = null;
+    const orderId = "@order.Id";
+
+    // START SIGNALR
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .build();
+
+    connection.on("ReceiveMessage", (senderId, message, type, attachmentUrl, attachmentName, originalSenderId) => {
+        console.log("Message received from:", senderId);
+        if (senderId === targetPharmacistId) {
+            appendMessage(message, false);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        lucide.createIcons();
+        
+        // 1. Fetch Dynamic Pharmacist ID
+        try {
+            const res = await fetch(`/Pharmacy/GetSupportAgent?orderId=${orderId}`);
+            const data = await res.json();
+            if(data.pharmacistId) {
+                targetPharmacistId = data.pharmacistId;
+                console.log("Connected to Support Agent:", targetPharmacistId);
+                
+                // 2. Start Connection
+                await connection.start();
+                
+                // 3. Load History
+                loadChatHistory();
+            } else {
+                console.error("No support agent available.");
+                appendMessage("System: No support agent is currently available. Please try later.", false);
+                document.querySelector('button[type="submit"]').disabled = true;
+            }
+        } catch (err) {
+            console.error("Error initializing chat:", err);
+        }
+    });
+
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+
+    async function handleChatSubmit(e) {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        
+        if (text && targetPharmacistId) {
+            // Optimistic Append
+            appendMessage(text, true);
+            
+            try {
+                // Use API for storage + notification
+                const response = await fetch('/Pharmacy/SendMessage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        receiverId: targetPharmacistId,
+                        content: text
+                    })
+                });
+                
+                if (!response.ok) {
+                    console.error("Failed to send message via API");
+                }
+            } catch (err) {
+                console.error("Send failed", err);
+            }
+            
+            chatInput.value = '';
+        }
+    }
+
+    function appendMessage(text, isMe) {
+        const div = document.createElement('div');
+        div.className = isMe 
+            ? 'flex gap-4 max-w-[80%] ml-auto flex-row-reverse animate-in fade-in slide-in-from-bottom-2 duration-300'
+            : 'flex gap-4 max-w-[80%] animate-in fade-in slide-in-from-bottom-2 duration-300';
+            
+        div.innerHTML = isMe ? `
+            <div class="w-8 h-8 rounded-xl bg-slate-200 flex shrink-0 items-center justify-center text-slate-500 text-[10px]">You</div>
+            <div class="space-y-1 text-right">
+                <div class="p-4 bg-emerald-500 rounded-2xl rounded-tr-none text-sm text-white font-medium shadow-lg shadow-emerald-500/20 text-left">
+                    ${text}
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 pr-1">Just now</span>
+            </div>
+        ` : `
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex shrink-0 items-center justify-center text-white text-[10px]">CC</div>
+            <div class="space-y-2">
+                <div class="p-4 bg-white rounded-2xl rounded-tl-none text-sm text-slate-600 leading-relaxed border border-slate-100 shadow-sm">
+                    ${text}
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 pl-1">Just now</span>
+            </div>
+        `;
+        
+        chatMessages.appendChild(div);
+        scrollToBottom();
+    }
+
+    async function loadChatHistory() {
+        if(!targetPharmacistId) return;
+
+        try {
+            const res = await fetch(`/Pharmacy/GetChatHistory?otherUserId=${targetPharmacistId}`);
+            const messages = await res.json();
+            
+            // Clear default greeting if we have history, OR keep it? 
+            // Let's keep the greeting as top-level context, but maybe clear if it's confusing.
+            // For now, let's just append history.
+            
+            if(messages.length > 0) {
+                 chatMessages.innerHTML = ''; // Clear initial greeting if history exists
+                 messages.forEach(m => appendMessage(m.content, m.isMe));
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+</script>

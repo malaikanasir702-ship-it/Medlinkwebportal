@@ -1,0 +1,194 @@
+@{
+    ViewData["Title"] = "Revenue Intelligence";
+    Layout = "_PharmacistLayout";
+    
+    var topMedicines = ViewBag.TopMedicines as IEnumerable<MedLinkPortal.Controllers.PharmacyController.MedicinePerformance>;
+    var monthlyRevenue = ViewBag.MonthlyRevenue as IEnumerable<MedLinkPortal.Controllers.PharmacyController.MonthlyRevenue>;
+}
+
+<div class="min-h-screen bg-slate-50/50 pb-20">
+    <div class="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+            <div class="flex items-center gap-6">
+                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-600/20">
+                    <i data-lucide="trending-up" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Revenue Intel</h1>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Financial Performance & Analytics</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="window.print()" class="px-6 py-3 bg-white text-slate-600 font-bold text-xs rounded-xl hover:bg-slate-50 transition-all border border-slate-100 shadow-sm print:hidden flex items-center gap-2">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Export Report
+                </button>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl relative overflow-hidden group">
+                <div class="relative z-10">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Revenue</p>
+                    <h3 class="text-3xl font-black text-slate-900 tracking-tight">PKR @(((decimal)ViewBag.TotalRevenue).ToString("N0"))</h3>
+                    <div class="mt-4 flex items-center gap-2">
+                        <span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-lg">+12.5%</span>
+                        <span class="text-[10px] font-bold text-slate-400">vs last month</span>
+                    </div>
+                </div>
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+                <i data-lucide="wallet" class="absolute right-8 bottom-8 w-10 h-10 text-indigo-100/50 group-hover:text-indigo-200 transition-colors"></i>
+            </div>
+
+            <div class="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl relative overflow-hidden group">
+                 <div class="relative z-10">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Orders</p>
+                    <h3 class="text-3xl font-black text-slate-900 tracking-tight">@ViewBag.TotalOrders</h3>
+                    <div class="mt-4 flex items-center gap-2">
+                        <span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-lg">+5.2%</span>
+                        <span class="text-[10px] font-bold text-slate-400">vs last month</span>
+                    </div>
+                </div>
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+                <i data-lucide="shopping-bag" class="absolute right-8 bottom-8 w-10 h-10 text-blue-100/50 group-hover:text-blue-200 transition-colors"></i>
+            </div>
+
+            <div class="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl relative overflow-hidden group">
+                 <div class="relative z-10">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Avg. Order Value</p>
+                    <h3 class="text-3xl font-black text-slate-900 tracking-tight">PKR @(((decimal)ViewBag.AverageOrderValue).ToString("N0"))</h3>
+                     <div class="mt-4 flex items-center gap-2">
+                        <span class="px-2 py-1 bg-amber-50 text-amber-600 text-[10px] font-black rounded-lg">-2.1%</span>
+                        <span class="text-[10px] font-bold text-slate-400">vs last month</span>
+                    </div>
+                </div>
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-amber-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+                <i data-lucide="receipt" class="absolute right-8 bottom-8 w-10 h-10 text-amber-100/50 group-hover:text-amber-200 transition-colors"></i>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+            <!-- Revenue Trend -->
+            <div class="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl">
+                <div class="flex justify-between items-center mb-8">
+                     <div>
+                        <h3 class="font-black text-lg text-slate-900">Revenue Trend</h3>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last 6 Months</p>
+                    </div>
+                    <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-500">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                <canvas id="revenueChart" height="250"></canvas>
+            </div>
+
+            <!-- Top Products -->
+            <div class="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl">
+                 <div class="flex justify-between items-center mb-8">
+                     <div>
+                        <h3 class="font-black text-lg text-slate-900">Top Performing Medicines</h3>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">By Units Sold</p>
+                    </div>
+                    <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
+                        <i data-lucide="award" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    @if(topMedicines != null)
+                    {
+                        var maxSold = topMedicines.Any() ? topMedicines.Max(m => m.Sold) : 100;
+
+                        foreach(var med in topMedicines)
+                        {
+                            var percentage = (double)med.Sold / maxSold * 100;
+
+                            <div>
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-sm font-bold text-slate-700">@med.Name</span>
+                                    <span class="text-xs font-black text-slate-900">@med.Sold sold <span class="text-slate-300 font-normal">|</span> <span class="text-emerald-600">PKR @med.Revenue.ToString("N0")</span></span>
+                                </div>
+                                <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-indigo-500 rounded-full" style="width: @percentage%"></div>
+                                </div>
+                            </div>
+                        }
+                    } else {
+                        <p class="text-slate-400 text-center py-10">No sales data available yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Revenue Data
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    
+    // Parse Monthly Data from View
+    // Since we are iterating simpler in razor, let's just mock or pass JSON if complex
+    // For now simple passing:
+    const months = @Html.Raw(Json.Serialize(monthlyRevenue?.Select(m => m.Month)));
+    const revenues = @Html.Raw(Json.Serialize(monthlyRevenue?.Select(m => m.Revenue)));
+
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: months && months.length ? months : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Monthly Revenue (PKR)',
+                data: revenues && revenues.length ? revenues : [0, 0, 0, 0, 0, 0],
+                borderColor: '#4f46e5',
+                backgroundColor: 'rgba(79, 70, 229, 0.05)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#4f46e5',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    padding: 12,
+                    titleFont: { family: 'Outfit', size: 13 },
+                    bodyFont: { family: 'Outfit', size: 13 },
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return 'PKR ' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f1f5f9', drawBorder: false },
+                    ticks: { font: { family: 'Outfit', size: 10 }, color: '#94a3b8' }
+                },
+                x: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: { font: { family: 'Outfit', size: 10 }, color: '#94a3b8' }
+                }
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    });
+</script>

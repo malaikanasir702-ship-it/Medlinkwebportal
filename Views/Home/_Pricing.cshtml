@@ -1,0 +1,82 @@
+﻿<section id="pricing" class="py-32 px-6 bg-white">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-20 fade-down" data-animate>
+            <h2 class="text-sm font-bold text-blue-600 uppercase tracking-widest mb-4">Transparent Pricing</h2>
+            <h3 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">Health care plans for <br /> every lifestyle.</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch stagger-children" data-animate>
+            @{
+                var plans = new[]
+                {
+                        new {
+                        Name = "Basic",
+                        Price = "$0",
+                        Period = "per month",
+                        Desc = "Perfect for one-off consultations and health tracking.",
+                        Features = new[] { "AI Symptom Checker", "Standard Appointments", "Basic Health Records", "24h Support Response" },
+                        Cta = "Get Started",
+                        Highlight = false
+                        },
+                        new {
+                        Name = "Premium",
+                        Price = "$29",
+                        Period = "per month",
+                        Desc = "Ideal for families and proactive health management.",
+                        Features = new[] { "Priority Specialist Access", "Predictive AI Diagnostics", "Unlimited Video Calls", "Family Plan (4 users)", "Personal Health Concierge" },
+                        Cta = "Join Premium",
+                        Highlight = true
+                        },
+                        new {
+                        Name = "Enterprise",
+                        Price = "Custom",
+                        Period = "for organizations",
+                        Desc = "For clinics, hospitals, and corporate health programs.",
+                        Features = new[] { "Custom Provider Dashboard", "API Integration", "HIPAA Dedicated Cloud", "Multi-region Compliance", "Dedicated Account Manager" },
+                        Cta = "Contact Sales",
+                        Highlight = false
+                        }
+                        };
+            }
+
+            @foreach (var plan in plans)
+            {
+                <div class="relative flex flex-col p-10 rounded-[3rem] border transition-all duration-500 @(plan.Highlight ? "bg-gray-900 text-white border-gray-900 scale-105 shadow-2xl shadow-blue-500/20 z-10" : "bg-gray-50 border-gray-100 text-gray-900 hover:bg-white hover:shadow-xl") fade-up" data-animate>
+                    @if (plan.Highlight)
+                    {
+                        <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
+                            <i data-lucide="zap" class="w-2.5 h-2.5 fill-current"></i>
+                            Most Popular
+                        </div>
+                    }
+
+                    <h4 class="text-xl font-bold mb-2">@plan.Name</h4>
+                    <p class="@(plan.Highlight ? "text-gray-400" : "text-gray-500") text-sm mb-8">@plan.Desc</p>
+
+                    <div class="mb-8 flex items-baseline gap-1">
+                        <span class="text-5xl font-black">@plan.Price</span>
+                        <span class="@(plan.Highlight ? "text-gray-400" : "text-gray-500") text-sm font-medium">@plan.Period</span>
+                    </div>
+
+                    <div class="flex-1 space-y-4 mb-10">
+                        @foreach (var feat in plan.Features)
+                        {
+                            <div class="flex items-start gap-3">
+                                <div class="mt-1 p-0.5 rounded-full @(plan.Highlight ? "bg-blue-500 text-white" : "bg-blue-100 text-blue-600")">
+                                    <i data-lucide="check" class="w-3 h-3"></i>
+                                </div>
+                                <span class="text-sm font-medium">@feat</span>
+                            </div>
+                        }
+                    </div>
+
+                    <button onclick="toggleModal('bookingModal')"
+                            class="w-full py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 group @(plan.Highlight ? "bg-blue-600 text-white hover:bg-blue-500 shadow-xl shadow-blue-900/40" : "bg-white border border-gray-200 text-gray-900 hover:bg-gray-900 hover:text-white hover:border-gray-900 shadow-sm")">
+                        @plan.Cta
+                        <i data-lucide="arrow-right" class="w-4.5 h-4.5 transition-transform group-hover:translate-x-1"></i>
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</section>

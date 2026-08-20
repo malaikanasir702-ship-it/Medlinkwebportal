@@ -1,0 +1,239 @@
+﻿@{
+    ViewData["Title"] = "Security & Privacy Vault | MedLink";
+}
+
+<div class="min-h-screen bg-[#FBFBFE] font-inter overflow-auto">
+    <!-- Advanced Security Background -->
+    <div class="fixed inset-0 -z-10">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#EFF6FF_0%,transparent_100%)] opacity-50"></div>
+        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
+        <div class="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-100/30 rounded-full blur-[120px] animate-pulse-slow"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/40 backdrop-blur-2xl border-b border-gray-100/50 py-4">
+        <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2 group">
+                <div class="bg-blue-600 p-1.5 rounded-lg text-white group-hover:rotate-12 transition-transform shadow-lg shadow-blue-200">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xl font-black tracking-tight text-gray-900">MedLink <span class="text-blue-600">Vault</span></span>
+            </a>
+
+            <div class="flex items-center gap-6">
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-full">
+                    <i data-lucide="lock" class="w-3 h-3 text-blue-600"></i>
+                    <span class="text-[10px] font-black text-blue-700 uppercase tracking-widest">Encrypted</span>
+                </div>
+                <a href="/" class="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Close View</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-28 pb-10 px-6 max-w-6xl mx-auto">
+        <!-- Compact Hero Section -->
+        <div class="text-center mb-12 animate-fade-in-up">
+            <div class="inline-flex items-center gap-2 bg-gray-900 text-white rounded-full px-5 py-2 mb-6 shadow-2xl">
+                <i data-lucide="shield" class="w-4 h-4 text-blue-400"></i>
+                <span class="text-[10px] font-black uppercase tracking-[0.3em]">Privacy First</span>
+            </div>
+
+            <h1 class="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter leading-[1.1] mt-5">
+                Security <span class="gradient-text italic">Vault</span>
+            </h1>
+
+            <p class="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed font-medium">
+                Military-grade encryption meets human-centric privacy in a multi-layered security system.
+            </p>
+        </div>
+
+        <!-- Compact Flex Grid: Security Features -->
+        <div class="flex flex-col lg:flex-row gap-6 mb-12">
+            <!-- Zero-Knowledge Card -->
+            <div class="flex-1 bg-white rounded-3xl p-8 border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-500 group min-h-[300px] flex flex-col">
+                <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mb-6 shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">
+                    <i data-lucide="unlocked" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4 leading-tight">Zero-Knowledge Protocol</h3>
+                <p class="text-gray-500 leading-relaxed font-medium flex-grow">
+                    Your medical data is encrypted with a key that only you possess. Never readable by our servers.
+                </p>
+                <div class="mt-6 flex items-center gap-2 text-blue-600 font-bold text-sm">
+                    Learn more <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </div>
+            </div>
+
+            <!-- Biometric Auth Card -->
+            <div class="flex-1 bg-gray-900 rounded-3xl p-8 text-white overflow-hidden relative group min-h-[300px] flex flex-col">
+                <div class="absolute top-0 right-0 w-full h-full opacity-20">
+                    <svg class="w-full h-full" viewBox="0 0 100 100">
+                        <circle cx="100" cy="0" r="60" fill="none" stroke="white" stroke-width="0.1" />
+                    </svg>
+                </div>
+                <div class="relative z-10 flex flex-col h-full">
+                    <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-6">
+                        <i data-lucide="key" class="w-6 h-6 text-blue-400"></i>
+                    </div>
+                    <h4 class="text-2xl font-bold mb-4">Biometric Auth</h4>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">Access your vault using FaceID, TouchID, or Hardware Security Keys (YubiKey).</p>
+                    <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-500 w-full animate-progress-fast"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Row Cards -->
+        <div class="flex flex-col md:flex-row gap-6 mb-12">
+            <!-- Immutable Logs Card -->
+            <div class="flex-1 bg-white rounded-3xl p-8 border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-500 min-h-[250px] flex flex-col">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6">
+                    <i data-lucide="file-check" class="w-6 h-6"></i>
+                </div>
+                <h4 class="text-xl font-bold text-gray-900 mb-4">Immutable Logs</h4>
+                <p class="text-gray-500 leading-relaxed flex-grow">Every access attempt is logged on a private tamper-proof ledger you can audit anytime.</p>
+            </div>
+
+            <!-- Quantum-Resistant Card -->
+            <div class="flex-1 bg-blue-50 overflow-hidden rounded-3xl p-8 border border-blue-100 relative group min-h-[250px] flex flex-col">
+                <div class="relative z-10 flex flex-col h-full">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mb-6">
+                        <i data-lucide="shield" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Quantum-Resistant Encryption</h3>
+                    <p class="text-gray-600 font-medium flex-grow">Implementing post-quantum cryptographic standards for future-proof security.</p>
+                    <div class="mt-6">
+                        <i data-lucide="database" class="w-12 h-12 text-blue-300 group-hover:rotate-12 transition-transform"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Redundant Backup Card -->
+            <div class="flex-1 bg-white rounded-3xl p-8 border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-500 min-h-[250px] flex flex-col">
+                <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6">
+                    <i data-lucide="globe" class="w-6 h-6"></i>
+                </div>
+                <h4 class="text-xl font-bold text-gray-900 mb-4">Global Redundancy</h4>
+                <p class="text-gray-500 leading-relaxed mb-4 flex-grow">Data sharded across 12 high-security data centers worldwide.</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full">Zürich</span>
+                    <span class="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full">Singapore</span>
+                    <span class="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full">Karachi</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Dashboard -->
+        <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Security Status</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-6 bg-gray-50 rounded-2xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-gray-700">Encryption Status</h3>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-2">AES-256 & Zero-Knowledge</p>
+                    <div class="text-3xl font-black text-gray-900">Active</div>
+                </div>
+
+                <div class="p-6 bg-gray-50 rounded-2xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-gray-700">Backup Status</h3>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-2">12/12 Nodes Active</p>
+                    <div class="text-3xl font-black text-gray-900">100%</div>
+                </div>
+
+                <div class="p-6 bg-gray-50 rounded-2xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-gray-700">Access Logs</h3>
+                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-2">Last 24 hours</p>
+                    <div class="text-3xl font-black text-gray-900">0 Alerts</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 flex flex-wrap gap-4 justify-center">
+            <button class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2">
+                <i data-lucide="shield" class="w-4 h-4"></i>
+                Security Settings
+            </button>
+            <button class="px-6 py-3 bg-white text-gray-700 font-bold rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                <i data-lucide="key" class="w-4 h-4"></i>
+                Manage Access
+            </button>
+            <button class="px-6 py-3 bg-white text-gray-700 font-bold rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                Audit Logs
+            </button>
+        </div>
+    </main>
+
+    <!-- Compact Footer -->
+    <footer class="mt-12 pb-8 px-6 max-w-6xl mx-auto text-center">
+        <div class="text-gray-400 text-sm">
+            <p class="mb-2">© 2024 MedLink Vault. All rights reserved.</p>
+            <p class="text-xs">Security and Privacy are our top priorities.</p>
+        </div>
+    </footer>
+</div>
+
+<style>
+    .gradient-text {
+        background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    @@keyframes progressFast {
+        from {
+            width: 0%;
+        }
+
+        to {
+            width: 100%;
+        }
+    }
+
+    .animate-progress-fast {
+        animation: progressFast 2s ease-in-out infinite alternate;
+    }
+
+    @@keyframes pulse-slow {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    .animate-pulse-slow {
+        animation: pulse-slow 3s ease-in-out infinite;
+    }
+</style>
+
+<script>
+    lucide.createIcons();
+</script>

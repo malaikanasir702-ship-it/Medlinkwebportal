@@ -1,0 +1,435 @@
+@model IEnumerable<MedLinkPortal.Areas.Admin.Models.Patient>
+@{}
+<div class="skeleton-container space-y-12 pb-20">
+    <div class="flex flex-col flex-md-row md:items-center justify-between gap-10 py-6">
+        <div class="w-full max-w-xl">
+            <div class="skeleton skeleton-title w-full h-16 md:h-24"></div>
+            <div class="skeleton skeleton-text w-3/4 h-6"></div>
+        </div>
+        <div class="skeleton w-48 h-16 rounded-[24px]"></div>
+    </div>
+    <div class="skeleton-card p-5 md:p-12">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12">
+            <div class="skeleton w-full max-w-2xl h-16 rounded-[28px]"></div>
+            <div class="skeleton w-40 h-14 rounded-[20px]"></div>
+        </div>
+        <div class="space-y-4">
+            @for(int i=0; i<5; i++) {
+                <div class="flex items-center gap-6 p-6 border-b border-slate-50">
+                    <div class="skeleton w-16 h-16 rounded-[22px]"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="skeleton skeleton-text w-48 h-6"></div>
+                        <div class="skeleton skeleton-text w-32"></div>
+                    </div>
+                    <div class="skeleton w-24 h-8 rounded-full"></div>
+                    <div class="skeleton w-32 h-10"></div>
+                    <div class="flex gap-2">
+                        <div class="skeleton w-10 h-10 rounded-xl"></div>
+                        <div class="skeleton w-10 h-10 rounded-xl"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="main-content-actual content-hidden space-y-12 pb-20">
+    <div class="flex flex-col flex-md-row md:items-center justify-between gap-10 py-6">
+        <div class="animate-in fade-in slide-in-from-left-8 duration-1000">
+            <h1 class="text-6xl md:text-7xl font-semibold text-slate-900 tracking-tighter mb-4">
+                Clinical <span class="text-blue-600">Registry</span>
+            </h1>
+            <p class="text-slate-500 text-xl font-medium leading-relaxed max-w-2xl">
+                Comprehensive patient diagnostics and medical history management.
+            </p>
+        </div>
+        <button id="btnOpenAdmissionModal" class="flex items-center gap-3 px-10 py-5 bg-[#0F172A] text-white rounded-[24px] text-sm font-semibold hover:bg-black transition-all shadow-xl active:scale-95 group">
+            <i class="fas fa-plus group-hover:rotate-90 transition-transform"></i> New Admission
+        </button>
+    </div>
+    <div class="bento-card p-5 md:p-12">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12">
+            <div class="relative flex-grow max-w-2xl">
+                <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="patientSearch" placeholder="Search by name, patient ID, or diagnostic..." 
+                       class="w-full pl-14 pr-8 py-5 bg-slate-50 border-slate-100 rounded-[28px] text-base focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium placeholder:text-slate-400 border" />
+            </div>
+            <div class="flex gap-4">
+                <div class="relative">
+                    <select id="patientFilter" class="appearance-none flex items-center gap-3 px-8 py-5 bg-white border border-slate-200 rounded-[20px] text-[10px] font-semibold text-slate-600 hover:bg-slate-50 transition-all uppercase tracking-widest shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10 cursor-pointer pr-12">
+                        <option value="ALL">Health Status</option>
+                        <option value="STABLE">Stable</option>
+                        <option value="OBSERVATION">Observation</option>
+                        <option value="CRITICAL">Critical</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-6 top-1/2 -translate-y-1/2 text-blue-500 pointer-events-none text-[10px]"></i>
+                </div>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="text-slate-400 text-[10px] font-semibold uppercase tracking-[0.3em]">
+                        <th class="px-6 py-8 border-b border-slate-50 text-left">Patient Identity</th>
+                        <th class="px-6 py-8 border-b border-slate-50 text-left">Primary Diagnostic</th>
+                        <th class="px-6 py-8 border-b border-slate-50 text-left">Vital Standing</th>
+                        <th class="px-6 py-8 border-b border-slate-50 text-left">Assigned Node</th>
+                        <th class="px-6 py-8 border-b border-slate-50 text-right">Settings</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    @foreach (var patient in Model) {
+                        <tr class="group hover:bg-slate-50/80 transition-all duration-500 patient-row" data-id="@patient.Id">
+                            <td class="px-6 py-10">
+                                <div class="flex items-center gap-6">
+                                    <div class="relative">
+                                        <div class="w-16 h-16 rounded-[22px] bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-300 group-hover:shadow-md group-hover:scale-105 transition-all duration-500">
+                                            <i class="fas fa-user-circle text-4xl"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors patient-name">@patient.Name</p>
+                                        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">ID: <span class="patient-id-display">@patient.Id</span></p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-10">
+                                <span class="inline-flex items-center px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-[10px] font-semibold uppercase tracking-[0.15em] border border-slate-200 patient-diag">
+                                    @patient.Diagnostic
+                                </span>
+                            </td>
+                            <td class="px-6 py-10">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-3 h-3 rounded-full @patient.StatusColor glow-pulse status-indicator"></div>
+                                    <span class="text-sm font-semibold text-slate-700 uppercase tracking-widest patient-status">@patient.Status</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-10 text-sm font-semibold text-slate-700">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-map-marker-alt text-blue-500/80"></i>
+                                    <span class="patient-node">@patient.Node</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-10 text-right">
+                                <div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0">
+                                    <button class="w-12 h-12 flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:text-blue-600 hover:shadow-xl hover:scale-110 rounded-2xl transition-all btn-edit-patient">
+                                        <i class="fas fa-file-medical"></i>
+                                    </button>
+                                    <button class="w-12 h-12 flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:text-red-500 hover:shadow-xl hover:scale-110 rounded-2xl transition-all btn-delete-patient">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div id="admissionModal" class="fixed inset-0 hidden items-center justify-center modal-overlay p-4">
+    <div class="modal-content w-full max-w-md max-h-[90vh] overflow-hidden relative flex flex-col bg-white rounded-2xl shadow-2xl" style="background-color: #ffffff !important;">
+        <div class="p-4 md:p-5 pb-2 flex justify-between items-start flex-shrink-0 border-b border-slate-100">
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900 tracking-tight">New <span class="text-blue-600">Admission</span></h3>
+                <p class="text-slate-500 text-[9px] font-medium mt-0.5">Register patient into clinical node.</p>
+            </div>
+            <button id="btnCloseModal" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:text-slate-900 transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="admissionForm" class="p-4 md:p-5 space-y-3 overflow-y-auto flex-1">
+            <div class="space-y-3">
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Patient Name</label>
+                    <input type="text" name="Name" data-val="true" data-val-required="Patient name is required" data-val-length="Name cannot exceed 200 characters" data-val-length-max="200" placeholder="Full Name" 
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 transition-all text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Name" data-valmsg-replace="true"></span>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Primary Diagnostic</label>
+                    <input type="text" name="Diagnostic" data-val="true" data-val-required="Diagnostic is required" data-val-length="Diagnostic cannot exceed 500 characters" data-val-length-max="500" placeholder="e.g. Hypertension" 
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Diagnostic" data-valmsg-replace="true"></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Health Status</label>
+                        <select name="Status" data-val="true" data-val-required="Status is required" data-val-regex="Status must be STABLE, OBSERVATION, or CRITICAL" data-val-regex-pattern="^(STABLE|OBSERVATION|CRITICAL)$" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs">
+                            <option value="">Select Status</option>
+                            <option value="STABLE">STABLE</option>
+                            <option value="OBSERVATION">OBSERVATION</option>
+                            <option value="CRITICAL">CRITICAL</option>
+                        </select>
+                        <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Status" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Assigned Node</label>
+                        <input type="text" name="Node" data-val="true" data-val-required="Node is required" data-val-length="Node cannot exceed 100 characters" data-val-length-max="100" placeholder="e.g. Ward 4A" 
+                               class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                        <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Node" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Patient ID</label>
+                    <input type="text" name="Id" data-val="true" data-val-required="Patient ID is required" data-val-length="Patient ID cannot exceed 50 characters" data-val-length-max="50" placeholder="P-XXXX" 
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 uppercase text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Id" data-valmsg-replace="true"></span>
+                </div>
+            </div>
+            <div class="pt-2 flex-shrink-0 border-t border-slate-100 mt-3">
+                <button type="submit" class="w-full py-3 bg-[#0F172A] text-white rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-95">
+                    Confirm Admission
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="editAdmissionModal" class="fixed inset-0 hidden items-center justify-center modal-overlay p-4">
+    <div class="modal-content w-full max-w-md max-h-[90vh] overflow-hidden relative flex flex-col bg-white rounded-2xl shadow-2xl" style="background-color: #ffffff !important;">
+        <div class="p-4 md:p-5 pb-2 flex justify-between items-start flex-shrink-0 border-b border-slate-100">
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900 tracking-tight">Edit <span class="text-blue-600">Admission</span></h3>
+                <p class="text-slate-500 text-[9px] font-medium mt-0.5">Update clinical record.</p>
+            </div>
+            <button id="btnCloseEditModal" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:text-slate-900 transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="editAdmissionForm" class="p-4 md:p-5 space-y-3 overflow-y-auto flex-1">
+            <input type="hidden" name="Id" />
+            <div class="space-y-3">
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Patient Name</label>
+                    <input type="text" name="Name" data-val="true" data-val-required="Patient name is required" data-val-length="Name cannot exceed 200 characters" data-val-length-max="200" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 transition-all text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Name" data-valmsg-replace="true"></span>
+                </div>
+                <div class="space-y-0.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Primary Diagnostic</label>
+                    <input type="text" name="Diagnostic" data-val="true" data-val-required="Diagnostic is required" data-val-length="Diagnostic cannot exceed 500 characters" data-val-length-max="500" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                    <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Diagnostic" data-valmsg-replace="true"></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Health Status</label>
+                        <select name="Status" data-val="true" data-val-required="Status is required" data-val-regex="Status must be STABLE, OBSERVATION, or CRITICAL" data-val-regex-pattern="^(STABLE|OBSERVATION|CRITICAL)$" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs">
+                            <option value="">Select Status</option>
+                            <option value="STABLE">STABLE</option>
+                            <option value="OBSERVATION">OBSERVATION</option>
+                            <option value="CRITICAL">CRITICAL</option>
+                        </select>
+                        <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Status" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="space-y-0.5">
+                        <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Assigned Node</label>
+                        <input type="text" name="Node" data-val="true" data-val-required="Node is required" data-val-length="Node cannot exceed 100 characters" data-val-length-max="100" class="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 text-xs" />
+                        <span class="field-validation-valid text-red-500 text-[10px] leading-tight block min-h-[14px]" data-valmsg-for="Node" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-2 flex-shrink-0 border-t border-slate-100 mt-3">
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg active:scale-95">
+                    Update Admission
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="deleteAdmissionModal" class="fixed inset-0 hidden items-center justify-center modal-overlay transition-opacity duration-300 p-4">
+    <div class="modal-content w-full max-w-sm overflow-hidden relative p-8 md:p-10 text-center">
+        <div class="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-trash-alt text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-semibold text-slate-900 tracking-tight mb-2">Discharge Patient?</h3>
+        <p class="text-slate-500 font-medium mb-8">This will permanently remove the patient record from the active registry.</p>
+        <div class="flex gap-4">
+            <button id="btnCancelDelete" class="flex-1 py-4 bg-slate-50 text-slate-500 rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-slate-100 transition-all">Cancel</button>
+            <button id="btnConfirmDelete" class="flex-1 py-4 bg-red-500 text-white rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg active:scale-95">Confirm</button>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Initialize jQuery validation for forms
+            $('#admissionForm').validate({
+                errorClass: 'input-validation-error',
+                errorElement: 'span',
+                errorPlacement: function(error, element) {
+                    error.addClass('text-red-500 text-xs');
+                    error.insertAfter(element);
+                },
+                highlight: function(element) {
+                    $(element).addClass('border-red-500');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('border-red-500');
+                }
+            });
+            
+            $('#editAdmissionForm').validate({
+                errorClass: 'input-validation-error',
+                errorElement: 'span',
+                errorPlacement: function(error, element) {
+                    error.addClass('text-red-500 text-xs');
+                    error.insertAfter(element);
+                },
+                highlight: function(element) {
+                    $(element).addClass('border-red-500');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('border-red-500');
+                }
+            });
+            const $body = $('body');
+            let deleteId = null;
+            // Search & Filter Logic
+            function filterTable() {
+                const searchTerm = $('#patientSearch').val().toLowerCase();
+                const filterVal = $('#patientFilter').val();
+                $('.patient-row').each(function() {
+                    const $row = $(this);
+                    const name = $row.find('.patient-name').text().toLowerCase();
+                    const diag = $row.find('.patient-diag').text().toLowerCase();
+                    const status = $row.find('.patient-status').text().trim().toUpperCase();
+                    const id = $row.data('id').toString().toLowerCase();
+                    const matchesSearch = name.includes(searchTerm) || diag.includes(searchTerm) || id.includes(searchTerm);
+                    const matchesFilter = filterVal === 'ALL' || status === filterVal;
+                    if (matchesSearch && matchesFilter) {
+                        $row.removeClass('hidden');
+                    } else {
+                        $row.addClass('hidden');
+                    }
+                });
+            }
+            $('#patientSearch').on('input', filterTable);
+            $('#patientFilter').on('change', filterTable);
+            function toggleModal($modal, show) {
+                if (show) {
+                    $modal.removeClass('hidden').addClass('flex');
+                    setTimeout(() => $modal.addClass('modal-open'), 10);
+                    $body.addClass('overflow-hidden');
+                } else {
+                    $modal.removeClass('modal-open');
+                    // Immediate close - no delay
+                    $modal.removeClass('flex').addClass('hidden');
+                    $body.removeClass('overflow-hidden');
+                }
+            }
+            // Create Admission
+            $('#btnOpenAdmissionModal').on('click', () => {
+                // Generate a random ID e.g. P-4921
+                const randomId = 'P-' + Math.floor(1000 + Math.random() * 9000);
+                $('#admissionForm').find('[name="Id"]').val(randomId);
+                toggleModal($('#admissionModal'), true);
+            });
+            $('#btnCloseModal, #admissionModal').on('click', function(e) { if (e.target === this) toggleModal($('#admissionModal'), false); });
+            $('#admissionForm').on('submit', function(e) {
+                e.preventDefault();
+                const $form = $(this);
+                if (!$form.valid()) {
+                    return false;
+                }
+                const data = Object.fromEntries(new FormData(this).entries());
+                const patient = {
+                    Id: data.Id,
+                    Name: data.Name,
+                    Diagnostic: data.Diagnostic,
+                    Status: data.Status,
+                    Node: data.Node
+                };
+                const $btn = $(this).find('button[type="submit"]');
+                const originalBtnText = $btn.text();
+                $btn.text('Processing...').prop('disabled', true);
+                $.ajax({
+                    url: '/Admin/Patient/Create',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(patient),
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            Object.keys(errors).forEach(function(key) {
+                                const errorMsg = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+                                $form.find('[data-valmsg-for="' + key + '"]').text(errorMsg).removeClass('field-validation-valid').addClass('field-validation-error');
+                            });
+                        } else {
+                            alert(xhr.responseJSON?.message || "An error occurred during admission.");
+                        }
+                        $btn.text(originalBtnText).prop('disabled', false);
+                    }
+                });
+            });
+            // Edit Admission
+            $(document).off('click', '.btn-edit-patient').on('click', '.btn-edit-patient', function() {
+                const $row = $(this).closest('tr');
+                const id = $row.data('id');
+                const name = $row.find('.patient-name').text();
+                const diag = $row.find('.patient-diag').text().trim();
+                const status = $row.find('.patient-status').text().trim();
+                const node = $row.find('.patient-node').text();
+                const $form = $('#editAdmissionForm');
+                $form.find('[name="Id"]').val(id);
+                $form.find('[name="Name"]').val(name);
+                $form.find('[name="Diagnostic"]').val(diag);
+                $form.find('[name="Status"]').val(status);
+                $form.find('[name="Node"]').val(node);
+                toggleModal($('#editAdmissionModal'), true);
+            });
+            $('#btnCloseEditModal, #editAdmissionModal').on('click', function(e) { if (e.target === this) toggleModal($('#editAdmissionModal'), false); });
+            $('#editAdmissionForm').on('submit', function(e) {
+                e.preventDefault();
+                const $form = $(this);
+                if (!$form.valid()) {
+                    return false;
+                }
+                const data = Object.fromEntries(new FormData(this).entries());
+                const patient = {
+                    Id: data.Id,
+                    Name: data.Name,
+                    Diagnostic: data.Diagnostic,
+                    Status: data.Status,
+                    Node: data.Node
+                };
+                $.ajax({
+                    url: '/Admin/Patient/Edit',
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(patient),
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            Object.keys(errors).forEach(function(key) {
+                                const errorMsg = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+                                $form.find('[data-valmsg-for="' + key + '"]').text(errorMsg).removeClass('field-validation-valid').addClass('field-validation-error');
+                            });
+                        } else {
+                            alert(xhr.responseJSON?.message || "An error occurred while updating.");
+                        }
+                    }
+                });
+            });
+            // Delete Logic
+            $(document).off('click', '.btn-delete-patient').on('click', '.btn-delete-patient', function() {
+                deleteId = $(this).closest('tr').data('id');
+                toggleModal($('#deleteAdmissionModal'), true);
+            });
+            $('#btnCancelDelete, #deleteAdmissionModal').on('click', function(e) { if (e.target === this) toggleModal($('#deleteAdmissionModal'), false); });
+            $('#btnConfirmDelete').on('click', function() {
+                $.ajax({
+                    url: `/Admin/Patient/Delete?id=${deleteId}`,
+                    type: 'DELETE',
+                    success: function() {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+}

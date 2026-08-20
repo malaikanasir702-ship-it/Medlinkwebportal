@@ -1,0 +1,147 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    ViewData["Title"] = "My Orders";
+    Layout = "_DashboardLayout";
+}
+
+<div class="min-h-screen pb-20">
+    <div class="max-w-6xl mx-auto px-4 py-8 lg:py-12">
+        <!-- Header -->
+        <div class="bg-white rounded-[2.5rem] p-8 md:p-10 border border-slate-100 shadow-xl mb-10 relative overflow-hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+                <div class="flex items-center gap-6">
+                    <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
+                        <i data-lucide="shopping-bag" class="w-10 h-10"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">My Pharmacy Orders</h1>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Track and manage your medical deliveries</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Orders</p>
+                        <p class="text-2xl font-black text-blue-600">@Model.PharmacyOrders.Count</p>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px] -z-0"></div>
+        </div>
+
+        @if (!Model.PharmacyOrders.Any())
+        {
+            <div class="bg-white rounded-[2.5rem] p-16 text-center border border-slate-100 shadow-xl">
+                <div class="w-24 h-24 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-dashed border-slate-200">
+                    <i data-lucide="package" class="w-12 h-12 text-slate-300"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-2">No orders yet</h3>
+                <p class="text-slate-500 font-medium max-w-sm mx-auto mb-8">When you purchase prescribed medicines during your consultations, they will appear here for tracking.</p>
+                <a href="@Url.Action("Appointments", "Dashboard")" class="inline-flex items-center gap-3 px-8 py-4 bg-blue-600 text-white font-black text-sm rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-600/20 transition-all active:scale-95">
+                    View Appointments
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-1 gap-6">
+                @foreach (var order in Model.PharmacyOrders)
+                {
+                    <div class="bg-white rounded-[2.5rem] p-6 lg:p-8 border border-slate-100 shadow-xl hover:shadow-2xl hover:border-blue-100 transition-all group overflow-hidden relative">
+                        <div class="flex flex-col lg:flex-row justify-between gap-8 relative z-10">
+                            <!-- Order Info -->
+                            <div class="flex-1">
+                                <div class="flex items-center gap-4 mb-4">
+                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 group-hover:bg-blue-50 transition-colors">
+                                        <span class="text-xs font-black text-slate-400 group-hover:text-blue-600">#MED-@order.Id.ToString("D5")</span>
+                                    </div>
+                                    <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest">@order.CreatedAt.ToString("MMM dd, yyyy • HH:mm")</span>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                                        <p class="text-sm font-bold text-slate-600 truncate max-w-md">@order.ShippingAddress</p>
+                                    </div>
+                                    
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach (var item in order.OrderItems.Take(3))
+                                        {
+                                            <span class="px-3 py-1 bg-slate-50 rounded-lg text-[10px] font-black text-slate-500 border border-slate-100">
+                                                @(item.Medicine?.Name ?? "Medicine") x@item.Quantity
+                                            </span>
+                                        }
+                                        @if (order.OrderItems.Count > 3)
+                                        {
+                                            <span class="px-3 py-1 bg-slate-50 rounded-lg text-[10px] font-black text-slate-400 border border-slate-100">
+                                                +@(order.OrderItems.Count - 3) more
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Status & Amount -->
+                            <div class="flex flex-row lg:flex-col justify-between items-center lg:items-end gap-4 lg:min-w-[180px]">
+                                <div class="text-right">
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
+                                    <p class="text-xl font-black text-slate-900 tracking-tight">PKR @order.TotalAmount.ToString("N2")</p>
+                                </div>
+
+                                @{
+                                    var statusColor = order.Status switch
+                                    {
+                                        MedLinkPortal.Models.PharmacyOrderStatus.Pending => "amber",
+                                        MedLinkPortal.Models.PharmacyOrderStatus.Accepted => "blue",
+                                        MedLinkPortal.Models.PharmacyOrderStatus.OnTheWay => "indigo",
+                                        MedLinkPortal.Models.PharmacyOrderStatus.Delivered => "emerald",
+                                        MedLinkPortal.Models.PharmacyOrderStatus.Cancelled => "rose",
+                                        _ => "slate"
+                                    };
+                                }
+                                <div class="flex items-center gap-2 px-4 py-2 bg-@statusColor-50 rounded-full border border-@statusColor-100">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-@statusColor-500 animate-pulse"></div>
+                                    <span class="text-[10px] font-black text-@statusColor-700 uppercase tracking-widest">@order.Status</span>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex items-center justify-end lg:border-l lg:border-slate-50 lg:pl-8">
+                                <a href="@Url.Action("OrderTracking", "Pharmacy", new { id = order.Id })" class="w-full lg:w-auto px-6 py-4 bg-slate-900 text-white font-black text-xs rounded-2xl hover:bg-blue-600 shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3">
+                                    Track Order <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Invisible Background Icon -->
+                        <i data-lucide="shopping-bag" class="absolute -right-4 -bottom-4 w-32 h-32 text-slate-500/5 rotate-12 group-hover:text-blue-500/10 transition-colors"></i>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .bg-amber-50 { background-color: #fffbeb; }
+    .border-amber-100 { border-color: #fef3c7; }
+    .text-amber-700 { color: #b45309; }
+    .bg-amber-500 { background-color: #f59e0b; }
+
+    .bg-indigo-50 { background-color: #eef2ff; }
+    .border-indigo-100 { border-color: #e0e7ff; }
+    .text-indigo-700 { color: #4338ca; }
+    .bg-indigo-500 { background-color: #6366f1; }
+
+    .bg-rose-50 { background-color: #fff1f2; }
+    .border-rose-100 { border-color: #ffe4e6; }
+    .text-rose-700 { color: #be123c; }
+    .bg-rose-500 { background-color: #f43f5e; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    });
+</script>

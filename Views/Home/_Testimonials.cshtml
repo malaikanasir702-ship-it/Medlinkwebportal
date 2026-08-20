@@ -1,0 +1,64 @@
+﻿<section class="py-32 px-6 bg-blue-50/30">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-20 fade-up" data-animate>
+            <h2 class="text-sm font-bold text-blue-600 uppercase tracking-widest mb-4">Success Stories</h2>
+            <h3 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-tight">
+                Trusted by patients <br /> <span class="text-gray-400">around the world.</span>
+            </h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-children" data-animate>
+            @{
+                var reviews = new[]
+                {
+                        new {
+                        Name = "Sarah McAvoy",
+                        Role = "Chronic Patient",
+                        Image = "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150&h=150",
+                        Content = "The AI diagnostic saved me weeks of uncertainty. Being able to talk to a cardiologist from London while I was in rural Ohio was a game changer.",
+                        Rating = 5
+                        },
+                        new {
+                        Name = "David Chen",
+                        Role = "Business Traveler",
+                        Image = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150&h=150",
+                        Content = "I use MedLink whenever I'm abroad. The speed of getting a prescription refill through their global network is simply unmatched.",
+                        Rating = 5
+                        },
+                        new {
+                        Name = "Emily Watson",
+                        Role = "Mother of Two",
+                        Image = "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150&h=150",
+                        Content = "24/7 pediatric access gives me such peace of mind. The doctors are empathetic and the video quality is crystal clear every time.",
+                        Rating = 5
+                        }
+                        };
+            }
+
+            @foreach (var rev in reviews)
+            {
+                <div class="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-blue-500/5 border border-white hover:-translate-y-2 transition-transform duration-500 fade-up" data-animate>
+                    <div class="text-blue-100 mb-6">
+                        <i data-lucide="quote" class="w-12 h-12 fill-current"></i>
+                    </div>
+                    <p class="text-gray-600 text-lg leading-relaxed mb-8 italic">
+                        "@rev.Content"
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <img src="@rev.Image" alt="@rev.Name" class="w-14 h-14 rounded-2xl object-cover" />
+                        <div>
+                            <h4 class="font-bold text-gray-900">@rev.Name</h4>
+                            <p class="text-xs text-blue-600 font-bold uppercase tracking-tight">@rev.Role</p>
+                            <div class="flex gap-0.5 mt-1">
+                                @for (int i = 0; i < rev.Rating; i++)
+                                {
+                                    <i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

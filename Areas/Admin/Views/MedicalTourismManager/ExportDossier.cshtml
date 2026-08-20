@@ -1,0 +1,230 @@
+@model MedLinkPortal.Models.ClinicalHistoryViewModel
+@{
+    ViewData["Title"] = "Clinical Dossier Export";
+    Layout = null; // Clean export
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Dossier - @Model.PatientName</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { font-family: 'Outfit', sans-serif; background: #fff; }
+        .page-break { page-break-before: always; }
+        .text-gradient { background: linear-gradient(135deg, #0F172A 0%, #334155 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="p-0 m-0 text-slate-900">
+
+    <div id="dossierExport" class="max-w-[1000px] mx-auto p-12">
+        <!-- Official Header -->
+        <div class="flex justify-between items-start border-b-2 border-slate-900 pb-12 mb-12">
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold tracking-tighter">MEDLINK<span class="text-slate-400">UNIFIED</span></h1>
+                        <p class="text-[10px] uppercase tracking-[0.3em] font-bold text-slate-400">Advanced Health Systems</p>
+                    </div>
+                </div>
+                <h2 class="text-5xl font-semibold tracking-tight text-gradient mb-2">Clinical Dossier</h2>
+                <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">Official Patient Record Summary</p>
+            </div>
+            <div class="text-right">
+                <div class="bg-slate-50 border border-slate-100 p-6 rounded-[2rem]">
+                    <p class="text-[9px] uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1">Generated On</p>
+                    <p class="text-lg font-semibold text-slate-900">@DateTime.Now.ToString("MMMM dd, yyyy")</p>
+                    <div class="mt-4 pt-4 border-t border-slate-200">
+                        <p class="text-[9px] uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1">Patient Identifier</p>
+                        <p class="text-xs font-mono font-bold text-slate-600">@Model.PatientId</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Info Section -->
+        <div class="grid grid-cols-3 gap-8 mb-16">
+            <div class="p-8 rounded-[2.5rem] bg-slate-900 text-white col-span-2 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-10"><svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg></div>
+                <h3 class="text-[10px] uppercase tracking-[0.3em] font-semibold text-white/30 mb-2">Subject Profile</h3>
+                <h4 class="text-4xl font-semibold tracking-tight mb-4">@Model.PatientName</h4>
+                <div class="flex gap-8 mt-6">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-widest font-semibold text-white/40 mb-1">Status</p>
+                        <span class="px-3 py-1 bg-emerald-500 text-[10px] font-semibold uppercase rounded-lg">Active Record</span>
+                    </div>
+                    <div>
+                        <p class="text-[9px] uppercase tracking-widest font-semibold text-white/40 mb-1">Records Found</p>
+                        <p class="text-xl font-semibold">@(Model.HealthRecords.Count + Model.Prescriptions.Count)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-8 rounded-[2.5rem] bg-slate-50 border border-slate-100 flex flex-col justify-center">
+                <h3 class="text-[10px] uppercase tracking-[0.3em] font-semibold text-slate-400 mb-6 flex items-center gap-2">
+                    <span class="w-4 h-px bg-slate-200"></span> Bio-Summary
+                </h3>
+                <ul class="space-y-4">
+                    <li class="flex justify-between border-b border-slate-200 pb-2">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">System Class</span>
+                        <span class="text-xs font-semibold">Verified Patient</span>
+                    </li>
+                    <li class="flex justify-between border-b border-slate-200 pb-2">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Data Integrity</span>
+                        <span class="text-xs font-semibold">ENCRYPTED</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Diagnostic History Section -->
+        <div class="mb-16">
+            <h3 class="text-sm uppercase tracking-[0.4em] font-semibold text-slate-900 mb-10 flex items-center gap-6">
+                Diagnostic History & Reports
+                <span class="h-px flex-1 bg-slate-900"></span>
+            </h3>
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left border-b-2 border-slate-900">
+                        <th class="py-4 text-[10px] uppercase tracking-widest font-semibold text-slate-400">Record Name</th>
+                        <th class="py-4 text-[10px] uppercase tracking-widest font-semibold text-slate-400">Type</th>
+                        <th class="py-4 text-[10px] uppercase tracking-widest font-semibold text-slate-400">Provider</th>
+                        <th class="py-4 text-[10px] uppercase tracking-widest font-semibold text-slate-400 text-right">Date Issued</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var record in Model.HealthRecords.OrderByDescending(r => r.CreatedAt))
+                    {
+                        <tr>
+                            <td class="py-6 pr-4">
+                                <p class="font-semibold text-slate-900">@record.Name</p>
+                                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Entry #@record.Id</p>
+                            </td>
+                            <td class="py-6 pr-4">
+                                <span class="px-3 py-1 bg-slate-100 rounded-lg text-[9px] font-semibold uppercase tracking-widest text-slate-600">@record.Type</span>
+                            </td>
+                            <td class="py-6 pr-4 font-bold text-slate-500 text-sm">@record.Provider</td>
+                            <td class="py-6 text-right font-semibold text-slate-900">@record.CreatedAt.ToString("MMM dd, yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.Prescriptions.Any()) {
+            <div class="page-break"></div>
+            <!-- Prescriptions Section -->
+            <div class="pt-12 mb-16">
+                <h3 class="text-sm uppercase tracking-[0.4em] font-semibold text-slate-900 mb-10 flex items-center gap-6">
+                    Medication & Clinical Prescriptions
+                    <span class="h-px flex-1 bg-slate-900"></span>
+                </h3>
+                <div class="space-y-8">
+                    @foreach (var p in Model.Prescriptions.OrderByDescending(pr => pr.CreatedAt))
+                    {
+                        <div class="p-10 rounded-[3rem] border-2 border-slate-100 bg-white shadow-sm">
+                            <div class="flex justify-between items-start mb-8">
+                                <div>
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="px-3 py-1 bg-amber-100 text-amber-600 text-[10px] font-semibold uppercase rounded-lg">Verified Rx</span>
+                                        <span class="text-[10px] font-bold text-slate-400 font-mono">ID: #@p.Id</span>
+                                    </div>
+                                    <h4 class="text-3xl font-semibold tracking-tight text-slate-900 capitalize">@p.Diagnosis</h4>
+                                    <p class="text-slate-500 font-bold mt-1 uppercase tracking-widest text-[10px]">Clinician: Dr. @(p.Appointment?.Doctor?.Name ?? "General Practitioner")</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400">Dossier Date</p>
+                                    <p class="text-lg font-semibold text-slate-900">@p.CreatedAt.ToString("MMM dd, yyyy")</p>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-8">
+                                @if (p.PrescriptionMedicines != null && p.PrescriptionMedicines.Any())
+                                {
+                                    foreach (var pm in p.PrescriptionMedicines)
+                                    {
+                                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-center">
+                                            <div>
+                                                <p class="font-semibold text-slate-900 text-sm">@(pm.Medicine?.Name ?? "Medicine")</p>
+                                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">@pm.Frequency</p>
+                                            </div>
+                                            <span class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold text-slate-900 shadow-sm">@pm.Dosage</span>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(p.Notes)) {
+                                <div class="p-6 rounded-2xl bg-slate-900 text-white relative">
+                                    <div class="absolute right-6 top-6 opacity-10 font-serif text-4xl">"</div>
+                                    <p class="text-sm font-medium leading-relaxed italic text-white/80">@p.Notes</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Tourism Journey Logs -->
+        @if (Model.PreviousRequests.Any()) {
+            <div class="page-break"></div>
+            <div class="pt-12 mb-16">
+                <h3 class="text-sm uppercase tracking-[0.4em] font-semibold text-slate-900 mb-10 flex items-center gap-6">
+                    International Tourism Journey Logs
+                    <span class="h-px flex-1 bg-slate-900"></span>
+                </h3>
+                <div class="relative pl-12 border-l-4 border-slate-900 space-y-12">
+                    @foreach (var request in Model.PreviousRequests.OrderByDescending(r => r.CreatedAt))
+                    {
+                        <div class="relative">
+                            <div class="absolute -left-[3.4rem] top-0 w-8 h-8 rounded-full bg-slate-900 border-4 border-white"></div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900 uppercase tracking-widest mb-1">@request.CreatedAt.ToString("MMMM dd, yyyy")</p>
+                                    <h4 class="text-2xl font-semibold tracking-tight text-slate-900 capitalize">@request.TreatmentType</h4>
+                                    <p class="text-slate-500 font-bold mt-1">@request.PreferredCountry | Status: <span class="text-slate-900">@request.Status</span></p>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-right">
+                                    <p class="text-[8px] uppercase tracking-widest font-semibold text-slate-400 mb-1">Budget Range</p>
+                                    <p class="text-lg font-semibold text-slate-900">@request.BudgetRange</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Footer -->
+        <div class="mt-24 pt-12 border-t border-slate-100 flex justify-between items-center opacity-40">
+            <p class="text-[9px] uppercase tracking-[0.3em] font-semibold">MEDLINK UNIFIED RECORDING SYSTEM</p>
+            <p class="text-[9px] font-mono">Dossier-Checksum: 0x@(Model.PatientId.GetHashCode().ToString("X"))</p>
+        </div>
+    </div>
+
+    <!-- Download Trigger Script -->
+    <script>
+        window.onload = function() {
+            const element = document.getElementById('dossierExport');
+            const opt = {
+                margin:       [0, 0],
+                filename:     'Clinical_Dossier_@(Model.PatientName.Replace(" ", "_"))_@(DateTime.Now.ToString("yyyyMMdd")).pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, logging: false },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                setTimeout(() => window.close(), 2000);
+            });
+        }
+    </script>
+</body>
+</html>

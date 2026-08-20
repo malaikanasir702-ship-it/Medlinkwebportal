@@ -1,0 +1,217 @@
+@model List<MedLinkPortal.Models.MedicalTest>
+@{
+    Layout = "_LabLayout";
+    ViewData["Title"] = "Diagnostics Center";
+    var categories = ViewBag.Categories as List<MedLinkPortal.Models.MedicalTestCategory>;
+}
+
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Diagnostics Catalog</h1>
+            <p class="text-slate-500 font-bold text-sm">Maintain your laboratory test offerings and pricing</p>
+        </div>
+        <button onclick="openAddModal()" class="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[13px] font-semibold shadow-lg shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3">
+            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+            Launch New Test
+        </button>
+    </div>
+
+    <!-- Inventory Grid -->
+    <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="p-8 border-b border-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h3 class="text-lg font-semibold text-slate-900">Active Test List</h3>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400">Filter by Category:</span>
+                <select class="bg-slate-50 border-none rounded-xl px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600 outline-none">
+                    <option>All Categories</option>
+                    @foreach(var cat in categories) {
+                        <option value="@cat.Id">@cat.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50/50 border-b border-slate-100">
+                        <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Test Profile</th>
+                        <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Category</th>
+                        <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Turnaround Time</th>
+                        <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Sample Required</th>
+                        <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Market Price</th>
+                        <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-right">Control</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    @foreach (var test in Model)
+                    {
+                        <tr class="hover:bg-indigo-50/20 transition-all group">
+                            <td class="px-8 py-6">
+                                <p class="text-sm font-semibold text-slate-900">@test.Name</p>
+                                <p class="text-[10px] font-bold text-indigo-500 uppercase mt-0.5 tracking-tighter">ID: @test.Id.ToString("D4")</p>
+                            </td>
+                            <td class="px-8 py-6">
+                                <span class="px-2.5 py-1 bg-slate-100 rounded-lg text-[10px] font-bold text-slate-600">@test.Category?.Name</span>
+                            </td>
+                            <td class="px-8 py-6 text-sm font-bold text-slate-600">@test.ReportTime</td>
+                            <td class="px-8 py-6">
+                                <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[9px] font-semibold uppercase tracking-widest">@test.SampleType</span>
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-1">
+                                    <span class="text-xs font-bold text-slate-400">Rs.</span>
+                                    <span class="text-lg font-semibold text-slate-900">@test.Price.ToString("N0")</span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button onclick='openEditModal(@Html.Raw(Json.Serialize(test)))' class="w-10 h-10 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="deleteTest(@test.Id)" class="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Test Modal (Add/Edit) -->
+<div id="testModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-[3rem] p-10 max-w-lg w-full shadow-2xl relative border border-white/20 animate-in fade-in zoom-in-95 duration-200">
+        <h3 id="modalTitle" class="text-2xl font-semibold text-slate-900 mb-8 tracking-tight">System Provisioning</h3>
+        
+        <form id="testForm" onsubmit="handleFormSubmit(event)" class="space-y-6">
+            <input type="hidden" id="testId" name="Id" />
+            
+            <div class="grid grid-cols-2 gap-6">
+                <div class="col-span-2 space-y-2">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Official Test Name</label>
+                    <input type="text" id="testName" name="Name" required class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all" />
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Market Category</label>
+                    <select id="testCategory" name="CategoryId" required onchange="toggleNewCategoryInput(this, 'editNewCategoryContainer')" class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all appearance-none">
+                        <option value="">Select Category</option>
+                        @foreach(var cat in categories) {
+                            <option value="@cat.Id">@cat.Name</option>
+                        }
+                        <option value="-1" class="text-indigo-600">+ Add New Category...</option>
+                    </select>
+                </div>
+
+                <div id="editNewCategoryContainer" class="hidden col-span-2 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <label class="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest ml-1">New Category Name</label>
+                    <input type="text" name="newCategoryName" placeholder="e.g. Genetics, Cardiology" class="w-full px-5 py-4 bg-indigo-50 border-none rounded-2xl font-semibold text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all" />
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Service Fee (PKR)</label>
+                    <input type="number" id="testPrice" name="Price" required class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all" />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Report TAT</label>
+                    <input type="text" id="testTAT" name="ReportTime" required placeholder="e.g. 24 Hours" class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all" />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Sample Protocol</label>
+                    <input type="text" id="testSample" name="SampleType" required placeholder="e.g. Blood, Urine" class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all" />
+                </div>
+            </div>
+
+            <div class="flex gap-4 pt-4">
+                <button type="button" onclick="closeModal()" class="flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-semibold hover:bg-slate-100 transition-all">Discard Changes</button>
+                <button type="submit" class="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-semibold shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all">Synchronize Data</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleNewCategoryInput(select, containerId) {
+        const container = document.getElementById(containerId);
+        const input = container.querySelector('input');
+        if (select.value === "-1") {
+            container.classList.remove('hidden');
+            input.required = true;
+            input.focus();
+        } else {
+            container.classList.add('hidden');
+            input.required = false;
+        }
+    }
+
+    function openAddModal() {
+        document.getElementById('modalTitle').innerText = "Launch New Protocol";
+        document.getElementById('testId').value = "0";
+        document.getElementById('testForm').reset();
+        document.getElementById('testModal').classList.remove('hidden');
+        document.getElementById('editNewCategoryContainer').classList.add('hidden');
+    }
+
+    function openEditModal(test) {
+        document.getElementById('modalTitle').innerText = "Update Protocol Parameters";
+        document.getElementById('testId').value = test.id;
+        document.getElementById('testName').value = test.name;
+        document.getElementById('testPrice').value = test.price;
+        document.getElementById('testTAT').value = test.reportTime;
+        document.getElementById('testSample').value = test.sampleType;
+        document.getElementById('testCategory').value = test.categoryId;
+        document.getElementById('editNewCategoryContainer').classList.add('hidden');
+        document.getElementById('testModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('testModal').classList.add('hidden');
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        const data = new FormData(e.target);
+        const id = data.get('Id');
+        const url = id === "0" ? `@Url.Action("AddTest", "Dashboard", new { area = "Lab" })` : `@Url.Action("UpdateTest", "Dashboard", new { area = "Lab" })`;
+        
+        // Ensure CategoryId is not -1 if we have a new name
+        if (data.get('CategoryId') === "-1") {
+            data.delete('CategoryId');
+        }
+
+        const params = new URLSearchParams();
+        for (const pair of data) params.append(pair[0], pair[1]);
+
+        fetch(url, {
+            method: 'POST',
+            body: params
+        }).then(r => r.json()).then(res => {
+            if (res.success) {
+                location.reload();
+            } else {
+                alert("Operation failed within the neural network. Please retry.");
+            }
+        });
+    }
+
+    function deleteTest(id) {
+        if (!confirm("Are you sure you want to delete this test? This action cannot be undone.")) return;
+
+        fetch(`@Url.Action("DeleteTest", "Dashboard", new { area = "Lab" })?id=${id}`, {
+            method: 'POST'
+        }).then(r => r.json()).then(res => {
+            if (res.success) {
+                location.reload();
+            } else {
+                alert("Failed to delete test.");
+            }
+        });
+    }
+</script>

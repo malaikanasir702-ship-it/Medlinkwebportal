@@ -1,0 +1,33 @@
+﻿<section class="py-24 px-12 bg-blue-50 flex flex-col justify-center border-l border-gray-100">
+    <div class="max-w-xl mx-auto lg:mr-auto lg:ml-0 fade-left" data-animate>
+        <div class="inline-flex items-center gap-2 text-blue-600 font-bold mb-6 text-sm">
+            <i data-lucide="heart" class="w-5 h-5"></i>
+            FOR PATIENTS
+        </div>
+        <h2 class="text-4xl font-bold text-gray-900 mb-6 leading-tight">Better care for you, <br /> on your terms.</h2>
+        <p class="text-gray-600 mb-10 text-lg leading-relaxed">
+            A stress-free journey centered around your safety. Access your history, receive
+            AI-assisted insights, and consult with the best without leaving home.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 stagger-children" data-animate>
+            @{
+                var features = new[]
+                {
+                        new { Title = "24/7 Availability", Icon = "activity" },
+                        new { Title = "Universal Mobility", Icon = "smartphone" },
+                        new { Title = "Full Privacy", Icon = "shield-check" },
+                        new { Title = "AI-Diagnostics", Icon = "brain" }
+                        };
+            }
+
+            @foreach (var feature in features)
+            {
+                <div class="flex flex-col gap-3 p-6 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow fade-up" data-animate>
+                    <i data-lucide="@feature.Icon" class="w-6 h-6 text-blue-600"></i>
+                    <span class="font-bold text-gray-800">@feature.Title</span>
+                </div>
+            }
+        </div>
+    </div>
+</section>

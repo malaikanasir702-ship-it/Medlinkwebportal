@@ -1,0 +1,82 @@
+@model List<MedLinkPortal.Models.Medicine>
+@{
+    ViewData["Title"] = "Pharmacy Inventory";
+    Layout = "_PharmacistLayout";
+}
+
+<div class="min-h-screen bg-slate-50/50 pb-20">
+    <div class="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+        <!-- Header -->
+        <div class="bg-white rounded-[2.5rem] p-8 md:p-10 border border-slate-100 shadow-xl mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+            <div class="flex items-center gap-6 relative z-10">
+                <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
+                    <i data-lucide="package" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Medical Inventory</h1>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">@Model.Count medicines currently in database</p>
+                </div>
+            </div>
+            <a asp-action="AddStock" class="px-8 py-4 bg-slate-900 text-white font-black text-xs rounded-2xl hover:bg-black shadow-xl shadow-black/10 active:scale-95 transition-all relative z-10 flex items-center justify-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4 text-blue-400"></i> Add New Stock
+            </a>
+            <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px] -z-0"></div>
+        </div>
+
+        <!-- Inventory Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach(var med in Model)
+            {
+                <div class="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-lg hover:shadow-2xl transition-all group relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-blue-600 border border-slate-100 transition-all overflow-hidden relative">
+                             @if(!string.IsNullOrEmpty(med.ImageUrl) && med.ImageUrl != "/images/medicines/default.png")
+                            {
+                                <img src="@med.ImageUrl" alt="@med.Name" class="w-full h-full object-cover" />
+                            }
+                            else
+                            {
+                                <i data-lucide="pill" class="w-6 h-6"></i>
+                            }
+                        </div>
+                        <div class="text-right">
+                             <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Stock</p>
+                             <p class="text-xl font-black @((med.StockQuantity ?? 0) < 20 ? "text-rose-500" : "text-slate-900")">@(med.StockQuantity ?? 0)</p>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-black text-slate-900 mb-1">@med.Name</h3>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">@med.Brand • @med.Category</p>
+                    
+                    <div class="flex items-center justify-between py-4 border-y border-dashed border-slate-100 mb-6">
+                        <div class="flex flex-col">
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Price / Unit</span>
+                             <span class="text-lg font-black text-emerald-600">PKR @((med.Price ?? 0).ToString("N0"))</span>
+                        </div>
+                        <div class="flex flex-col text-right">
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Status</span>
+                             <span class="text-[10px] font-black uppercase tracking-widest @(med.IsActive == true ? "text-emerald-500" : "text-rose-500")">@(med.IsActive == true ? "Active" : "Inactive")</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 relative z-10">
+                        <a asp-action="UpdateStock" asp-route-id="@med.Id" class="flex-1 py-3 bg-slate-50 text-slate-600 font-bold text-xs rounded-xl hover:bg-slate-100 transition-all border border-slate-100 flex items-center justify-center">Update Stock</a>
+                        <button class="w-12 h-12 bg-slate-50 text-slate-400 rounded-xl hover:text-rose-500 border border-slate-100 transition-all flex items-center justify-center">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-slate-50 rounded-full -z-0 group-hover:bg-blue-50 transition-colors duration-500"></div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    });
+</script>

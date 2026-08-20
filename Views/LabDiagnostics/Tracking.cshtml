@@ -1,0 +1,171 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Track Booking";
+    var booking = ViewBag.Booking as MedLinkPortal.Models.LabBooking;
+}
+
+<div class="max-w-5xl mx-auto py-12 px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    
+    <!-- Sophisticated Header -->
+    <div class="relative bg-white/40 backdrop-blur-xl rounded-[3rem] p-10 md:p-14 border border-white shadow-2xl mb-12 overflow-hidden group">
+        <div class="absolute -right-24 -top-24 w-80 h-80 bg-blue-50/50 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-100/50 transition-colors duration-1000"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-10">
+            <div class="flex items-center gap-8 text-center md:text-left">
+                <div class="w-20 h-20 bg-blue-600 text-white rounded-[2rem] flex items-center justify-center shadow-2xl shadow-blue-600/30 ring-4 ring-white/50">
+                    <i data-lucide="pulse" class="w-10 h-10 animate-pulse"></i>
+                </div>
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-900/5 text-slate-500 rounded-full text-[10px] font-black tracking-widest uppercase mb-4">
+                        Reference ID: #@booking.Id.ToString("D6")
+                    </div>
+                    <h1 class="text-4xl font-black text-slate-900 tracking-tighter">Live <span class="text-blue-600">Tracking.</span></h1>
+                    <p class="text-slate-500 font-bold text-lg mt-1">@booking.Laboratory.Name Service Hub</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center md:items-end gap-3">
+                <div class="px-6 py-3 bg-blue-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-blue-600/20 ring-1 ring-white/20">
+                    <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                    @booking.Status
+                </div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Awaiting Laboratory Uploads</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tracking Architecture -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        
+        <!-- Left: Timeline (Glass List) -->
+        <div class="lg:col-span-7 relative">
+            <div class="bg-white/40 backdrop-blur-xl border border-white rounded-[3rem] p-4 md:p-8 shadow-2xl">
+                <div class="relative py-8 px-4 space-y-12">
+                    
+                    <!-- Vertical Track -->
+                    <div class="absolute left-12 top-0 bottom-0 w-px bg-gradient-to-b from-blue-600 via-slate-100 to-slate-100"></div>
+
+                    @{
+                        var statuses = new[] { 
+                            (MedLinkPortal.Models.LabBookingStatus.Booked, "Request Logged", "Your appointment has been successfully recorded.", "calendar-check"),
+                            (MedLinkPortal.Models.LabBookingStatus.CollectorOnWay, "Phlebotomist Dispatch", "A certified collector is currently en-route to your location.", "truck"),
+                            (MedLinkPortal.Models.LabBookingStatus.SampleCollected, "Specimen Secured", "Your sample has been collected and packed for transport.", "droplets"),
+                            (MedLinkPortal.Models.LabBookingStatus.Processing, "Biological Analysis", "Experts are performing clinical diagnostics on your sample.", "microscope"),
+                            (MedLinkPortal.Models.LabBookingStatus.Ready, "Digital Verification", "Your final reports are ready for secure download.", "file-check")
+                        };
+                    }
+
+                    @foreach (var (status, title, desc, icon) in statuses)
+                    {
+                        var isActive = booking.Status >= status;
+                        var isCurrent = booking.Status == status;
+
+                        <div class="flex gap-8 group/item relative">
+                            <!-- Indicator -->
+                            <div class="relative z-10 w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center transition-all duration-700 border-2
+                                @(isActive ? "bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-600/30 scale-110" : "bg-white text-slate-200 border-slate-50 shadow-sm")
+                                @(isCurrent ? "ring-4 ring-blue-100" : "")">
+                                <i data-lucide="@icon" class="w-6 h-6"></i>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="pt-2 flex-1">
+                                <div class="flex items-center gap-4 mb-2">
+                                    <h3 class="text-xl font-black tracking-tight @(isActive ? "text-slate-900" : "text-slate-300")">@title</h3>
+                                    @if (isCurrent)
+                                    {
+                                        <div class="px-2 py-0.5 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg text-[9px] font-black uppercase tracking-widest animate-pulse">Live</div>
+                                    }
+                                </div>
+                                <p class="text-sm font-medium leading-relaxed @(isActive ? "text-slate-500" : "text-slate-200")">@desc</p>
+                                
+                                @if (status == MedLinkPortal.Models.LabBookingStatus.Booked && isActive)
+                                {
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-3">Verified @booking.BookingDate.ToString("hh:mm tt")</p>
+                                }
+
+                                @if (status == MedLinkPortal.Models.LabBookingStatus.Ready && isActive && booking.TestResults.Any())
+                                {
+                                    <div class="mt-8">
+                                        <a href="@booking.TestResults.OrderByDescending(r => r.UploadedDate).First().ReportUrl" 
+                                           class="inline-flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs hover:bg-blue-600 transition-all shadow-xl shadow-slate-900/10 group/btn">
+                                            <i data-lucide="download" class="w-4 h-4 group-hover:-translate-y-1 transition-transform"></i>
+                                            Download Encrypted Report
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Detail Summary -->
+        <div class="lg:col-span-5 space-y-8">
+            
+            <!-- Patient Mini Card -->
+            <div class="bg-white/60 backdrop-blur-md rounded-[2.5rem] p-8 border border-white shadow-xl">
+                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">Patient Identity</h4>
+                
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+                        <span class="text-xs font-bold text-slate-400">FullName</span>
+                        <span class="text-sm font-black text-slate-900">@booking.PatientName</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+                        <span class="text-xs font-bold text-slate-400">Contact</span>
+                        <span class="text-sm font-black text-slate-900">@booking.PhoneNumber</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+                        <span class="text-xs font-bold text-slate-400">Scheduled</span>
+                        <span class="text-sm font-black text-slate-900">@booking.PreferredDate.ToString("MMM dd, yyyy")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Hub -->
+            <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(59,130,246,0.2),transparent)] pointer-events-none"></div>
+                
+                <div class="relative z-10">
+                    <h4 class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] mb-6">Concierge Support</h4>
+                    <p class="text-sm font-medium text-white/60 mb-10 leading-relaxed">
+                        Need to adjust your sample collection time or have questions about testing protocols?
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <button class="py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest border border-white/5 transition-all active:scale-95">
+                            Direct Voice
+                        </button>
+                        <button class="py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-600/20 transition-all active:scale-95">
+                            WhatsApp IR
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Branding/Security -->
+            <div class="flex items-center justify-center gap-3 p-6 opacity-30">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
+                <p class="text-[10px] font-black uppercase tracking-widest">End-to-End Encrypted Diagnostics</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@keyframes pulse-ring {
+        0% { transform: scale(0.33); opacity: 1; }
+        80%, 100% { opacity: 0; }
+    }
+    .status-ring::before {
+        content: '';
+        position: absolute;
+        width: 100%; height: 100%;
+        background: inherit;
+        border-radius: inherit;
+        animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+    }
+</style>

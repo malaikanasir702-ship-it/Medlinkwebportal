@@ -1,0 +1,116 @@
+﻿@model MedLinkPortal.Areas.Doctor.Models.Appointment
+@using MedLinkPortal.Areas.Identity.Pages.Account
+@{
+    ViewData["Title"] = "Patient Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var doctors = ViewBag.Doctors as IEnumerable<ApplicationUser>;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-xl overflow-hidden">
+                <div class="card-header bg-primary text-white p-4">
+                    <h3 class="mb-0 fw-bold"><i class="fas fa-calendar-plus me-2"></i> Book an Appointment</h3>
+                    <p class="mb-0 opacity-75">Select a doctor and schedule your consultation</p>
+                </div>
+                <div class="card-body p-4 bg-light">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="BookAppointment" method="post" class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Select Doctor</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-user-md text-primary"></i></span>
+                                <select asp-for="DoctorId" class="form-select border-start-0" required>
+                                    <option value="">Choose a doctor...</option>
+                                    @if (doctors != null)
+                                    {
+                                        foreach (var doctor in doctors)
+                                        {
+                                            <option value="@doctor.Id">@doctor.Name (@doctor.Specialist)</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Date & Time</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-clock text-primary"></i></span>
+                                <input asp-for="ScheduledTime" type="datetime-local" class="form-select border-start-0" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Consultation Type</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-stethoscope text-primary"></i></span>
+                                <select asp-for="ConsultationType" class="form-select border-start-0">
+                                    <option value="Normal Checkup">Normal Checkup</option>
+                                    <option value="Follow-up">Follow-up</option>
+                                    <option value="Emergency">Emergency</option>
+                                    <option value="Report Sync">Report Sync</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Duration (Minutes)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-hourglass-half text-primary"></i></span>
+                                <input asp-for="DurationMinutes" type="number" class="form-control border-start-0" value="30" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Initial Status (Testing)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-tag text-primary"></i></span>
+                                <select asp-for="Status" class="form-select border-start-0">
+                                    <option value="Confirmed">Confirmed</option>
+                                    <option value="Pending">Pending</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4 text-center">
+                            <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill shadow-sm">
+                                <i class="fas fa-check me-2"></i> Book Appointment Now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-link text-muted text-decoration-none">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rounded-xl { border-radius: 1rem !important; }
+    .form-select, .form-control { border-color: #dee2e6; }
+    .form-select:focus, .form-control:focus { border-color: #3b82f6; box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.1); }
+    .input-group-text { border-color: #dee2e6; color: #6b7280; }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

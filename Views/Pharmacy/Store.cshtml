@@ -1,0 +1,211 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    ViewData["Title"] = "Pharmacy Store";
+    Layout = "_DashboardLayout";
+}
+
+<div class="min-h-screen pb-20">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        .swiper-pagination-bullet { width: 10px; height: 10px; background: rgba(255,255,255,0.5); opacity: 1; transition: all 0.3s; }
+        .swiper-pagination-bullet-active { width: 30px; border-radius: 5px; background: #10b981; }
+        .glass-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+    </style>
+
+    <div class="max-w-6xl mx-auto px-4 py-8 lg:py-8">
+        <!-- Advanced Carousel -->
+        <div class="swiper mySwiper w-full h-auto min-h-[300px] md:h-[400px] rounded-[2rem] md:rounded-[2.5rem] shadow-2xl mb-8 md:mb-12 relative overflow-hidden group">
+            <div class="swiper-wrapper">
+                <!-- Slide 1 -->
+                <div class="swiper-slide relative">
+                    <img src="https://images.unsplash.com/photo-1576602976047-174e57a47881?q=80&w=1920&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Pharmacy Banner 1">
+                    <div class="relative z-10 bg-gradient-to-r from-slate-900/95 via-slate-900/60 to-transparent flex items-center px-6 py-12 md:px-20 h-full">
+                        <div class="max-w-xl space-y-4 md:space-y-6 animate-in fade-in slide-in-from-left-10 duration-1000">
+                            <span class="px-3 py-1.5 md:px-4 md:py-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] backdrop-blur-sm">Premium Healthcare</span>
+                            <h2 class="text-3xl md:text-6xl font-black text-white leading-tight">Your Health, <br><span class="text-emerald-400">Our Priority</span></h2>
+                            <p class="text-slate-300 text-sm md:text-lg font-medium max-w-[280px] md:max-w-md leading-relaxed">Experience next-generation pharmacy services with instant delivery.</p>
+                            <button class="px-6 py-3 md:px-8 md:py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-900 rounded-xl md:rounded-2xl font-black transition-all hover:scale-105 active:scale-95 flex items-center gap-2 md:gap-3 shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] text-sm md:text-base">
+                                Shop Now <i data-lucide="arrow-right" class="w-4 h-4 md:w-5 md:h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Slide 2 -->
+                <div class="swiper-slide relative">
+                    <img src="https://images.unsplash.com/photo-1631549916768-4119b2e5f926?q=80&w=1920&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Pharmacy Banner 2">
+                    <div class="relative z-10 bg-gradient-to-r from-blue-900/95 via-blue-900/60 to-transparent flex items-center px-6 py-12 md:px-20 h-full">
+                        <div class="max-w-xl space-y-4 md:space-y-6">
+                            <span class="px-3 py-1.5 md:px-4 md:py-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] backdrop-blur-sm">24/7 Service</span>
+                            <h2 class="text-3xl md:text-6xl font-black text-white leading-tight">Digital <br><span class="text-blue-400">Prescriptions</span></h2>
+                            <p class="text-slate-300 text-sm md:text-lg font-medium max-w-[280px] md:max-w-md leading-relaxed">Upload your prescription and let our pharmacists handle the rest.</p>
+                            <button class="px-6 py-3 md:px-8 md:py-4 bg-blue-500 hover:bg-blue-400 text-white rounded-xl md:rounded-2xl font-black transition-all hover:scale-105 active:scale-95 flex items-center gap-2 md:gap-3 shadow-[0_0_40px_-10px_rgba(59,130,246,0.5)] text-sm md:text-base">
+                                Upload Rx <i data-lucide="upload-cloud" class="w-4 h-4 md:w-5 md:h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Slide 3 -->
+                <div class="swiper-slide relative">
+                    <img src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=1920&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Pharmacy Banner 3">
+                    <div class="relative z-10 bg-gradient-to-r from-violet-900/95 via-violet-900/60 to-transparent flex items-center px-6 py-12 md:px-20 h-full">
+                        <div class="max-w-xl space-y-4 md:space-y-6">
+                            <span class="px-3 py-1.5 md:px-4 md:py-2 bg-violet-500/20 text-violet-300 border border-violet-500/30 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] backdrop-blur-sm">Exclusive Deals</span>
+                            <h2 class="text-3xl md:text-6xl font-black text-white leading-tight">Save on <br><span class="text-violet-400">Essentials</span></h2>
+                            <p class="text-slate-300 text-sm md:text-lg font-medium max-w-[280px] md:max-w-md leading-relaxed">Get up to 50% off on daily vitamins and supplements.</p>
+                            <button class="px-6 py-3 md:px-8 md:py-4 bg-violet-500 hover:bg-violet-400 text-white rounded-xl md:rounded-2xl font-black transition-all hover:scale-105 active:scale-95 flex items-center gap-2 md:gap-3 shadow-[0_0_40px_-10px_rgba(139,92,246,0.5)] text-sm md:text-base">
+                                View Offers <i data-lucide="percent" class="w-4 h-4 md:w-5 md:h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-pagination !bottom-6 md:!bottom-8 !left-6 md:!left-12 !w-auto"></div>
+            <!-- Navigation Buttons -->
+            <div class="hidden md:flex gap-2 absolute bottom-8 right-12 z-20">
+                <button class="swiper-button-prev-custom w-12 h-12 rounded-full glass-card text-white flex items-center justify-center hover:bg-white hover:text-slate-900 transition-all active:scale-95">
+                    <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                </button>
+                <button class="swiper-button-next-custom w-12 h-12 rounded-full glass-card text-white flex items-center justify-center hover:bg-white hover:text-slate-900 transition-all active:scale-95">
+                    <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Header & Search -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight">Pharmacy Store</h1>
+                <p class="text-slate-500 font-bold mt-1">Browse and purchase certified medicines.</p>
+            </div>
+            
+            <div class="relative w-full md:w-96 group">
+                <input type="text" id="medicineSearch" 
+                       class="w-full pl-12 pr-4 py-4 bg-white border border-slate-100 rounded-2xl shadow-lg shadow-slate-200/50 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300"
+                       placeholder="Search medicines, brands, or symptoms...">
+                <i data-lucide="search" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-blue-500 transition-colors"></i>
+            </div>
+        </div>
+
+        @if (!Model.StoreMedicines.Any())
+        {
+            <div class="bg-white rounded-[2.5rem] p-16 text-center border border-slate-100 shadow-xl">
+                <div class="w-24 h-24 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-dashed border-slate-200">
+                    <i data-lucide="pill" class="w-10 h-10 text-slate-300"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-2">Pharmacy is Empty</h3>
+                <p class="text-slate-500 font-medium max-w-sm mx-auto">No medicines are currently available in the inventory. Please check back later.</p>
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="medicineGrid">
+                @foreach (var medicine in Model.StoreMedicines)
+                {
+                    <div class="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all group relative overflow-hidden medicine-card" 
+                         data-name="@medicine.Name.ToLower()" data-brand="@medicine.Brand.ToLower()">
+                        
+                        <!-- Stock Badge -->
+                        <div class="absolute top-6 right-6 z-10">
+                            @if((medicine.StockQuantity ?? 0) > 0) {
+                                <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-100">In Stock</span>
+                            } else {
+                                <span class="px-3 py-1 bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-rose-100">Out of Stock</span>
+                            }
+                        </div>
+
+                        <a href="/Pharmacy/Details/@medicine.Id" class="block h-48 w-full bg-slate-50 rounded-[2rem] mb-6 overflow-hidden relative group-hover:shadow-md transition-all">
+                            @if(!string.IsNullOrEmpty(medicine.ImageUrl) && medicine.ImageUrl != "/images/medicines/default.png")
+                            {
+                                <img src="@medicine.ImageUrl" alt="@medicine.Name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full flex items-center justify-center text-slate-300">
+                                    <i data-lucide="pill" class="w-12 h-12 text-slate-300 opacity-50"></i>
+                                </div>
+                            }
+                        </a>
+
+                        <a href="/Pharmacy/Details/@medicine.Id" class="block group-hover:text-blue-600 transition-colors">
+                            <h3 class="text-lg font-black text-slate-900 mb-1 line-clamp-1">@medicine.Name</h3>
+                        </a>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">@medicine.Brand • @medicine.Category</p>
+
+                        <div class="flex items-end justify-between mt-auto pt-4 border-t border-slate-50">
+                            <div>
+                                <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Price per Unit</p>
+                                 <p class="text-xl font-black text-slate-900">PKR @((medicine.Price ?? 0).ToString("N0"))</p>
+                            </div>
+                            
+                             @if((medicine.StockQuantity ?? 0) > 0)
+                            {
+                                 <button onclick="addToCart(@medicine.Id, '@medicine.Name', @(medicine.Price ?? 0), '@medicine.Brand', '@medicine.ImageUrl')" 
+                                        class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all shadow-lg active:scale-95 group/btn" title="Add to Cart">
+                                    <i data-lucide="plus" class="w-4 h-4 group-hover/btn:hidden"></i>
+                                    <i data-lucide="shopping-cart" class="w-4 h-4 hidden group-hover/btn:block animate-bounce"></i>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Simple Client-Side Search Script -->
+<script>
+    document.getElementById('medicineSearch').addEventListener('keyup', function(e) {
+        const term = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.medicine-card');
+        
+        cards.forEach(card => {
+            const name = card.getAttribute('data-name');
+            const brand = card.getAttribute('data-brand');
+            
+            if (name.includes(term) || brand.includes(term)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        lucide.createIcons();
+    });
+
+    function addToCart(id, name, price, brand, imageUrl) {
+        // Use Global Cart
+        PharmacyCart.addItem({
+            id: id,
+            name: name,
+            price: price,
+            brand: brand,
+            imageUrl: imageUrl
+        });
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        
+        var swiper = new Swiper(".mySwiper", {
+            spaceBetween: 30,
+            effect: "fade",
+            loop: true,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+            navigation: {
+                nextEl: ".swiper-button-next-custom",
+                prevEl: ".swiper-button-prev-custom",
+            },
+        });
+    });
+</script>

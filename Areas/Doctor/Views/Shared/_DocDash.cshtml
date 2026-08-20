@@ -1,0 +1,653 @@
+@using Microsoft.AspNetCore.Identity
+@using MedLinkPortal.Areas.Identity.Pages.Account 
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject MedLinkPortal.Services.INotificationService NotificationService
+
+@{
+    ViewData["Title"] = "_DocDash";
+    var user = await UserManager.GetUserAsync(User);
+    var notifications = user != null ? await NotificationService.GetUserNotificationsAsync(user.Id) : new List<MedLinkPortal.Models.Notification>();
+    var unreadCount = notifications.Count(n => !n.IsRead);
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script src="~/js/webrtc-handler.js"></script>
+    <script>
+        // Initialize chat hub globally so GlobalCallOverlay reuses it
+        window.chatHubConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+        window.chatHubConnection.start().catch(err => console.error('Doctor ChatHub error:', err));
+    </script>
+    <title>Doctor Dashboard - MedLink Portal</title>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary-glow: conic-gradient(from 180deg at 50% 50%, #16abff33 0deg, #0885ff33 55deg, #54d6ff33 120deg, #0071ff33 160deg, transparent 360deg);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f8fafc; /* Slate 50 */
+            color: #0f172a;
+            transition: background-color 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        /* Enforce Dark Mode on HTML tag class */
+        html.dark body {
+            background-color: #020617 !important; /* Slate 950 */
+            color: #f8fafc !important;
+        }
+
+        [x-cloak] { display: none !important; }
+
+        /* Premium Glassmorphism & Cards */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+        }
+
+        html.dark .glass-panel {
+            background: #1e293b !important; /* Slate 800 */
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .premium-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        html.dark .premium-card {
+            background-color: #1e293b !important; /* Slate 800 */
+            border-color: #334155 !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .premium-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            border-color: #cbd5e1;
+        }
+
+        html.dark .premium-card:hover {
+            border-color: #475569 !important;
+            background-color: #1f2937 !important; /* Gray 800 */
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            background-color: #ffffff;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        html.dark .sidebar {
+            background-color: #0f172a !important; /* Slate 900 */
+            border-right: 1px solid #1e293b !important;
+        }
+
+        .sidebar-link {
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .sidebar-link:hover {
+            background: #f1f5f9;
+        }
+        
+        html.dark .sidebar-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-link.active {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        html.dark .sidebar-link.active {
+            background: rgba(37, 99, 235, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        /* DARK MODE TEXT OVERRIDES for Sidebar */
+        html.dark .sidebar-link i {
+            /* Keep icon colors specifically controlled by classes, but base needs to be slate-400 */
+        }
+        
+        /* Inputs */
+        .premium-input {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #0f172a;
+        }
+
+        .premium-input:focus {
+             background: #ffffff;
+             border-color: #3b82f6;
+             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        html.dark .premium-input {
+            background: #0f172a !important; /* Slate 900 */
+            border-color: #334155 !important;
+            color: white !important;
+        }
+
+        html.dark .premium-input:focus {
+            background: #020617 !important;
+            border-color: #60a5fa !important;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        html.dark ::-webkit-scrollbar-thumb { background: #475569; }
+
+        @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Emergency Red Alert Pulse */
+        .emergency-red-pulse {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            box-shadow: inset 0 0 100px rgba(220, 38, 38, 0.4);
+            border: 8px solid rgba(220, 38, 38, 0.5);
+            animation: redAlertPulse 1.5s infinite;
+            display: none;
+        }
+
+        @@keyframes redAlertPulse {
+            0% { box-shadow: inset 0 0 60px rgba(220, 38, 38, 0.2); border-color: rgba(220, 38, 38, 0.2); }
+            50% { box-shadow: inset 0 0 150px rgba(220, 38, 38, 0.6); border-color: rgba(220, 38, 38, 0.8); }
+            100% { box-shadow: inset 0 0 60px rgba(220, 38, 38, 0.2); border-color: rgba(220, 38, 38, 0.2); }
+        }
+    </style>
+</head>
+<!-- Removed bg-slate-50 dark:bg-[#020617] classes to rely on CSS above for cleaner override -->
+<body class="transition-colors duration-300">
+    <!-- Global Emergency Red Alert Overlay -->
+    <div id="emergencyRedAlertOverlay" class="emergency-red-pulse"></div>
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar Backdrop -->
+        <div id="sidebarBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity opacity-0"></div>
+
+        <!-- Sidebar - REMOVED bg-white/dark:bg-[#0f172a] classes from HTML to let CSS handle it -->
+        <aside id="sidebar" class="sidebar fixed h-full w-72 z-50 transition-transform duration-300 transform lg:translate-x-0 -translate-x-full shadow-2xl lg:shadow-none font-sans">
+            <div class="flex flex-col h-full px-5 overflow-y-auto custom-scrollbar">
+                <!-- Brand -->
+                <div class="py-8 flex items-center space-x-3.5">
+                    <div class="w-11 h-11 rounded-2xl overflow-hidden shadow-lg shadow-blue-500/30 flex-shrink-0">
+                        <img src="/images/medlink-logo.png" alt="MedLink Logo" class="w-10 h-10 rounded-2xl object-cover shadow-lg">
+                    </div>
+                    <div>
+                        <span class="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">MedLink</span>
+                        <div class="flex items-center space-x-1.5 mt-0.5">
+                            <span class="block w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.2em]">Portal Pro</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor Profile Card -->
+                <div class="mb-10 px-1">
+                    <div class="p-4 bg-slate-50 dark:bg-[#1e293b] rounded-3xl border border-slate-200 dark:border-slate-700 group hover:border-blue-200 dark:hover:border-blue-500/30 transition-all cursor-pointer shadow-sm">
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <div class="w-12 h-12 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden border border-slate-100 dark:border-slate-700">
+                                     <i class="fas fa-user-md text-blue-600 dark:text-blue-500 text-xl"></i>
+                                </div>
+                                <div class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-slate-900 dark:text-white truncate tracking-tight">Dr. @user?.Name</p>
+                                <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate">@user?.Specialist</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="flex-grow space-y-1.5">
+                    <p class="px-5 text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-4 opacity-80">Perspective</p>
+                    
+                    <a asp-controller="Doctor" asp-action="DoctorDashBoard" 
+                       class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mb-1 text-slate-500 dark:text-slate-400">
+                        <i class="fas fa-chart-pie mr-4 text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors text-base group-[.active]:text-blue-600 dark:group-[.active]:text-blue-400"></i>
+                        <span class="text-sm font-bold tracking-tight group-[.active]:text-blue-700 dark:group-[.active]:text-blue-300">Intelligence</span>
+                    </a>
+
+                    <a asp-controller="Doctor" asp-action="PatientRecords" 
+                       class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mb-1 text-slate-500 dark:text-slate-400">
+                        <i class="fas fa-user-group mr-4 text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors text-base group-[.active]:text-blue-600 dark:group-[.active]:text-blue-400"></i>
+                        <span class="text-sm font-bold tracking-tight group-[.active]:text-blue-700 dark:group-[.active]:text-blue-300">Patients</span>
+                    </a>
+
+                    <a asp-controller="Doctor" asp-action="Schedule" 
+                       class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mb-1 text-slate-500 dark:text-slate-400">
+                        <i class="fas fa-calendar-check mr-4 text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors text-base group-[.active]:text-blue-600 dark:group-[.active]:text-blue-400"></i>
+                        <span class="text-sm font-bold tracking-tight group-[.active]:text-blue-700 dark:group-[.active]:text-blue-300">Schedule</span>
+                    </a>
+
+                    <a asp-controller="Doctor" asp-action="Availability" 
+                       class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mb-1 text-slate-500 dark:text-slate-400">
+                        <i class="fas fa-clock mr-4 text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors text-base group-[.active]:text-blue-600 dark:group-[.active]:text-blue-400"></i>
+                        <span class="text-sm font-bold tracking-tight group-[.active]:text-blue-700 dark:group-[.active]:text-blue-300">Availability</span>
+                    </a>
+
+                    <a asp-controller="Doctor" asp-action="Messages" 
+                       class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mb-1 text-slate-500 dark:text-slate-400">
+                        <i class="fas fa-comments mr-4 text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors text-base group-[.active]:text-blue-600 dark:group-[.active]:text-blue-400"></i>
+                        <span class="text-sm font-bold tracking-tight group-[.active]:text-blue-700 dark:group-[.active]:text-blue-300">Consultations</span>
+                        <span class="ml-auto px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-semibold rounded-full">4</span>
+                    </a>
+
+                    <a asp-controller="EmergencyCenter" asp-action="Index" 
+                       class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mb-1 text-slate-500 dark:text-slate-400 border border-transparent hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/10">
+                        <i class="fas fa-truck-medical mr-4 text-red-400 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors text-base group-[.active]:text-red-600 dark:group-[.active]:text-red-400"></i>
+                        <span class="text-sm font-bold tracking-tight text-red-600 dark:text-red-400">Emergency Center</span>
+                        <span class="ml-auto flex h-2 w-2 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                    </a>
+
+                    <a asp-controller="Doctor" asp-action="TranscriptionHistory" 
+                       class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mb-1 text-slate-500 dark:text-slate-400">
+                        <i class="fas fa-file-audio mr-4 text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors text-base group-[.active]:text-blue-600 dark:group-[.active]:text-blue-400"></i>
+                        <span class="text-sm font-bold tracking-tight group-[.active]:text-blue-700 dark:group-[.active]:text-blue-300">Transcript History</span>
+                    </a>
+
+                    <a asp-controller="Doctor" asp-action="Wallet" 
+                       class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mb-1 text-slate-500 dark:text-slate-400">
+                        <i class="fas fa-wallet mr-4 text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors text-base group-[.active]:text-blue-600 dark:group-[.active]:text-blue-400"></i>
+                        <span class="text-sm font-bold tracking-tight group-[.active]:text-blue-700 dark:group-[.active]:text-blue-300">Earnings</span>
+                    </a>
+
+                    <div class="pt-8 mt-8 border-t border-slate-100 dark:border-slate-800">
+                        <a asp-controller="Doctor" asp-action="Profile" class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group text-slate-500 dark:text-slate-400">
+                            <i class="fas fa-sliders mr-4 text-slate-400 group-hover:rotate-90 transition-transform duration-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 text-base group-[.active]:text-blue-600 dark:group-[.active]:text-blue-400"></i>
+                            <span class="text-sm font-bold tracking-tight group-[.active]:text-blue-700 dark:group-[.active]:text-blue-300">Settings</span>
+                        </a>
+                        <a asp-controller="Doctor" asp-action="AuditLogs" class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mt-1 text-slate-500 dark:text-slate-400">
+                             <i class="fas fa-shield-halved mr-4 text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors text-base group-[.active]:text-blue-600 dark:group-[.active]:text-blue-400"></i>
+                             <span class="text-sm font-bold tracking-tight group-[.active]:text-blue-700 dark:group-[.active]:text-blue-300">Audit Trail</span>
+                         </a>
+                    </div>
+                </nav>
+
+                <!-- Footer Action -->
+                <div class="py-8 mt-auto">
+                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                        <button type="submit" class="w-full flex items-center justify-center px-6 py-4 bg-slate-50 dark:bg-[#1e293b] hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-2xl transition-all duration-300 font-bold text-sm group border border-slate-100 dark:border-slate-700 hover:border-red-100 dark:hover:border-red-900/30">
+                            <i class="fas fa-power-off mr-3 group-hover:scale-110 transition-transform"></i>
+                            Sign Out
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-grow lg:ml-72 flex flex-col min-h-screen transition-all duration-300">
+            <!-- Header -->
+            <header class="sticky top-0 z-30 bg-white/90 dark:bg-[#020617]/90 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800 px-5 lg:px-10">
+                <div class="flex items-center justify-between h-auto min-h-[80px] py-4 lg:py-0">
+                    <!-- Left: Welcome Area -->
+                    <div class="flex items-center space-x-5">
+                        <button id="sidebarToggle" class="lg:hidden w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 active:scale-95 transition-all shadow-sm">
+                            <i class="fas fa-bars text-lg"></i>
+                        </button>
+                        <div class="reveal">
+                             <h1 class="text-xl lg:text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">Hi, Dr. @(!string.IsNullOrEmpty(user?.Name) ? user.Name.Split(' ')[0] : "Doctor")</h1>
+                            <div class="flex items-center mt-1">
+                                <div class="hidden sm:flex px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold rounded-md uppercase tracking-wider mr-3">System Online</div>
+                                <span id="currentDateDisplay" class="text-xs font-bold text-slate-400 dark:text-slate-500"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Search & Quick Actions -->
+                    <div class="flex items-center space-x-3 lg:space-x-5">
+                        <!-- Ultra Modern Search -->
+                        <div class="hidden md:flex relative group">
+                            <input id="globalSearch" type="text" placeholder="Search..." 
+                                   class="w-64 focus:w-80 pl-11 pr-5 py-3 bg-slate-100 dark:bg-[#1e293b] border-2 border-transparent focus:border-blue-500/20 rounded-2xl text-sm font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none transition-all duration-300">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
+                        </div>
+
+                        <!-- Theme Control -->
+                        <button id="themeToggle" class="w-11 h-11 flex items-center justify-center bg-white dark:bg-[#1e293b] border border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-2xl transition-all duration-300 hover:rotate-12 shadow-sm">
+                            <i id="themeIcon" class="fas fa-moon text-lg"></i>
+                        </button>
+
+                        <!-- Notification -->
+                        <div class="relative dropdown">
+                            <button id="notificationButton" class="w-11 h-11 flex items-center justify-center bg-white dark:bg-[#1e293b] border border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-2xl transition-all shadow-sm" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell text-lg"></i>
+                                @if (unreadCount > 0)
+                                {
+                                    <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-[#1e293b]"></span>
+                                }
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end p-0 mt-4 border border-slate-100 dark:border-slate-700 shadow-2xl bg-white dark:bg-[#1e293b] rounded-[32px] w-[300px] lg:min-w-[380px] animate-in slide-in-from-top-2 duration-300 overflow-hidden">
+                                <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                                    <h3 class="text-base font-semibold text-slate-900 dark:text-white tracking-tight">Intelligence</h3>
+                                    <span id="unreadBadgeText" class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] font-semibold rounded-lg uppercase">@unreadCount New</span>
+                                </div>
+                                <div id="notificationContainer" class="p-2 space-y-1 max-h-[350px] overflow-y-auto custom-scrollbar">
+                                    @if (!notifications.Any())
+                                    {
+                                        <div class="p-8 text-center">
+                                            <p class="text-sm font-bold text-slate-400">All caught up!</p>
+                                        </div>
+                                    }
+                                    @foreach (var note in notifications)
+                                    {
+                                        <div onclick="markNoteAsRead(@note.Id, this)" class="p-4 @(note.IsRead ? "" : "bg-blue-500/5 dark:bg-blue-500/10") rounded-2xl hover:bg-blue-500/10 dark:hover:bg-blue-500/20 transition-all cursor-pointer group">
+                                            <div class="flex gap-4">
+                                                <div class="w-10 h-10 rounded-xl bg-@(note.Color == "rose" ? "red" : note.Color == "emerald" ? "emerald" : "blue")-600 flex items-center justify-center text-white text-xs shadow-lg shadow-blue-500/20 flex-shrink-0">
+                                                    <i class="fas fa-@(note.Icon)"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <p class="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">@note.Title</p>
+                                                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 leading-relaxed">@note.Content</p>
+                                                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-2 uppercase tracking-wide">@((DateTime.Now - note.CreatedAt).TotalMinutes < 60 ? $"{(int)(DateTime.Now - note.CreatedAt).TotalMinutes} mins ago" : note.CreatedAt.ToString("MMM dd"))</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="px-2 py-2 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700">
+                                    <button onclick="clearAllNotifications()" class="w-full py-2.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-center">Clear All Events</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mini Profile -->
+                        <div class="relative dropdown">
+                            <button class="flex items-center space-x-2 p-1.5 pr-4 bg-slate-100 dark:bg-[#1e293b] rounded-2xl border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all group" data-bs-toggle="dropdown">
+                                <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                                     @(!string.IsNullOrEmpty(user?.Name) ? user.Name[0].ToString().ToUpper() : (user?.UserName?[0].ToString().ToUpper() ?? "D"))
+                                </div>
+                                <i class="fas fa-chevron-down text-[10px] text-slate-400 dark:text-slate-500 hidden lg:block group-hover:text-blue-500 transition-colors"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end p-2 mt-4 border border-slate-100 dark:border-slate-700 shadow-2xl bg-white dark:bg-[#1e293b] rounded-3xl min-w-[240px] animate-in slide-in-from-top-2 duration-300">
+                                <li class="px-4 py-3 border-b border-slate-100 dark:border-slate-700 mb-2">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Logged in as</p>
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[180px]">@user?.UserName</p>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item flex items-center px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors" asp-controller="Doctor" asp-action="Profile">
+                                        <i class="fas fa-fingerprint mr-3 text-blue-500 opacity-50"></i> Security Profile
+                                    </a>
+                                </li>
+                                <li class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                                        <button type="submit" class="w-full flex items-center px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl text-sm font-bold text-red-600 dark:text-red-400 transition-colors group">
+                                            <i class="fas fa-sign-out-alt mr-3 group-hover:translate-x-1 transition-transform"></i> Log Out
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Render Area -->
+            <main class="flex-grow p-5 lg:p-10">
+                @RenderBody()
+            </main>
+
+            <!-- Footer -->
+            <footer class="mt-auto px-5 lg:px-10 py-8 border-t border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-[#020617]/50 backdrop-blur-xl">
+                <div class="flex flex-col lg:flex-row justify-center lg:justify-between items-center gap-6 lg:gap-8 text-center lg:text-left">
+                    <div class="flex flex-col md:flex-row items-center gap-4 lg:gap-6">
+                        <div class="flex items-center space-x-2.5">
+                             <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md shadow-blue-500/20">
+                                <i class="fas fa-heart-pulse text-white text-xs"></i>
+                             </div>
+                             <span class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">MedLink System</span>
+                        </div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2026 Integrated Health Systems.</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+                        <a href="#" class="text-[10px] font-semibold text-slate-400 hover:text-blue-500 transition-colors uppercase tracking-widest">Privacy Protocol</a>
+                        <a href="#" class="text-[10px] font-semibold text-slate-400 hover:text-blue-500 transition-colors uppercase tracking-widest">Support Node</a>
+                        <div class="flex items-center px-3 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-semibold border border-emerald-500/20">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
+                            SECURE
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Set date
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        const dateElement = document.getElementById('currentDateDisplay');
+        if(dateElement) dateElement.textContent = new Date().toLocaleDateString('en-US', options);
+
+        // Sidebar Toggle Logic
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        
+        function toggleSidebar() {
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+                setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('opacity-0');
+                setTimeout(() => backdrop.classList.add('hidden'), 300);
+            }
+        }
+
+        if(toggleBtn) toggleBtn.onclick = toggleSidebar;
+        if(backdrop) backdrop.onclick = toggleSidebar;
+
+        // --- Theme Toggle Logic ---
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+            if(themeIcon) themeIcon.className = 'fas fa-sun text-lg';
+        }
+
+        themeToggle?.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            if(themeIcon) themeIcon.className = isDark ? 'fas fa-sun text-lg' : 'fas fa-moon text-lg';
+        });
+
+        // Active Link Handling
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && currentPath.includes(href)) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // Global Search Visual
+        const gSearch = document.getElementById('globalSearch');
+        gSearch?.addEventListener('input', (e) => {
+            // This can be used for cross-page search navigation or emitting events
+            console.log('Searching for:', e.target.value);
+        });
+
+        // NOTIFICATION LOGIC
+        async function markNoteAsRead(id, element) {
+            try {
+                const response = await fetch(`/Dashboard/MarkNotificationAsRead?id=${id}`, { method: 'POST' });
+                if (response.ok) {
+                    element.classList.remove('bg-blue-500/5', 'dark:bg-blue-500/10');
+                    updateUnreadBadge(-1);
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function clearAllNotifications() {
+            try {
+                const response = await fetch('/Dashboard/MarkAllNotificationsAsRead', { method: 'POST' });
+                if (response.ok) {
+                    document.getElementById('notificationContainer').innerHTML = '<div class="p-8 text-center"><p class="text-sm font-bold text-slate-400">All caught up!</p></div>';
+                    document.querySelector('#notificationButton span')?.remove();
+                    document.getElementById('unreadBadgeText').textContent = '0 New';
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function updateUnreadBadge(delta) {
+            const badgeText = document.getElementById('unreadBadgeText');
+            let current = parseInt(badgeText.textContent) || 0;
+            let newVal = Math.max(0, current + delta);
+            badgeText.textContent = newVal + ' New';
+            
+            if (newVal === 0) {
+                document.querySelector('#notificationButton span')?.remove();
+            }
+        }
+
+        // SIGNALR NOTIFICATION ENGINE
+        const notificationConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub")
+            .withAutomaticReconnect()
+            .build();
+
+        notificationConnection.on("ReceiveNotification", function (notification) {
+            console.log("New Intelligence Received:", notification);
+            
+            // 1. Update Badge
+            let button = document.getElementById('notificationButton');
+            let dot = button.querySelector('span');
+            if (!dot) {
+                dot = document.createElement('span');
+                dot.className = "absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-[#1e293b]";
+                button.appendChild(dot);
+            }
+
+            // 2. Add to Dropdown
+            let container = document.getElementById('notificationContainer');
+            if (container.querySelector('.text-center')) container.innerHTML = ''; // Clear empty state
+            
+            const colorClass = notification.color === 'rose' ? 'red' : notification.color === 'emerald' ? 'emerald' : 'blue';
+            const newNoteHtml = `
+                <div onclick="markNoteAsRead(${notification.id}, this)" class="p-4 bg-blue-500/5 dark:bg-blue-500/10 rounded-2xl hover:bg-blue-500/10 dark:hover:bg-blue-500/20 transition-all cursor-pointer group">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-${colorClass}-600 flex items-center justify-center text-white text-xs shadow-lg shadow-blue-500/20 flex-shrink-0">
+                            <i class="fas fa-${notification.icon}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">${notification.title}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 leading-relaxed">${notification.content}</p>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-2 uppercase tracking-wide">Just Now</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('afterbegin', newNoteHtml);
+            updateUnreadBadge(1);
+        });
+
+        // TACTICAL EMERGENCY HANDLER (Centralized)
+        notificationConnection.on("EmergencyAlert", function (alertData) {
+            console.log("!!! RED ALERT TRIGGERED !!!", alertData);
+            
+            // 1. Trigger Global Red Alert UI
+            const overlay = document.getElementById('emergencyRedAlertOverlay');
+            if (overlay) {
+                overlay.style.display = 'block';
+                const audio = new Audio('/sounds/emergency_alert.mp3');
+                audio.play().catch(e => console.log("Audio play blocked"));
+                setTimeout(() => { overlay.style.display = 'none'; }, 15000);
+            }
+
+            // 2. Persist to LocalStorage (to maintain across refresh)
+            let alerts = JSON.parse(localStorage.getItem('medlink_emergency_history') || '[]');
+            // Add timestamp for expiry logic
+            alertData.receivedAt = new Date().getTime();
+            alerts.unshift(alertData); 
+            // Keep only last 10 alerts
+            if (alerts.length > 10) alerts.pop();
+            localStorage.setItem('medlink_emergency_history', JSON.stringify(alerts));
+
+            // 3. Dispatch to any active views (like Emergency Center)
+            window.dispatchEvent(new CustomEvent('medlink:emergency', { detail: alertData }));
+        });
+
+        notificationConnection.start().catch(err => console.error("Notification Sync Error:", err));
+    </script>
+    <script src="~/js/premium-modals.js"></script>
+    @if (ViewData["HideGlobalCall"] == null || !(bool)ViewData["HideGlobalCall"])
+    {
+        @await Html.PartialAsync("_GlobalCallOverlay")
+    }
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+

@@ -1,0 +1,207 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Clinic Visit Details";
+    var appointment = ViewBag.Appointment as MedLinkPortal.Models.Appointment;
+    var doctor = appointment?.Doctor;
+    var doctorUser = ViewBag.DoctorUser as MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser;
+}
+
+<div class="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
+    <!-- Header with Back Button -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+             <a href="@Url.Action("Consultations", "Dashboard")" class="group inline-flex items-center gap-2 text-gray-500 hover:text-blue-600 font-semibold text-[11px] uppercase tracking-widest transition-all mb-4">
+                <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i> Back to History
+            </a>
+            <h2 class="text-4xl font-semibold text-gray-900 tracking-tight">Clinic Visit Identity</h2>
+            <p class="text-gray-400 font-bold mt-2 uppercase text-[11px] tracking-[0.2em]">Secure Physical Consultation Protocol • REF #@(appointment.Id)X7P</p>
+        </div>
+        <div class="flex items-center gap-3">
+             <div class="px-6 py-3 bg-emerald-50 border border-emerald-100/50 rounded-2xl flex items-center gap-3 shadow-sm">
+                 <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                 <span class="text-[11px] font-semibold text-emerald-600 uppercase tracking-widest">Confirmed Visit</span>
+             </div>
+        </div>
+    </div>
+
+    <!-- Bento Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
+        
+        <!-- Left Column: Clinic & Map (Bento Main) -->
+        <div class="lg:col-span-8 space-y-6">
+            <!-- 3D Map Container -->
+            <div class="relative group perspective-2000" x-data="{ tiltX: 0, tiltY: 0, zoom: 1 }">
+                <div class="absolute -inset-4 bg-gradient-to-tr from-blue-600/15 to-emerald-600/15 rounded-[3.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                
+                <div class="relative bg-white rounded-[3.5rem] border border-gray-100 shadow-2xl overflow-hidden min-h-[500px] transition-all duration-500 ease-out"
+                     :style="`transform: rotateX(${tiltY}deg) rotateY(${tiltX}deg)`"
+                     @@mousemove="tiltX = ($event.clientX - ($el.getBoundingClientRect().left + $el.offsetWidth / 2)) / 80; tiltY = -($event.clientY - ($el.getBoundingClientRect().top + $el.offsetHeight / 2)) / 80"
+                     @@mouseleave="tiltX = 0; tiltY = 0">
+                    
+                    <!-- Premium Map Layer -->
+                    <div class="absolute inset-0 bg-[#f1f5f9] overflow-hidden">
+                        <!-- High-Contrast Map Tiles -->
+                        <div class="absolute inset-0 transition-transform duration-700 ease-out flex items-center justify-center bg-gray-100"
+                             :style="`transform: scale(${zoom})`"
+                             style="background-image: url('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'), url('https://www.google.com/maps/vt/pb=!1m4!1m3!1i14!2i11592!3i6324!2m3!1e0!2sm!3i600000000!3m8!2sen!3spk!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0!5m1!1e0!6m6!1e12!2i2!21m1!2sen!24m1!2s9!34m1!3b1'); background-size: cover; background-position: center;">
+                            
+                            <!-- Premium Custom Map Decoration (Grid) -->
+                            <div class="absolute inset-0 opacity-10" style="background-image: linear-gradient(#3b82f6 1px, transparent 1px), linear-gradient(90deg, #3b82f6 1px, transparent 1px); background-size: 40px 40px;"></div>
+                        </div>
+                        
+                        <!-- Pulse Point -->
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="relative flex flex-col items-center" :style="`transform: scale(${1/zoom})`">
+                                <div class="w-16 h-16 bg-blue-600/30 rounded-full flex items-center justify-center animate-ping absolute"></div>
+                                <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-2xl relative z-20 border-4 border-white">
+                                    <i data-lucide="map-pin" class="w-7 h-7"></i>
+                                </div>
+                                <div class="mt-4 bg-white/95 backdrop-blur-md px-6 py-3 rounded-2xl border border-white shadow-2xl text-center transform -translate-y-2">
+                                    <p class="text-[10px] font-semibold text-blue-600 uppercase tracking-widest mb-0.5">Physical Hub</p>
+                                    <p class="text-sm font-semibold text-gray-900">@doctor.ClinicName</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map Overlay Controls -->
+                    <div class="absolute bottom-10 left-10 right-10 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <button @@click="zoom = Math.min(zoom + 0.2, 2)" 
+                                    class="p-4 bg-white/95 backdrop-blur-md rounded-2xl border border-white shadow-xl text-gray-900 hover:bg-blue-600 hover:text-white transition-all pointer-events-auto">
+                                <i data-lucide="plus" class="w-5 h-5"></i>
+                            </button>
+                            <button @@click="zoom = Math.max(zoom - 0.2, 0.8)"
+                                    class="p-4 bg-white/95 backdrop-blur-md rounded-2xl border border-white shadow-xl text-gray-900 hover:bg-blue-600 hover:text-white transition-all pointer-events-auto">
+                                <i data-lucide="minus" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        @{
+                            var mapQuery = !string.IsNullOrEmpty(doctor.ClinicMapUrl) ? doctor.ClinicMapUrl : $"https://www.google.com/maps/search/?api=1&query={Uri.EscapeDataString(doctor.ClinicAddress ?? "")}";
+                        }
+                        <a href="@mapQuery" target="_blank" class="flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-[2rem] text-[11px] font-semibold uppercase tracking-widest shadow-2xl hover:bg-blue-600 hover:scale-105 active:scale-95 transition-all pointer-events-auto">
+                            <i data-lucide="navigation" class="w-4 h-4"></i>
+                            Get Live Directions
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clinic Features Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:shadow-xl transition-all duration-500">
+                    <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-inner">
+                        <i data-lucide="clock" class="w-7 h-7"></i>
+                    </div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2 tracking-tight">Clinic Timings</h4>
+                    <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-4">Practice Operation Hours</p>
+                    <div class="space-y-3">
+                         <div class="flex justify-between items-center text-sm font-medium">
+                             <span class="text-gray-400">Regular Slots</span>
+                             <span class="text-gray-900">09:00 AM - 05:00 PM</span>
+                         </div>
+                         <div class="flex justify-between items-center text-sm font-medium">
+                             <span class="text-gray-400">Evening Hours</span>
+                             <span class="text-gray-900">06:00 PM - 09:00 PM</span>
+                         </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:shadow-xl transition-all duration-500">
+                    <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500 shadow-inner">
+                        <i data-lucide="shield-check" class="w-7 h-7"></i>
+                    </div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2 tracking-tight">Clinic Credentials</h4>
+                    <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-4">Certified Healthcare Facility</p>
+                    <div class="flex flex-wrap gap-2">
+                         <span class="px-3 py-1.5 bg-emerald-50 text-emerald-600 text-[10px] font-semibold uppercase rounded-lg border border-emerald-100">PMC Registered</span>
+                         <span class="px-3 py-1.5 bg-emerald-50 text-emerald-600 text-[10px] font-semibold uppercase rounded-lg border border-emerald-100">ISO Certified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Doctor & Appointment Details -->
+        <div class="lg:col-span-4 space-y-6">
+            <!-- Appointment Card -->
+            <div class="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm border-b-8 border-b-blue-600">
+                <div class="text-center space-y-4 mb-8">
+                    <div class="relative inline-block">
+                         <img src="@doctor.Image" class="w-32 h-32 rounded-[2.5rem] object-cover mx-auto border-4 border-white shadow-2xl">
+                         <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-12">
+                             <i data-lucide="user-check" class="w-5 h-5"></i>
+                         </div>
+                    </div>
+                    <div>
+                        <h4 class="text-2xl font-semibold text-gray-900 tracking-tight">@doctor.Name</h4>
+                        <p class="text-blue-600 font-semibold uppercase text-[10px] tracking-widest mt-1">@doctor.Specialty Specialist</p>
+                    </div>
+                </div>
+
+                <div class="space-y-6 pt-6 border-t border-gray-50">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400">
+                            <i data-lucide="calendar" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-widest">Scheduled Date</p>
+                            <p class="text-sm font-semibold text-gray-900">@appointment.AppointmentDate.ToString("MMMM dd, yyyy")</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400">
+                            <i data-lucide="clock" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-widest">Selected Slot</p>
+                            <p class="text-sm font-semibold text-gray-900">@appointment.TimeSlot</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                            <i data-lucide="map-pin" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-widest">Physical Venue</p>
+                            <p class="text-sm font-semibold text-gray-900">@doctor.ClinicName</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Card -->
+            <div class="bg-gray-900 p-8 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                    <i data-lucide="building-2" class="w-32 h-32"></i>
+                </div>
+                <div class="relative z-10">
+                    <h4 class="text-xl font-semibold mb-4 tracking-tight">Full Address</h4>
+                    <p class="text-gray-400 text-sm leading-relaxed font-medium mb-8">
+                        @doctor.ClinicAddress
+                    </p>
+                    <a href="https://www.google.com/maps/search/?api=1&query=@Uri.EscapeDataString(doctor.ClinicAddress ?? "")" target="_blank"
+                       class="w-full py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-semibold uppercase tracking-widest text-center block hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-blue-900/40">
+                        Navigate to Destination
+                    </a>
+                </div>
+            </div>
+
+            <!-- Contact Help -->
+            <div class="bg-amber-50 p-6 rounded-[2.5rem] border border-amber-100 text-center">
+                <p class="text-[10px] font-semibold text-amber-600 uppercase tracking-widest mb-2 flex items-center justify-center gap-2">
+                    <i data-lucide="life-buoy" class="w-4 h-4"></i> Support Protocol
+                </p>
+                <p class="text-xs text-amber-800 font-bold">Lost or delayed? Contact the clinic directly at <br/> <span class="text-sm font-semibold mt-1 inline-block">@doctorUser?.PhoneNumber</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .perspective-1000 {
+        perspective: 1000px;
+    }
+</style>

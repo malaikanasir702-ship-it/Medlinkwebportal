@@ -1,0 +1,454 @@
+@model IEnumerable<MedLinkPortal.Areas.Doctor.Models.Appointment>
+@{
+    Layout = "~/Areas/Doctor/Views/Shared/_DocDash.cshtml";
+    ViewData["Title"] = "Appointment Schedule";
+
+    string currentPeriod = ViewBag.CurrentPeriod as string ?? "Week";
+    DateTime currentDate = (DateTime)(ViewBag.CurrentDate ?? DateTime.Today);
+    DateTime startDate = (DateTime)(ViewBag.StartDate ?? DateTime.Today);
+    DateTime endDate = (DateTime)(ViewBag.EndDate ?? DateTime.Today);
+
+    string prevDateStr, nextDateStr;
+    string dateDisplay;
+
+    switch (currentPeriod.ToLower())
+    {
+        case "day":
+            prevDateStr = currentDate.AddDays(-1).ToString("yyyy-MM-dd");
+            nextDateStr = currentDate.AddDays(1).ToString("yyyy-MM-dd");
+            dateDisplay = currentDate.ToString("MMMM dd, yyyy");
+            break;
+        case "month":
+            prevDateStr = currentDate.AddMonths(-1).ToString("yyyy-MM-dd");
+            nextDateStr = currentDate.AddMonths(1).ToString("yyyy-MM-dd");
+            dateDisplay = currentDate.ToString("MMMM yyyy");
+            break;
+        case "week":
+        default:
+            prevDateStr = currentDate.AddDays(-7).ToString("yyyy-MM-dd");
+            nextDateStr = currentDate.AddDays(7).ToString("yyyy-MM-dd");
+            dateDisplay = $"{startDate:MMM dd} - {endDate:MMM dd}, {currentDate.Year}";
+            break;
+    }
+}
+
+<div class="premium-card overflow-hidden reveal bg-white dark:bg-slate-900/50">
+    <div class="p-10 border-b border-slate-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+            <h2 class="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">Appointment Schedule</h2>
+            <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-2 flex items-center">
+                <span class="w-2 h-2 bg-blue-500 rounded-full mr-3 animate-pulse"></span>
+                Real-time consultation queue
+            </p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center bg-slate-50 dark:bg-white/5 p-1.5 rounded-2xl border border-slate-100 dark:border-white/5">
+                <a href="@Url.Action("Schedule", new { period = "Day", date = currentDate.ToString("yyyy-MM-dd") })" 
+                   class="px-5 py-2 text-[10px] font-semibold uppercase tracking-widest transition-all @(currentPeriod == "Day" ? "text-blue-600 bg-white dark:bg-white/10 shadow-sm rounded-xl" : "text-slate-400 hover:text-blue-600")">Day</a>
+                <a href="@Url.Action("Schedule", new { period = "Week", date = currentDate.ToString("yyyy-MM-dd") })" 
+                   class="px-5 py-2 text-[10px] font-semibold uppercase tracking-widest transition-all @(currentPeriod == "Week" ? "text-blue-600 bg-white dark:bg-white/10 shadow-sm rounded-xl" : "text-slate-400 hover:text-blue-600")">Week</a>
+                <a href="@Url.Action("Schedule", new { period = "Month", date = currentDate.ToString("yyyy-MM-dd") })" 
+                   class="px-5 py-2 text-[10px] font-semibold uppercase tracking-widest transition-all @(currentPeriod == "Month" ? "text-blue-600 bg-white dark:bg-white/10 shadow-sm rounded-xl" : "text-slate-400 hover:text-blue-600")">Month</a>
+            </div>
+            <button onclick="openAddAppointmentModal()" class="w-12 h-12 flex items-center justify-center bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl hover:opacity-90 transition-all shadow-xl">
+                <i class="fas fa-plus text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Calendar Nav -->
+    <div class="px-10 py-6 bg-slate-50/50 dark:bg-white/2 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
+        <div class="flex items-center gap-6">
+            <a href="@Url.Action("Schedule", new { period = currentPeriod, date = prevDateStr })" 
+               class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-all"><i class="fas fa-chevron-left text-xs"></i></a>
+            <span class="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-widest">@dateDisplay</span>
+            <a href="@Url.Action("Schedule", new { period = currentPeriod, date = nextDateStr })" 
+               class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-all"><i class="fas fa-chevron-right text-xs"></i></a>
+        </div>
+        <div class="hidden sm:flex items-center gap-2">
+            <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-tighter">System Synchronized</span>
+        </div>
+    </div>
+
+    <!-- Mobile Card View (Visible < md) -->
+    <div class="md:hidden space-y-4">
+        @foreach (var appointment in Model)
+        {
+            var now = DateTime.Now;
+            var isAppointmentTime = now >= appointment.ScheduledTime && now <= appointment.ScheduledTime.AddMinutes(appointment.DurationMinutes);
+            var btnStyle = isAppointmentTime ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400";
+            
+             <div class="premium-card p-5 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                         <div class="w-10 h-10 rounded-xl bg-blue-600/10 text-blue-600 flex items-center justify-center shadow-inner">
+                            <i class="fas fa-clock text-xs"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">@appointment.ScheduledTime.ToString("hh:mm tt")</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">@appointment.DurationMinutes min</div>
+                        </div>
+                    </div>
+                    @{
+                        var statusColor = appointment.Status == "Confirmed" ? "text-emerald-500" :
+                                            appointment.Status == "Pending" ? "text-amber-500" :
+                                            appointment.Status == "Completed" ? "text-blue-500" : "text-red-500";
+                    }
+                    <div class="flex items-center gap-2 @statusColor font-semibold text-[10px] uppercase tracking-widest">
+                        <span class="w-1.5 h-1.5 bg-current rounded-full"></span>
+                        @appointment.Status
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5">
+                    <div class="w-8 h-8 rounded-lg bg-white dark:bg-white/10 flex items-center justify-center text-slate-500 font-semibold text-[10px] border border-slate-200 dark:border-white/5">
+                        @((appointment.Patient?.Name ?? appointment.Patient?.UserName ?? "P").Substring(0, 1))
+                    </div>
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-900 dark:text-white tracking-tight">@(appointment.Patient?.Name ?? appointment.Patient?.UserName ?? "Patient")</div>
+                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">ID: @appointment.Patient?.Id.Substring(0, 6)</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                     <a asp-controller="Doctor" asp-action="Messages" asp-route-patientId="@appointment.PatientId" 
+                       class="h-10 flex items-center justify-center gap-2 rounded-xl text-[10px] font-semibold uppercase tracking-widest @btnStyle hover:opacity-90 transition-all">
+                        <i class="fas @(isAppointmentTime ? "fa-bolt animate-pulse" : "fa-comment-alt") text-[10px]"></i>
+                        @(isAppointmentTime ? "Live" : "Message")
+                    </a>
+                    
+                    <button class="h-10 flex items-center justify-center bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-slate-900 dark:hover:bg-white hover:text-white dark:hover:text-slate-900 transition-all dropdown-toggle" data-bs-toggle="dropdown">
+                        Actions <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end p-2 border-none shadow-2xl glass-panel rounded-2xl min-w-[180px]">
+                        @{
+                            var apptStarted = DateTime.Now >= appointment.ScheduledTime;
+                            var historyLink = apptStarted ? Url.Action("ViewHistory", new { patientId = appointment.PatientId }) : "#";
+                        }
+                        <li><a class="dropdown-item p-3 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-3" href="@historyLink"><i class="fas fa-user-circle text-xs"></i> View Node History</a></li>
+                        
+                        @if (appointment.Status == "Pending")
+                        {
+                            <li><button class="dropdown-item p-3 rounded-xl text-[11px] font-bold text-emerald-500 hover:bg-emerald-50 flex items-center gap-3"><i class="fas fa-check-circle text-xs"></i> Accept Signal</button></li>
+                        }
+                        @if (isAppointmentTime && appointment.Status != "Completed")
+                        {
+                            <li><button class="dropdown-item p-3 rounded-xl text-[11px] font-bold text-blue-500 hover:bg-blue-50 flex items-center gap-3"><i class="fas fa-flag-checkered text-xs"></i> Complete Session</button></li>
+                        }
+
+                        <li><button class="dropdown-item reschedule-btn p-3 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-3" data-bs-toggle="modal" data-bs-target="#rescheduleModal" data-appointment-id="@appointment.Id" data-patient-name="@(appointment.Patient?.Name ?? appointment.Patient?.UserName ?? "Patient")" data-current-time="@appointment.ScheduledTime.ToString("yyyy-MM-ddTHH:mm")"><i class="fas fa-clock-rotate-left text-xs"></i> Reschedule</button></li>
+                        <li><hr class="my-2 border-slate-100 dark:border-white/5"></li>
+                        <li><button onclick="deleteAppointment(@appointment.Id)" class="dropdown-item p-3 rounded-xl text-[11px] font-bold text-red-500 hover:bg-red-50 flex items-center gap-3"><i class="fas fa-ban text-xs"></i> Terminate</button></li>
+                    </ul>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="overflow-x-auto hidden md:block">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50/30 dark:bg-transparent">
+                    <th class="px-10 py-6 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Appointment Slot</th>
+                    <th class="px-6 py-6 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Patient Name</th>
+                    <th class="px-6 py-6 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Classification</th>
+                    <th class="px-6 py-6 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Status</th>
+                    <th class="px-10 py-6 text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-right">Interactions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-white/5">
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="py-24 text-center">
+                            <div class="inline-flex items-center justify-center w-20 h-20 bg-slate-50 dark:bg-white/5 rounded-[32px] mb-6">
+                                <i class="fas fa-calendar-minus text-slate-200 text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-400 uppercase tracking-widest">No Active Sessions</h3>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var appointment in Model)
+                    {
+                        <tr class="group hover:bg-slate-50/50 dark:hover:bg-white/2 transition-all">
+                            <td class="px-10 py-8">
+                                <div class="flex items-center gap-5">
+                                    <div class="w-12 h-12 rounded-2xl bg-blue-600/10 text-blue-600 flex items-center justify-center shadow-inner">
+                                        <i class="fas fa-clock text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">@appointment.ScheduledTime.ToString("hh:mm tt")</div>
+                                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">@appointment.DurationMinutes min session</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-8">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 font-semibold text-xs border border-slate-200 dark:border-white/5">
+                                        @((appointment.Patient?.Name ?? appointment.Patient?.UserName ?? "P").Substring(0, 1))
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">@(appointment.Patient?.Name ?? appointment.Patient?.UserName ?? "Patient")</div>
+                                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">ID: @appointment.Patient?.Id.Substring(0, 8)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-8">
+                                @{
+                                    var typeColor = appointment.ConsultationType == "Emergency" ? "text-red-500 bg-red-500/10 border-red-500/20" :
+                                                    appointment.ConsultationType == "Follow-up" ? "text-amber-500 bg-amber-500/10 border-amber-500/20" :
+                                                    "text-blue-500 bg-blue-500/10 border-blue-500/20";
+                                }
+                                <span class="px-3 py-1.5 @typeColor border text-[9px] font-semibold rounded-lg uppercase tracking-widest">
+                                    @appointment.ConsultationType
+                                </span>
+                            </td>
+                            <td class="px-6 py-8">
+                                @{
+                                    var statusColor = appointment.Status == "Confirmed" ? "text-emerald-500" :
+                                                      appointment.Status == "Pending" ? "text-amber-500" :
+                                                      appointment.Status == "Completed" ? "text-blue-500" : "text-red-500";
+                                }
+                                <div class="flex items-center gap-3 @statusColor font-semibold text-[10px] uppercase tracking-widest">
+                                    <span class="w-2 h-2 bg-current rounded-full"></span>
+                                    @appointment.Status
+                                </div>
+                            </td>
+                            <td class="px-10 py-8 text-right">
+                                <div class="flex items-center justify-end gap-3">
+                                    @{
+                                        var now = DateTime.Now;
+                                        var isAppointmentTime = now >= appointment.ScheduledTime && now <= appointment.ScheduledTime.AddMinutes(appointment.DurationMinutes);
+                                        var btnStyle = isAppointmentTime ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400";
+                                    }
+                                    <a asp-controller="Doctor" asp-action="Messages" asp-route-patientId="@appointment.PatientId" 
+                                       class="h-10 px-5 flex items-center gap-2 rounded-xl text-[10px] font-semibold uppercase tracking-widest @btnStyle hover:opacity-90 transition-all">
+                                        <i class="fas @(isAppointmentTime ? "fa-bolt animate-pulse" : "fa-comment-alt") text-[10px]"></i>
+                                        @(isAppointmentTime ? "Live" : "Message")
+                                    </a>
+                                    <div class="dropdown">
+                                        <button class="w-10 h-10 flex items-center justify-center bg-slate-50 dark:bg-white/5 text-slate-400 hover:text-blue-600 rounded-xl transition-all" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v text-[10px]"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end p-2 border-none shadow-2xl glass-panel rounded-2xl min-w-[180px]">
+                                            @{
+                                                var apptStarted = DateTime.Now >= appointment.ScheduledTime;
+                                                var historyLink = apptStarted ? Url.Action("ViewHistory", new { patientId = appointment.PatientId }) : "#";
+                                            }
+                                            <li><a class="dropdown-item p-3 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-3" href="@historyLink"><i class="fas fa-user-circle text-xs"></i> View Node History</a></li>
+                                            
+                                            @if (appointment.Status == "Pending")
+                                            {
+                                                <li><button class="dropdown-item p-3 rounded-xl text-[11px] font-bold text-emerald-500 hover:bg-emerald-50 flex items-center gap-3"><i class="fas fa-check-circle text-xs"></i> Accept Signal</button></li>
+                                            }
+                                            @if (isAppointmentTime && appointment.Status != "Completed")
+                                            {
+                                                <li><button class="dropdown-item p-3 rounded-xl text-[11px] font-bold text-blue-500 hover:bg-blue-50 flex items-center gap-3"><i class="fas fa-flag-checkered text-xs"></i> Complete Session</button></li>
+                                            }
+
+                                            <li><button class="dropdown-item reschedule-btn p-3 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-3" data-bs-toggle="modal" data-bs-target="#rescheduleModal" data-appointment-id="@appointment.Id" data-patient-name="@(appointment.Patient?.Name ?? appointment.Patient?.UserName ?? "Patient")" data-current-time="@appointment.ScheduledTime.ToString("yyyy-MM-ddTHH:mm")"><i class="fas fa-clock-rotate-left text-xs"></i> Reschedule Event</button></li>
+                                            <li><hr class="my-2 border-slate-100 dark:border-white/5"></li>
+                                            <li><button onclick="deleteAppointment(@appointment.Id)" class="dropdown-item p-3 rounded-xl text-[11px] font-bold text-red-500 hover:bg-red-50 flex items-center gap-3"><i class="fas fa-ban text-xs"></i> Terminate Link</button></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Operations Summary -->
+    <div class="p-10 bg-slate-50/50 dark:bg-white/2 border-t border-slate-100 dark:border-white/5">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-10 text-center sm:text-left">
+            <div>
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Total Booked</p>
+                <p class="text-3xl font-semibold text-slate-900 dark:text-white tracking-tighter">@Model.Count()</p>
+            </div>
+            <div class="sm:border-l border-slate-200 dark:border-white/10 sm:pl-10">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Cycle Completed</p>
+                <p class="text-3xl font-semibold text-blue-600 tracking-tighter">@Model.Count(a => a.Status == "Completed")</p>
+            </div>
+            <div class="sm:border-l border-slate-200 dark:border-white/10 sm:pl-10">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Live Pending</p>
+                <p class="text-3xl font-semibold text-amber-500 tracking-tighter">@Model.Count(a => a.Status == "Pending")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reschedule Modal: Premium View -->
+<div class="modal fade" id="rescheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-none shadow-2xl glass-panel rounded-[40px] overflow-hidden">
+            <div class="p-10 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/2">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-semibold text-slate-900 dark:text-white tracking-tight">Loop Calibration</h3>
+                        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Reschedule Consultation Node</p>
+                    </div>
+                    <button type="button" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <form asp-action="Reschedule" method="post" class="p-10 space-y-8">
+                <input type="hidden" id="rescheduleId" name="id" />
+                <div class="space-y-3">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Target Node</label>
+                    <div class="flex items-center gap-4 p-5 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="patientNameDisplay" class="text-sm font-semibold text-slate-900 dark:text-white">Patient Name</span>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <label for="scheduledTime" class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">New Temporal Slot</label>
+                    <input type="datetime-local" class="premium-input w-full" id="scheduledTime" name="scheduledTime" required>
+                </div>
+                <div class="pt-6 flex gap-4">
+                    <button type="button" class="flex-1 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-widest hover:text-slate-900 dark:hover:text-white transition-all" data-bs-dismiss="modal">Abort</button>
+                    <button type="submit" class="flex-[2] py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[11px] font-semibold uppercase tracking-widest shadow-xl active:scale-95 transition-all">
+                        Commit Slot
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Appointment -->
+<div class="modal fade" id="addAppointmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-none shadow-2xl glass-panel rounded-[40px] overflow-hidden">
+            <div class="p-10 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/2">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-semibold text-slate-900 dark:text-white tracking-tight">Initiate session</h3>
+                        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Schedule Consultation Node</p>
+                    </div>
+                    <button type="button" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <form id="addAppointmentForm" class="p-10 space-y-8">
+                <div class="space-y-3">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Patient Node</label>
+                    <select id="ajaxPatientSelect" name="PatientId" class="premium-input w-full" required>
+                        <option value="">Querying Active Nodes...</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Temporal Slot</label>
+                        <input type="datetime-local" name="ScheduledTime" class="premium-input w-full" required />
+                    </div>
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Duration (Min)</label>
+                        <input type="number" name="DurationMinutes" class="premium-input w-full" value="20" required />
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Classification</label>
+                    <select name="ConsultationType" class="premium-input w-full">
+                        <option value="Initial">Initial Consultation</option>
+                        <option value="Follow-up">Follow-up Analysis</option>
+                        <option value="Emergency">Emergency Protocol</option>
+                    </select>
+                </div>
+                <div class="pt-6 flex gap-4">
+                    <button type="button" class="flex-1 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-widest hover:text-slate-900 dark:hover:text-white transition-all" data-bs-dismiss="modal">Abort</button>
+                    <button type="submit" class="flex-[2] py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[11px] font-semibold uppercase tracking-widest shadow-xl active:scale-95 transition-all">
+                        Commit Slot
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const rescheduleModal = document.getElementById('rescheduleModal');
+            if (rescheduleModal) {
+                rescheduleModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const appointmentId = button.getAttribute('data-appointment-id');
+                    const patientName = button.getAttribute('data-patient-name');
+                    const currentTime = button.getAttribute('data-current-time');
+
+                    const idInput = rescheduleModal.querySelector('#rescheduleId');
+                    const nameDisplay = rescheduleModal.querySelector('#patientNameDisplay');
+                    const timeInput = rescheduleModal.querySelector('#scheduledTime');
+
+                    idInput.value = appointmentId;
+                    nameDisplay.textContent = patientName;
+                    timeInput.value = currentTime;
+                });
+            }
+        });
+
+        async function openAddAppointmentModal() {
+            const modalElement = document.getElementById('addAppointmentModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            modal.show();
+            
+            try {
+                const response = await fetch('/Doctor/Doctor/GetPatientsAjax');
+                const patients = await response.json();
+                const select = document.getElementById('ajaxPatientSelect');
+                select.innerHTML = '<option value="">Select Target Patient</option>';
+                patients.forEach(p => {
+                    select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+                });
+            } catch (error) {
+                console.error('Core sync failure:', error);
+            }
+        }
+
+        document.getElementById('addAppointmentForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            try {
+                const response = await fetch('/Doctor/Doctor/CreateAppointmentAjax', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ""
+                    },
+                    body: new URLSearchParams(formData).toString()
+                });
+                const result = await response.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    await PremiumModal.error('Scheduling failed: ' + (result.errors ? result.errors.join(', ') : 'Temporal constraints mismatch'), 'Protocol Error');
+                }
+            } catch (error) {
+                console.error('Schedule commit failure:', error);
+            }
+        });
+
+        async function deleteAppointment(id) {
+            const confirmed = await PremiumModal.confirm('Permanently terminate this consultation link?', 'Terminate Session');
+            if (!confirmed) return;
+            try {
+                const response = await fetch(`/Doctor/Doctor/DeleteAppointmentAjax?id=${id}`, { method: 'POST' });
+                const result = await response.json();
+                if (result.success) {
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('Session termination error:', error);
+            }
+        }
+    </script>
+}

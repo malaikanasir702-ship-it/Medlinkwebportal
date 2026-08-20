@@ -1,0 +1,220 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+
+@{
+    ViewData["Title"] = "Plan Your Journey";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<!-- Lucide Icons Script -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<div class="min-h-[calc(100vh-100px)] flex flex-col lg:flex-row gap-8 pb-10">
+    
+    <!-- Left Column: Form Section (Wider) -->
+    <div class="w-full lg:w-2/3 order-2 lg:order-1">
+        
+        <div class="mb-8">
+            <a href="@Url.Action("InboundLanding")" class="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors mb-4 font-medium group">
+                <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
+                <span>Back to Overview</span>
+            </a>
+            <h1 class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">
+                Plan Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Medical Journey</span>
+            </h1>
+            <p class="text-slate-500 font-medium text-lg">Tell us your medical needs and travel preferences.</p>
+        </div>
+
+        <form asp-action="RequestInbound" method="post" class="space-y-8">
+            
+            <!-- Section 1: Personal Details -->
+            <div class="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-slate-200/50">
+                <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                    <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">Personal Details</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Current Country</label>
+                        <div class="relative">
+                            <i data-lucide="globe" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <select name="SourceCountry" class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-bold text-slate-700 appearance-none" required>
+                                <option value="" disabled selected>Select Region</option>
+                                <option value="USA">USA</option>
+                                <option value="UK">UK</option>
+                                <option value="UAE">UAE / Gulf</option>
+                                <option value="Europe">Europe</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Travel Party</label>
+                        <div class="relative">
+                            <i data-lucide="users" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <select name="TravelWithFamily" class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-bold text-slate-700 appearance-none">
+                                <option value="false">Solo Traveler</option>
+                                <option value="true">With Family</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Medical Requirements -->
+            <div class="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-slate-200/50">
+                <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                    <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                        <i data-lucide="stethoscope" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">Medical Requirements</h3>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Treatment Needed</label>
+                        <div class="relative">
+                            <i data-lucide="activity" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input type="text" name="TreatmentType" placeholder="e.g. Hair Transplant, Dental Implant" class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-bold text-slate-900 placeholder:font-medium placeholder:text-slate-400" required />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Preferred City</label>
+                            <div class="relative">
+                                <i data-lucide="map-pin" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                                <select name="PreferredCity" class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-bold text-slate-700 appearance-none">
+                                    <option value="Any">Any Recommendation</option>
+                                    <option value="Lahore">Lahore</option>
+                                    <option value="Karachi">Karachi</option>
+                                    <option value="Islamabad">Islamabad</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Budget Range</label>
+                            <div class="relative">
+                                <i data-lucide="dollar-sign" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                                <select name="BudgetRange" class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-bold text-slate-700 appearance-none">
+                                    <option value="$1k-5k">$1,000 - $5,000</option>
+                                    <option value="$5k-10k">$5,000 - $10,000</option>
+                                    <option value="$10k+">$10,000+</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Medical Reports Link</label>
+                        <div class="relative">
+                            <i data-lucide="link" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input type="url" name="MedicalReportsUrl" placeholder="https://drive.google.com/..." class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-bold text-slate-900 placeholder:font-medium placeholder:text-slate-400" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Tourism Preferences -->
+            <div class="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-slate-200/50">
+                <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                    <div class="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center text-sky-600">
+                        <i data-lucide="mountain-snow" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">Tourism Interests (Optional)</h3>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    @foreach (var (value, label, icon) in new[] { 
+                        ("Hunza", "Hunza Valley", "mountain"), 
+                        ("Murree", "Murree Hills", "rss"),
+                        ("LahoreHeritage", "Lahore Heritage", "landmark"),
+                        ("Islamabad", "Islamabad City", "building-2")
+                    })
+                    {
+                        <label class="relative group cursor-pointer">
+                            <input type="checkbox" name="InterestedTourLocations" value="@value" class="peer sr-only" />
+                            <div class="flex items-center gap-3 p-4 rounded-2xl border-2 border-slate-100 bg-slate-50/50 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 peer-checked:text-blue-900 hover:border-blue-200 hover:bg-white">
+                                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-slate-400 shadow-sm peer-checked:text-blue-600 peer-checked:shadow-blue-100">
+                                    <i data-lucide="@icon" class="w-5 h-5"></i>
+                                </div>
+                                <span class="font-bold text-slate-600 peer-checked:text-blue-800">@label</span>
+                            </div>
+                            <div class="absolute top-4 right-4 text-blue-600 opacity-0 peer-checked:opacity-100 transition-opacity">
+                                <i data-lucide="check-circle-2" class="w-5 h-5 fill-blue-100"></i>
+                            </div>
+                        </label>
+                    }
+                </div>
+
+                <div class="space-y-2">
+                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Additional Notes</label>
+                     <textarea name="AdditionalNotes" rows="3" class="w-full px-4 py-4 rounded-2xl bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium placeholder:text-slate-400" placeholder="Dietary restrictions, special needs, etc..."></textarea>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-lg uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl hover:shadow-2xl hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3">
+                <span>Submit Request</span>
+                <i data-lucide="arrow-right" class="w-6 h-6"></i>
+            </button>
+
+
+        </form>
+    </div>
+
+    <!-- Right Column: Doctor Visual (Narrower) -->
+    <div class="hidden lg:block w-1/3 order-1 lg:order-2">
+        <div class="sticky top-24">
+            <div class="relative h-[700px] rounded-[48px] overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 border border-slate-100 shadow-2xl">
+                 
+                 <!-- Background Elements -->
+                 <div class="absolute top-0 right-0 w-80 h-80 bg-blue-200/30 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
+                 <div class="absolute bottom-0 left-0 w-80 h-80 bg-indigo-200/30 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2"></div>
+
+                 <!-- Doctor Image -->
+                 <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=2664&auto=format&fit=crop" 
+                      class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[160%] h-auto object-cover object-top mask-image-gradient-b transition-transform duration-1000 hover:scale-105" 
+                      style="mask-image: linear-gradient(to top, transparent 0%, black 20%); -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);"
+                      alt="Doctor Portrait" />
+
+                 <!-- Content Overlay -->
+                 <div class="absolute top-10 left-8 right-8 z-10">
+                     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-blue-900 text-xs font-bold uppercase tracking-widest mb-6">
+                         <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                         World-Class Care
+                     </div>
+                     <h2 class="text-3xl font-black text-slate-900 leading-tight mb-4">
+                         Your Health, <br/>Our Priority.
+                     </h2>
+                 </div>
+
+                 <!-- Review Card Floating -->
+                 <div class="absolute bottom-10 left-6 right-6 bg-white/80 backdrop-blur-xl p-5 rounded-[24px] border border-white/60 shadow-lg shadow-blue-900/10">
+                     <div class="flex items-center gap-4 mb-3">
+                         <div class="flex -space-x-3">
+                             <img src="https://i.pravatar.cc/100?img=1" class="w-8 h-8 rounded-full border-2 border-white" />
+                             <img src="https://i.pravatar.cc/100?img=5" class="w-8 h-8 rounded-full border-2 border-white" />
+                             <img src="https://i.pravatar.cc/100?img=8" class="w-8 h-8 rounded-full border-2 border-white" />
+                             <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold">+2k</div>
+                         </div>
+                         <div class="flex gap-1 text-yellow-400">
+                             <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                             <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                             <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                             <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                             <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                         </div>
+                     </div>
+                     <p class="text-xs font-bold text-slate-800">Trusted by thousands of patients worldwide.</p>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>

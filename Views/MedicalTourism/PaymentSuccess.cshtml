@@ -1,0 +1,84 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+
+@{
+    ViewData["Title"] = "Payment Success";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    var request = ViewBag.Request as MedLinkPortal.Models.MedicalTourismRequest;
+}
+
+<div class="max-w-4xl mx-auto py-12 text-center space-y-12">
+    
+    <div class="relative inline-block">
+        <div class="absolute inset-0 bg-blue-100 rounded-full blur-3xl opacity-50 scale-150 animate-pulse"></div>
+        <div class="w-28 h-28 bg-blue-600 rounded-full flex items-center justify-center mx-auto relative shadow-2xl shadow-blue-200 animate-in zoom-in duration-500">
+            <i data-lucide="check" class="w-14 h-14 text-white"></i>
+        </div>
+    </div>
+
+    <div>
+        <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tighter">Investment Confirmed.</h1>
+        <p class="text-xl text-slate-500 font-medium max-w-xl mx-auto leading-relaxed">
+            Your premium medical journey project has been initiated. Expect world-class care and seamless logistics.
+        </p>
+    </div>
+
+    <div class="bg-white rounded-[48px] p-10 md:p-14 shadow-2xl shadow-slate-200/50 border border-slate-100/50 text-left relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+        
+        <div class="relative z-10">
+            <div class="flex flex-col md:flex-row justify-between md:items-center gap-8 border-b border-slate-100 pb-10 mb-10">
+                <div class="space-y-1">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Transaction Hash</p>
+                    <p class="text-lg font-black text-slate-900 font-mono tracking-tight">@ViewBag.SessionId</p>
+                </div>
+                <div class="text-left md:text-right space-y-1">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Total Disbursed</p>
+                    <p class="text-3xl font-black text-blue-600 tracking-tighter">PKR @(request?.AssignedPackage?.TotalPrice.ToString("N0") ?? "0")</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="space-y-6">
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Next Milestones</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                                <i data-lucide="user-check" class="w-4 h-4"></i>
+                            </div>
+                            <p class="text-slate-600 font-medium text-sm leading-relaxed">Personal Concierge will finalize details via secure channel in <span class="text-slate-900 font-black">24h</span>.</p>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                                <i data-lucide="mail" class="w-4 h-4"></i>
+                            </div>
+                            <p class="text-slate-600 font-medium text-sm leading-relaxed">Medical Visa Invitation & Hospital Proofs will be dispatched to your inbox.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 rounded-[32px] p-8 border border-slate-100 flex flex-col justify-center">
+                    <h4 class="text-sm font-black text-slate-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="info" class="w-4 h-4 text-blue-500"></i>
+                        Ready for departure?
+                    </h4>
+                    <p class="text-slate-500 text-xs font-medium leading-relaxed">
+                        Ensure your travel documents are at hand. Our team handles everything else—from pickup to recovery.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-6 justify-center">
+        <a href="@Url.Action("DownloadInvoice", new { id = request?.Id })" class="px-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-blue-600 hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center justify-center gap-3">
+            <i data-lucide="download" class="w-4 h-4"></i> Receipt & Invoice
+        </a>
+        <a href="@Url.Action("Tracking")" class="px-10 py-5 bg-white border border-slate-200 text-slate-700 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all shadow-sm">
+            View Journey Tracker
+        </a>
+    </div>
+
+</div>
+
+<script>
+    lucide.createIcons();
+</script>

@@ -1,0 +1,183 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Neural Calibration";
+    ViewData["HeaderTitle"] = "Neural Core V2.4";
+    ViewData["HeaderSubtitle"] = "Initialize your deep-learning health profile.";
+}
+
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <form asp-action="ProcessHealthAnalysis" method="post" class="relative">
+        
+        <!-- Header Section -->
+        <div class="mb-10 text-center relative z-10">
+            <div class="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-full text-[10px] font-semibold uppercase tracking-[0.2em] mb-4 text-blue-500">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                System Calibration
+            </div>
+            <h2 class="text-4xl md:text-5xl font-semibold text-slate-900 tracking-tight mb-4">
+                Neural <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Input Matrix</span>
+            </h2>
+            <p class="text-slate-500 font-medium max-w-xl mx-auto text-sm md:text-base">
+                Configure your biometric parameters. Our neural engine uses this data to generate a precise, multi-dimensional health analysis.
+            </p>
+        </div>
+
+        <!-- Bento Grid Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 relative z-10">
+            
+            <!-- Biometrics Card (Span 8) -->
+            <div class="col-span-12 md:col-span-8 bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative group overflow-hidden hover:shadow-2xl transition-all duration-300">
+                <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i data-lucide="ruler" class="w-32 h-32 text-blue-600"></i>
+                </div>
+                
+                <h3 class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+                    <i data-lucide="scan-face" class="text-blue-500 w-5 h-5"></i>
+                    Core Biometrics
+                </h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Age</label>
+                        <div class="relative">
+                            <input type="number" name="Age" placeholder="28" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-semibold text-xl text-slate-900 placeholder:text-slate-300 text-center" required />
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">YRS</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Weight</label>
+                        <div class="relative">
+                            <input type="number" name="Weight" step="0.1" placeholder="72.5" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-semibold text-xl text-slate-900 placeholder:text-slate-300 text-center" required />
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">KG</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Height</label>
+                        <div class="relative">
+                            <input type="number" name="Height" placeholder="175" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-semibold text-xl text-slate-900 placeholder:text-slate-300 text-center" required />
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">CM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gender & Activity (Span 4) -->
+            <div class="col-span-12 md:col-span-4 bg-slate-900 text-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-900/20 relative group overflow-hidden hover:scale-[1.02] transition-transform duration-300">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
+                
+                <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2 relative z-10">
+                    <i data-lucide="activity" class="text-blue-400 w-5 h-5"></i>
+                    Lifestyle Force
+                </h3>
+
+                <div class="space-y-5 relative z-10">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Activity Level</label>
+                        <select name="ActivityLevel" class="w-full px-5 py-3 bg-white/10 border border-white/10 rounded-2xl text-white font-bold focus:bg-white/20 outline-none transition-all appearance-none cursor-pointer hover:bg-white/15">
+                            <option value="sedentary" class="text-slate-900">Sedentary (Low)</option>
+                            <option value="moderate" class="text-slate-900" selected>Moderate (Medium)</option>
+                            <option value="active" class="text-slate-900">High Active (High)</option>
+                            <option value="elite" class="text-slate-900">Elite Athlete (Peak)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Gender</label>
+                        <div class="flex gap-2">
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="Gender" value="Male" class="peer hidden" checked />
+                                <div class="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-center text-xs font-bold text-slate-300 peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-400 transition-all hover:bg-white/10">Male</div>
+                            </label>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="Gender" value="Female" class="peer hidden" />
+                                <div class="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-center text-xs font-bold text-slate-300 peer-checked:pink-500 peer-checked:bg-pink-500 peer-checked:text-white peer-checked:border-pink-400 transition-all hover:bg-white/10">Female</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diet Preference (Span 4) -->
+            <div class="col-span-12 md:col-span-4 bg-emerald-50 rounded-[2.5rem] p-8 border border-emerald-100 relative group overflow-hidden hover:shadow-lg hover:shadow-emerald-100/50 transition-all duration-300">
+                <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                    <i data-lucide="leaf" class="w-24 h-24 text-emerald-600"></i>
+                </div>
+
+                <h3 class="text-lg font-semibold text-emerald-900 mb-6 flex items-center gap-2">
+                    <i data-lucide="utensils" class="text-emerald-600 w-5 h-5"></i>
+                    Fuel Source
+                </h3>
+                
+                <div class="space-y-2 relative z-10">
+                    <label class="block cursor-pointer group/option">
+                        <input type="radio" name="DietPreference" value="balanced" class="peer hidden" checked />
+                        <div class="p-3 bg-white rounded-xl border border-emerald-100 flex items-center gap-3 peer-checked:ring-2 peer-checked:ring-emerald-500 transition-all">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600"><i data-lucide="scale" class="w-4 h-4"></i></div>
+                            <span class="text-xs font-bold text-emerald-900">Balanced / All</span>
+                        </div>
+                    </label>
+                    <label class="block cursor-pointer group/option">
+                        <input type="radio" name="DietPreference" value="vegetarian" class="peer hidden" />
+                        <div class="p-3 bg-white rounded-xl border border-emerald-100 flex items-center gap-3 peer-checked:ring-2 peer-checked:ring-emerald-500 transition-all">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600"><i data-lucide="carrot" class="w-4 h-4"></i></div>
+                            <span class="text-xs font-bold text-emerald-900">Vegetarian</span>
+                        </div>
+                    </label>
+                    <div class="mt-4 text-center">
+                        <select name="DietPreferenceDetailed" class="text-[10px] font-bold text-emerald-600 bg-transparent border-none outline-none cursor-pointer hover:underline">
+                            <option>More options (Keto, Paleo...)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Goals & Symptoms (Span 8) -->
+            <div class="col-span-12 md:col-span-8 bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 relative group hover:shadow-2xl transition-all duration-300 flex flex-col justify-between">
+                <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                            <i data-lucide="target" class="text-indigo-500 w-5 h-5"></i>
+                            Primary Goals
+                        </h3>
+                        <textarea name="HealthGoals" rows="3" placeholder="e.g. Better sleep, muscle gain, stress reduction..." class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium text-sm text-slate-700 resize-none"></textarea>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                            <i data-lucide="stethoscope" class="text-rose-500 w-5 h-5"></i>
+                            Symptoms
+                        </h3>
+                        <textarea name="Symptoms" rows="3" placeholder="e.g. Lower back pain, fatigue, headaches..." class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all font-medium text-sm text-slate-700 resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Submit Button (Full Width) -->
+            <div class="col-span-12">
+                <button type="submit" class="w-full group relative bg-slate-900 text-white rounded-[2rem] p-6 overflow-hidden shadow-2xl shadow-blue-900/20 hover:shadow-blue-900/40 transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all"></div>
+                    
+                    <div class="relative z-10 flex items-center justify-between px-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:bg-white group-hover:text-blue-600 transition-all">
+                                <i data-lucide="sparkles" class="w-6 h-6 animate-pulse"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="text-lg font-semibold tracking-tight">Initialize Neural Analysis</h4>
+                                <p class="text-xs text-slate-400 font-medium group-hover:text-blue-100">Process inputs • Validate Vitals • Generate Report</p>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full border-2 border-white/20 flex items-center justify-center group-hover:border-white group-hover:bg-white group-hover:text-blue-600 transition-all">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+        </div>
+    </form>
+</div>
+

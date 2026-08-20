@@ -1,0 +1,134 @@
+@model MedLinkPortal.Models.PharmacyProfileViewModel
+@{
+    ViewData["Title"] = "Pharmacy Profile";
+    Layout = "~/Views/Shared/_PharmacistLayout.cshtml";
+}
+
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-black text-slate-900">Pharmacy Profile</h1>
+        <p class="text-slate-500">Manage your account and pharmacy details.</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-6 bg-emerald-50 text-emerald-600 px-4 py-3 rounded-xl border border-emerald-100 flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+            <span class="font-medium">@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    <form asp-action="Profile" method="post" enctype="multipart/form-data" class="space-y-6">
+        @Html.AntiForgeryToken()
+
+        <!-- Profile Card -->
+        <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-xl shadow-slate-200/50">
+            <div class="flex flex-col md:flex-row gap-8 items-start">
+                
+                <!-- Image Upload -->
+                <div class="w-full md:w-auto flex flex-col items-center gap-4">
+                    <div class="relative group">
+                        <img src="@Model.ProfileImageUrl" alt="Profile" 
+                             class="w-32 h-32 rounded-full object-cover border-4 border-slate-50 shadow-lg group-hover:brightness-90 transition-all"
+                             id="profilePreview">
+                        <label for="imageUpload" class="absolute bottom-0 right-0 w-10 h-10 bg-emerald-600 rounded-full text-white flex items-center justify-center cursor-pointer hover:bg-emerald-700 transition-colors shadow-lg">
+                            <i data-lucide="camera" class="w-5 h-5"></i>
+                        </label>
+                        <input type="file" id="imageUpload" name="ProfileImage" class="hidden" accept="image/*" onchange="previewImage(this)">
+                    </div>
+                    <p class="text-xs text-slate-400 font-medium">Allowed *.jpeg, *.jpg, *.png</p>
+                </div>
+
+                <!-- Fields -->
+                <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    
+                    <div class="col-span-2">
+                         <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <i data-lucide="user" class="w-5 h-5 text-emerald-500"></i>
+                            Personal Information
+                         </h3>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="FirstName" class="text-sm font-bold text-slate-700"></label>
+                        <input asp-for="FirstName" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900">
+                        <span asp-validation-for="FirstName" class="text-xs text-rose-500 font-bold"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="LastName" class="text-sm font-bold text-slate-700"></label>
+                        <input asp-for="LastName" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900">
+                        <span asp-validation-for="LastName" class="text-xs text-rose-500 font-bold"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="Email" class="text-sm font-bold text-slate-700"></label>
+                        <div class="relative">
+                            <input asp-for="Email" readonly class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed font-medium">
+                            @if(Model.IsEmailVerified) {
+                                <i data-lucide="badge-check" class="w-5 h-5 text-emerald-500 absolute right-3 top-3.5" title="Verified"></i>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="PhoneNumber" class="text-sm font-bold text-slate-700"></label>
+                        <input asp-for="PhoneNumber" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900">
+                        <span asp-validation-for="PhoneNumber" class="text-xs text-rose-500 font-bold"></span>
+                    </div>
+
+                    <div class="col-span-2 mt-4">
+                         <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <i data-lucide="building-2" class="w-5 h-5 text-emerald-500"></i>
+                            Pharmacy Details
+                         </h3>
+                    </div>
+
+                    <div class="col-span-2 space-y-2">
+                        <label asp-for="Workplace" class="text-sm font-bold text-slate-700"></label>
+                        <input asp-for="Workplace" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900 placeholder:text-slate-400" placeholder="e.g. MedLink Central Pharmacy">
+                        <span asp-validation-for="Workplace" class="text-xs text-rose-500 font-bold"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="City" class="text-sm font-bold text-slate-700"></label>
+                        <input asp-for="City" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900">
+                         <span asp-validation-for="City" class="text-xs text-rose-500 font-bold"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="ResidentialAddress" class="text-sm font-bold text-slate-700"></label>
+                        <input asp-for="ResidentialAddress" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900">
+                        <span asp-validation-for="ResidentialAddress" class="text-xs text-rose-500 font-bold"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="pt-8 mt-8 border-t border-slate-100 flex justify-end gap-3">
+                <button type="reset" class="px-6 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-8 py-3 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-95">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profilePreview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

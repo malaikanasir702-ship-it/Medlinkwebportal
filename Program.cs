@@ -212,11 +212,14 @@ else if (System.IO.File.Exists(Path.Combine(builder.Environment.ContentRootPath,
 
 var app = builder.Build();
 
-// Forwarded Headers
-app.UseForwardedHeaders(new ForwardedHeadersOptions
+// Forwarded Headers (Required for Railway / reverse proxies so HTTPS scheme is detected properly)
+var forwardedHeadersOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
-});
+};
+forwardedHeadersOptions.KnownNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeadersOptions);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

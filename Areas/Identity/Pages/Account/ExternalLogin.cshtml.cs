@@ -92,7 +92,7 @@ namespace MedLinkPortal.Areas.Identity.Pages.Account
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider}.",
                     info.Principal.Identity.Name, info.LoginProvider);
-                return RedirectToLoginDestination(returnUrl);
+                return await RedirectToLoginDestinationAsync(returnUrl);
             }
 
             if (result.IsLockedOut)
@@ -135,7 +135,7 @@ namespace MedLinkPortal.Areas.Identity.Pages.Account
                 if (addLoginResult.Succeeded || addLoginResult.Errors.All(e => e.Code == "LoginAlreadyAssociated"))
                 {
                     await _signInManager.SignInAsync(existingUser, isPersistent: false, info.LoginProvider);
-                    return RedirectToLoginDestination(returnUrl);
+                    return await RedirectToLoginDestinationAsync(returnUrl, existingUser);
                 }
                 ModelState.AddModelError(string.Empty, "This Google account is already linked to a different email.");
                 ReturnUrl           = returnUrl;
@@ -200,15 +200,59 @@ namespace MedLinkPortal.Areas.Identity.Pages.Account
             await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
 
             _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
-            return RedirectToLoginDestination(returnUrl);
+            return await RedirectToLoginDestinationAsync(returnUrl, user);
         }
 
         // ── Helper ────────────────────────────────────────────────────────
-        private IActionResult RedirectToLoginDestination(string returnUrl)
+        private async Task<IActionResult> RedirectToLoginDestinationAsync(string returnUrl, ApplicationUser user = null)
         {
+            if (user == null)
+            {
+                var info = await _signInManager.GetExternalLoginInfoAsync();
+                if (info != null)
+                {
+                    user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                    if (user == null)
+                    {
+                        var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            user = await _userManager.FindByEmailAsync(email);
+                        }
+                    }
+                }
+            }
+
+            if (user != null)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (roles.Contains("Admin"))
+                {
+                    return LocalRedirect("~/Admin/Admin/Index");
+                }
+                if (roles.Contains("Doctor"))
+                {
+                    return LocalRedirect("~/Doctor/Doctor/DoctorDashBoard");
+                }
+                if (roles.Contains("Pharmacist"))
+                {
+                    return LocalRedirect("~/Pharmacy/Dashboard");
+                }
+                if (roles.Contains("LabAdmin"))
+                {
+                    return LocalRedirect("~/Lab/Dashboard");
+                }
+                if (roles.Contains("Patient"))
+                {
+                    return LocalRedirect("~/Dashboard/Index");
+                }
+            }
+
             if (Url.IsLocalUrl(returnUrl) && returnUrl != "/")
                 return LocalRedirect(returnUrl);
-            return LocalRedirect("~/");
+
+            return LocalRedirect("~/Dashboard/Index");
         }
     }
 }

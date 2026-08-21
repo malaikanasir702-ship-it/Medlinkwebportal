@@ -67,7 +67,7 @@ namespace MedLinkPortal.Controllers.Api
 
                 if (request.Role == "Doctor")
                 {
-                    // Create doctor record
+                    // Create doctor record — use existing context, no extra scope needed
                     var doctor = new MedLinkPortal.Models.Doctor
                     {
                         Name = $"{request.FirstName} {request.LastName}",
@@ -83,13 +83,8 @@ namespace MedLinkPortal.Controllers.Api
                         Description = "New doctor profile pending verification.",
                         Languages = "English"
                     };
-
-                    using (var scope = HttpContext.RequestServices.CreateScope())
-                    {
-                        var context = scope.ServiceProvider.GetRequiredService<MedLinkPortal.Models.ApplicationDbContext>();
-                        context.Doctors.Add(doctor);
-                        await context.SaveChangesAsync();
-                    }
+                    _context.Doctors.Add(doctor);
+                    await _context.SaveChangesAsync();
                 }
 
                 // Auto-login after registration or just return success

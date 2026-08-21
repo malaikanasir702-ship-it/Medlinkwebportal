@@ -64,7 +64,18 @@ builder.Services.AddCors(options =>
 });
 
 // Database Context
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Railway injects DATABASE_URL as a full Postgres connection string.
+// Supabase direct connection string is in appsettings.json as fallback.
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+                    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Npgsql requires key=value format; Railway provides postgres:// URI — convert if needed
+if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres"))
+{
+    var uri = new Uri(connectionString);
+    var userInfo = uri.UserInfo.Split(':');
+    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={Uri.UnescapeDataString(userInfo[1])};SSL Mode=Require;Trust Server Certificate=true;Pooling=true;Minimum Pool Size=2;Maximum Pool Size=20;Connection Idle Lifetime=300";
+}
 
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString)
@@ -118,12 +129,25 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         }
     };
-})
-.AddGoogle(options =>
-{
-    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });
+
+// Google OAuth — only add if credentials are configured (Railway env vars or appsettings)
+var googleClientId     = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID")
+                      ?? builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET")
+                      ?? builder.Configuration["Authentication:Google:ClientSecret"];
+
+if (!string.IsNullOrWhiteSpace(googleClientId)
+    && !string.IsNullOrWhiteSpace(googleClientSecret)
+    && googleClientId != "YOUR_GOOGLE_CLIENT_ID")
+{
+    builder.Services.AddAuthentication()
+        .AddGoogle(options =>
+        {
+            options.ClientId     = googleClientId;
+            options.ClientSecret = googleClientSecret;
+        });
+}
 
 // Email Configuration
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -267,6 +291,10 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
+
+// ── Health check — Railway uses this to know the app is ready ─────────────
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
 app.MapHub<MedLinkPortal.Hubs.ConsultationHub>("/consultationHub");
 app.MapHub<MedLinkPortal.Hubs.ChatHub>("/chatHub");
 app.MapHub<MedLinkPortal.Hubs.NotificationHub>("/notificationHub");

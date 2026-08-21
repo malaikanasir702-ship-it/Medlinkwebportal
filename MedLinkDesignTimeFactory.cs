@@ -15,7 +15,7 @@ public class MedLinkDesignTimeFactory : IDesignTimeDbContextFactory<ApplicationD
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
         var connStr = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-            ?? "Host=db.oaigzdrntnsyacceveno.supabase.co;Database=postgres;Username=postgres;Password=Ayesha@12349094;Port=5432;SSL Mode=Require;Trust Server Certificate=true";
+            ?? "Host=aws-0-ap-southeast-1.pooler.supabase.com;Database=postgres;Username=postgres.oaigzdrntnsyacceveno;Password=Ayesha@12349094;Port=6543;SSL Mode=Require;Trust Server Certificate=true;Pooling=true;Minimum Pool Size=2;Maximum Pool Size=20;Connection Idle Lifetime=300";
 
         optionsBuilder.UseNpgsql(connStr);
 

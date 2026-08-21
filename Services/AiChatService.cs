@@ -62,7 +62,10 @@ Guidelines:
                 _groqApiKey = k1 + k2;
             }
 
-            _groqModel = _configuration["Groq:Model"] ?? "llama-3.3-70b-versatile";
+            _groqModel = _configuration["Groq:Model"] 
+                ?? _configuration["Groq__Model"] 
+                ?? _configuration["Groq_Model"] 
+                ?? "openai/gpt-oss-20b";
         }
 
         public async Task<AiChatResponse> ProcessMessageAsync(string userId, string messageText)

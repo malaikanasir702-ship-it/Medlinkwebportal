@@ -303,76 +303,84 @@ app.MapHub<MedLinkPortal.Hubs.TrackingHub>("/trackingHub");
 // Seed Roles and Admin User (Optional)
 using (var scope = app.Services.CreateScope())
 {
-    // Ensure Database Schema is up to date
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-    dbContext.Database.Migrate();
-
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-    // Create roles if they don't exist
-    string[] roleNames = { "Admin", "Doctor", "Patient", "Pharmacist", "LabAdmin", "Rider" };
-
-    foreach (var roleName in roleNames)
+    try
     {
-        if (!await roleManager.RoleExistsAsync(roleName))
+        // Ensure Database Schema is up to date
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        dbContext.Database.Migrate();
+
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        // Create roles if they don't exist
+        string[] roleNames = { "Admin", "Doctor", "Patient", "Pharmacist", "LabAdmin", "Rider" };
+
+        foreach (var roleName in roleNames)
         {
-            await roleManager.CreateAsync(new IdentityRole(roleName));
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+        }
+
+        // Seed Admin
+        var adminEmail = "admin@medlink.com";
+        var adminPassword = "Admin@123";
+        if (await userManager.FindByEmailAsync(adminEmail) == null)
+        {
+            var adminUser = new ApplicationUser { UserName = adminEmail, Email = adminEmail, FirstName = "Admin", LastName = "User", EmailConfirmed = true, PhoneNumber = "+1234567890" };
+            var result = await userManager.CreateAsync(adminUser, adminPassword);
+            if (result.Succeeded) await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+
+        // Seed Lab Admin
+        var labAdminEmail = "labadmin@medlink.com";
+        var labAdminPassword = "LabAdmin@123";
+        if (await userManager.FindByEmailAsync(labAdminEmail) == null)
+        {
+            var labAdminUser = new ApplicationUser { UserName = labAdminEmail, Email = labAdminEmail, FirstName = "Lab", LastName = "Manager", EmailConfirmed = true, PhoneNumber = "+1122334466" };
+            var labResult = await userManager.CreateAsync(labAdminUser, labAdminPassword);
+            if (labResult.Succeeded) await userManager.AddToRoleAsync(labAdminUser, "LabAdmin");
+        }
+
+        // Seed Doctor
+        var doctorEmail = "doctor@medlink.com";
+        var doctorPassword = "Doctor@123";
+        if (await userManager.FindByEmailAsync(doctorEmail) == null)
+        {
+            var doctorUser = new ApplicationUser { UserName = doctorEmail, Email = doctorEmail, FirstName = "Doctor", LastName = "Who", EmailConfirmed = true, PhoneNumber = "+1987654321", Specialist = "General Practitioner", IsAvailable = true };
+            var docResult = await userManager.CreateAsync(doctorUser, doctorPassword);
+            if (docResult.Succeeded) await userManager.AddToRoleAsync(doctorUser, "Doctor");
+        }
+
+        // Seed Pharmacist
+        var pharmacistEmail = "pharmacist@medlink.com";
+        var pharmacistPassword = "Pharmacist@123";
+        if (await userManager.FindByEmailAsync(pharmacistEmail) == null)
+        {
+            var pharmacistUser = new ApplicationUser { UserName = pharmacistEmail, Email = pharmacistEmail, FirstName = "Main", LastName = "Pharmacist", EmailConfirmed = true, PhoneNumber = "+1122334455" };
+            var pharmResult = await userManager.CreateAsync(pharmacistUser, pharmacistPassword);
+            if (pharmResult.Succeeded) await userManager.AddToRoleAsync(pharmacistUser, "Pharmacist");
+        }
+
+        // Seed Medicines
+        if (!dbContext.Medicines.Any())
+        {
+            dbContext.Medicines.AddRange(new List<Medicine>
+            {
+                new Medicine { Name = "Panadol", Brand = "GSK", Category = "Painkiller", Price = 50, StockQuantity = 1000, ExpiryDate = DateTime.Now.AddYears(2), PrescriptionRequired = false },
+                new Medicine { Name = "Augmentin", Brand = "GSK", Category = "Antibiotic", Price = 450, StockQuantity = 200, ExpiryDate = DateTime.Now.AddYears(1), PrescriptionRequired = true },
+                new Medicine { Name = "Arinac", Brand = "Abbott", Category = "Flu/Cold", Price = 80, StockQuantity = 500, ExpiryDate = DateTime.Now.AddYears(2), PrescriptionRequired = false },
+                new Medicine { Name = "Lisinopril", Brand = "Pfizer", Category = "Blood Pressure", Price = 300, StockQuantity = 150, ExpiryDate = DateTime.Now.AddYears(1), PrescriptionRequired = true }
+            });
+            await dbContext.SaveChangesAsync();
         }
     }
-
-    // Seed Admin
-    var adminEmail = "admin@medlink.com";
-    var adminPassword = "Admin@123";
-    if (await userManager.FindByEmailAsync(adminEmail) == null)
+    catch (Exception ex)
     {
-        var adminUser = new ApplicationUser { UserName = adminEmail, Email = adminEmail, FirstName = "Admin", LastName = "User", EmailConfirmed = true, PhoneNumber = "+1234567890" };
-        var result = await userManager.CreateAsync(adminUser, adminPassword);
-        if (result.Succeeded) await userManager.AddToRoleAsync(adminUser, "Admin");
-    }
-
-    // Seed Lab Admin
-    var labAdminEmail = "labadmin@medlink.com";
-    var labAdminPassword = "LabAdmin@123";
-    if (await userManager.FindByEmailAsync(labAdminEmail) == null)
-    {
-        var labAdminUser = new ApplicationUser { UserName = labAdminEmail, Email = labAdminEmail, FirstName = "Lab", LastName = "Manager", EmailConfirmed = true, PhoneNumber = "+1122334466" };
-        var labResult = await userManager.CreateAsync(labAdminUser, labAdminPassword);
-        if (labResult.Succeeded) await userManager.AddToRoleAsync(labAdminUser, "LabAdmin");
-    }
-
-    // Seed Doctor
-    var doctorEmail = "doctor@medlink.com";
-    var doctorPassword = "Doctor@123";
-    if (await userManager.FindByEmailAsync(doctorEmail) == null)
-    {
-        var doctorUser = new ApplicationUser { UserName = doctorEmail, Email = doctorEmail, FirstName = "Doctor", LastName = "Who", EmailConfirmed = true, PhoneNumber = "+1987654321", Specialist = "General Practitioner", IsAvailable = true };
-        var docResult = await userManager.CreateAsync(doctorUser, doctorPassword);
-        if (docResult.Succeeded) await userManager.AddToRoleAsync(doctorUser, "Doctor");
-    }
-
-    // Seed Pharmacist
-    var pharmacistEmail = "pharmacist@medlink.com";
-    var pharmacistPassword = "Pharmacist@123";
-    if (await userManager.FindByEmailAsync(pharmacistEmail) == null)
-    {
-        var pharmacistUser = new ApplicationUser { UserName = pharmacistEmail, Email = pharmacistEmail, FirstName = "Main", LastName = "Pharmacist", EmailConfirmed = true, PhoneNumber = "+1122334455" };
-        var pharmResult = await userManager.CreateAsync(pharmacistUser, pharmacistPassword);
-        if (pharmResult.Succeeded) await userManager.AddToRoleAsync(pharmacistUser, "Pharmacist");
-    }
-
-    // Seed Medicines
-    if (!dbContext.Medicines.Any())
-    {
-        dbContext.Medicines.AddRange(new List<Medicine>
-        {
-            new Medicine { Name = "Panadol", Brand = "GSK", Category = "Painkiller", Price = 50, StockQuantity = 1000, ExpiryDate = DateTime.Now.AddYears(2), PrescriptionRequired = false },
-            new Medicine { Name = "Augmentin", Brand = "GSK", Category = "Antibiotic", Price = 450, StockQuantity = 200, ExpiryDate = DateTime.Now.AddYears(1), PrescriptionRequired = true },
-            new Medicine { Name = "Arinac", Brand = "Abbott", Category = "Flu/Cold", Price = 80, StockQuantity = 500, ExpiryDate = DateTime.Now.AddYears(2), PrescriptionRequired = false },
-            new Medicine { Name = "Lisinopril", Brand = "Pfizer", Category = "Blood Pressure", Price = 300, StockQuantity = 150, ExpiryDate = DateTime.Now.AddYears(1), PrescriptionRequired = true }
-        });
-        await dbContext.SaveChangesAsync();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while running database migrations or seeding.");
     }
 }
 

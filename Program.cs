@@ -377,9 +377,9 @@ using (var scope = app.Services.CreateScope())
 }
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-if (!app.Environment.IsDevelopment())
-{
-    app.Urls.Add($"http://0.0.0.0:{port}");
-}
+// Always bind to 0.0.0.0:PORT — required for Railway container networking.
+// Clear any previously set URLs to avoid conflict with ASPNETCORE_URLS env var.
+app.Urls.Clear();
+app.Urls.Add($"http://0.0.0.0:{port}");
 
 app.Run();

@@ -14,14 +14,14 @@
                         <i data-lucide="shopping-bag" class="w-10 h-10"></i>
                     </div>
                     <div>
-                        <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">My Pharmacy Orders</h1>
+                        <h1 class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">My Pharmacy Orders</h1>
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Track and manage your medical deliveries</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="text-right hidden sm:block">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Orders</p>
-                        <p class="text-2xl font-black text-blue-600">@Model.PharmacyOrders.Count</p>
+                        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Total Orders</p>
+                        <p class="text-2xl font-semibold text-blue-600">@Model.PharmacyOrders.Count</p>
                     </div>
                 </div>
             </div>
@@ -34,9 +34,9 @@
                 <div class="w-24 h-24 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-dashed border-slate-200">
                     <i data-lucide="package" class="w-12 h-12 text-slate-300"></i>
                 </div>
-                <h3 class="text-xl font-black text-slate-900 mb-2">No orders yet</h3>
+                <h3 class="text-xl font-semibold text-slate-900 mb-2">No orders yet</h3>
                 <p class="text-slate-500 font-medium max-w-sm mx-auto mb-8">When you purchase prescribed medicines during your consultations, they will appear here for tracking.</p>
-                <a href="@Url.Action("Appointments", "Dashboard")" class="inline-flex items-center gap-3 px-8 py-4 bg-blue-600 text-white font-black text-sm rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-600/20 transition-all active:scale-95">
+                <a href="@Url.Action("Appointments", "Dashboard")" class="inline-flex items-center gap-3 px-8 py-4 bg-blue-600 text-white font-semibold text-sm rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-600/20 transition-all active:scale-95">
                     View Appointments
                 </a>
             </div>
@@ -52,9 +52,9 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 group-hover:bg-blue-50 transition-colors">
-                                        <span class="text-xs font-black text-slate-400 group-hover:text-blue-600">#MED-@order.Id.ToString("D5")</span>
+                                        <span class="text-xs font-semibold text-slate-400 group-hover:text-blue-600">#MED-@order.Id.ToString("D5")</span>
                                     </div>
-                                    <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest">@order.CreatedAt.ToString("MMM dd, yyyy • HH:mm")</span>
+                                    <span class="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">@order.CreatedAt.ToString("MMM dd, yyyy • HH:mm")</span>
                                 </div>
 
                                 <div class="space-y-4">
@@ -66,13 +66,13 @@
                                     <div class="flex flex-wrap gap-2">
                                         @foreach (var item in order.OrderItems.Take(3))
                                         {
-                                            <span class="px-3 py-1 bg-slate-50 rounded-lg text-[10px] font-black text-slate-500 border border-slate-100">
+                                            <span class="px-3 py-1 bg-slate-50 rounded-lg text-[10px] font-semibold text-slate-500 border border-slate-100">
                                                 @(item.Medicine?.Name ?? "Medicine") x@item.Quantity
                                             </span>
                                         }
                                         @if (order.OrderItems.Count > 3)
                                         {
-                                            <span class="px-3 py-1 bg-slate-50 rounded-lg text-[10px] font-black text-slate-400 border border-slate-100">
+                                            <span class="px-3 py-1 bg-slate-50 rounded-lg text-[10px] font-semibold text-slate-400 border border-slate-100">
                                                 +@(order.OrderItems.Count - 3) more
                                             </span>
                                         }
@@ -83,8 +83,8 @@
                             <!-- Status & Amount -->
                             <div class="flex flex-row lg:flex-col justify-between items-center lg:items-end gap-4 lg:min-w-[180px]">
                                 <div class="text-right">
-                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
-                                    <p class="text-xl font-black text-slate-900 tracking-tight">PKR @order.TotalAmount.ToString("N2")</p>
+                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
+                                    <p class="text-xl font-semibold text-slate-900 tracking-tight">PKR @order.TotalAmount.ToString("N2")</p>
                                 </div>
 
                                 @{
@@ -100,13 +100,13 @@
                                 }
                                 <div class="flex items-center gap-2 px-4 py-2 bg-@statusColor-50 rounded-full border border-@statusColor-100">
                                     <div class="w-1.5 h-1.5 rounded-full bg-@statusColor-500 animate-pulse"></div>
-                                    <span class="text-[10px] font-black text-@statusColor-700 uppercase tracking-widest">@order.Status</span>
+                                    <span class="text-[10px] font-semibold text-@statusColor-700 uppercase tracking-widest">@order.Status</span>
                                 </div>
                             </div>
 
                             <!-- Actions -->
                             <div class="flex items-center justify-end lg:border-l lg:border-slate-50 lg:pl-8">
-                                <a href="@Url.Action("OrderTracking", "Pharmacy", new { id = order.Id })" class="w-full lg:w-auto px-6 py-4 bg-slate-900 text-white font-black text-xs rounded-2xl hover:bg-blue-600 shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3">
+                                <a href="@Url.Action("OrderTracking", "Pharmacy", new { id = order.Id })" class="w-full lg:w-auto px-6 py-4 bg-slate-900 text-white font-semibold text-xs rounded-2xl hover:bg-blue-600 shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3">
                                     Track Order <i data-lucide="arrow-right" class="w-4 h-4"></i>
                                 </a>
                             </div>

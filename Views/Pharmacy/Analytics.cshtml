@@ -15,7 +15,7 @@
                     <i data-lucide="trending-up" class="w-8 h-8"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Revenue Intel</h1>
+                    <h1 class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Revenue Intel</h1>
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Financial Performance & Analytics</p>
                 </div>
             </div>
@@ -31,10 +31,10 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div class="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl relative overflow-hidden group">
                 <div class="relative z-10">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Revenue</p>
-                    <h3 class="text-3xl font-black text-slate-900 tracking-tight">PKR @(((decimal)ViewBag.TotalRevenue).ToString("N0"))</h3>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Total Revenue</p>
+                    <h3 class="text-3xl font-semibold text-slate-900 tracking-tight">PKR @(((decimal)ViewBag.TotalRevenue).ToString("N0"))</h3>
                     <div class="mt-4 flex items-center gap-2">
-                        <span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-lg">+12.5%</span>
+                        <span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-semibold rounded-lg">+12.5%</span>
                         <span class="text-[10px] font-bold text-slate-400">vs last month</span>
                     </div>
                 </div>
@@ -44,10 +44,10 @@
 
             <div class="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl relative overflow-hidden group">
                  <div class="relative z-10">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Orders</p>
-                    <h3 class="text-3xl font-black text-slate-900 tracking-tight">@ViewBag.TotalOrders</h3>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Total Orders</p>
+                    <h3 class="text-3xl font-semibold text-slate-900 tracking-tight">@ViewBag.TotalOrders</h3>
                     <div class="mt-4 flex items-center gap-2">
-                        <span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-lg">+5.2%</span>
+                        <span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-semibold rounded-lg">+5.2%</span>
                         <span class="text-[10px] font-bold text-slate-400">vs last month</span>
                     </div>
                 </div>
@@ -57,10 +57,10 @@
 
             <div class="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl relative overflow-hidden group">
                  <div class="relative z-10">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Avg. Order Value</p>
-                    <h3 class="text-3xl font-black text-slate-900 tracking-tight">PKR @(((decimal)ViewBag.AverageOrderValue).ToString("N0"))</h3>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Avg. Order Value</p>
+                    <h3 class="text-3xl font-semibold text-slate-900 tracking-tight">PKR @(((decimal)ViewBag.AverageOrderValue).ToString("N0"))</h3>
                      <div class="mt-4 flex items-center gap-2">
-                        <span class="px-2 py-1 bg-amber-50 text-amber-600 text-[10px] font-black rounded-lg">-2.1%</span>
+                        <span class="px-2 py-1 bg-amber-50 text-amber-600 text-[10px] font-semibold rounded-lg">-2.1%</span>
                         <span class="text-[10px] font-bold text-slate-400">vs last month</span>
                     </div>
                 </div>
@@ -75,7 +75,7 @@
             <div class="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl">
                 <div class="flex justify-between items-center mb-8">
                      <div>
-                        <h3 class="font-black text-lg text-slate-900">Revenue Trend</h3>
+                        <h3 class="font-semibold text-lg text-slate-900">Revenue Trend</h3>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last 6 Months</p>
                     </div>
                     <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-500">
@@ -89,7 +89,7 @@
             <div class="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl">
                  <div class="flex justify-between items-center mb-8">
                      <div>
-                        <h3 class="font-black text-lg text-slate-900">Top Performing Medicines</h3>
+                        <h3 class="font-semibold text-lg text-slate-900">Top Performing Medicines</h3>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">By Units Sold</p>
                     </div>
                     <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
@@ -109,7 +109,7 @@
                             <div>
                                 <div class="flex justify-between items-end mb-2">
                                     <span class="text-sm font-bold text-slate-700">@med.Name</span>
-                                    <span class="text-xs font-black text-slate-900">@med.Sold sold <span class="text-slate-300 font-normal">|</span> <span class="text-emerald-600">PKR @med.Revenue.ToString("N0")</span></span>
+                                    <span class="text-xs font-semibold text-slate-900">@med.Sold sold <span class="text-slate-300 font-normal">|</span> <span class="text-emerald-600">PKR @med.Revenue.ToString("N0")</span></span>
                                 </div>
                                 <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                                     <div class="h-full bg-indigo-500 rounded-full" style="width: @percentage%"></div>

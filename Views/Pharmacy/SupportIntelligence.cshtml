@@ -18,14 +18,14 @@
                             <i data-lucide="package" class="w-6 h-6"></i>
                         </div>
                         <div>
-                            <h2 class="text-xl font-black text-slate-900 tracking-tight">Order #@order.Id.ToString("D5")</h2>
-                            <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest">@order.Status</span>
+                            <h2 class="text-xl font-semibold text-slate-900 tracking-tight">Order #@order.Id.ToString("D5")</h2>
+                            <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-semibold uppercase tracking-widest">@order.Status</span>
                         </div>
                     </div>
 
                     <div class="space-y-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                         <div>
-                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Items</h3>
+                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Items</h3>
                             <div class="space-y-3">
                                 @foreach (var item in order.OrderItems)
                                 {
@@ -44,7 +44,7 @@
                         </div>
 
                         <div>
-                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Delivery To</h3>
+                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Delivery To</h3>
                             <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                 <div class="flex gap-3">
                                     <i data-lucide="map-pin" class="w-4 h-4 text-emerald-500 mt-1 shrink-0"></i>
@@ -74,7 +74,7 @@
                                 <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
                             </div>
                             <div>
-                                <h1 class="text-lg font-black text-slate-900 tracking-tight">Customer Care</h1>
+                                <h1 class="text-lg font-semibold text-slate-900 tracking-tight">Customer Care</h1>
                                 <p class="text-xs font-bold text-slate-400 flex items-center gap-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> @(order.PharmacistId != null ? "Pharmacist Connected" : "Support Team Online")
                                 </p>

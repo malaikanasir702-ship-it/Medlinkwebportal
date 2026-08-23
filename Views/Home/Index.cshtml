@@ -1,4 +1,4 @@
-﻿@model dynamic
+@model dynamic
 @{
     ViewData["Title"] = "MedLink | Revolutionizing Global Healthcare";
 }
@@ -37,20 +37,26 @@
     </div>
 
     <!-- Mobile Menu -->
-    <div id="mobileMenu" class="md:hidden bg-white border-b border-gray-100 absolute w-full px-6 py-6 flex-col gap-4 hidden">
-        <a href="#features" class="text-lg font-medium">Features</a>
-        <a href="#how-it-works" class="text-lg font-medium">How it Works</a>
-        <a href="#security" class="text-lg font-medium">Security</a>
-        <button onclick="toggleModal('bookingModal')" class="bg-blue-600 text-white py-3 rounded-xl font-semibold">Get Started</button>
+    <div id="mobileMenu" class="md:hidden bg-white border-b border-gray-100 absolute w-full px-6 py-5 flex-col gap-3 hidden">
+        <a href="#features" class="text-base font-semibold text-gray-800 py-2">Features</a>
+        <a href="#how-it-works" class="text-base font-semibold text-gray-800 py-2">How it Works</a>
+        <a href="#security" class="text-base font-semibold text-gray-800 py-2">Security</a>
+        <a href="#impact" class="text-base font-semibold text-gray-800 py-2">Vision</a>
+        <div class="flex flex-col gap-2 pt-2 border-t border-gray-100">
+            <a asp-area="Identity" asp-page="/Account/Login"
+               class="login-link-mobile text-center text-sm font-semibold text-gray-700 py-3 px-4 rounded-xl bg-gray-50 border border-gray-200">Log in</a>
+            <a asp-area="Identity" asp-page="/Account/Register"
+               class="bg-blue-600 text-white text-sm font-bold py-3 px-4 rounded-xl text-center hover:bg-blue-700 transition-all">Get Started Free</a>
+        </div>
     </div>
 </nav>
 
 <!-- Hero Section -->
-<section class="relative pt-20 pb-12 md:pt-32 md:pb-20 px-4 overflow-hidden min-h-[70vh] flex items-center">
+<section class="relative pt-20 pb-12 md:pt-32 md:pb-20 px-4 overflow-hidden min-h-[70vh] flex items-center" style="overflow-x:hidden">
     <div class="max-w-6xl mx-auto w-full">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-6 items-center">
             <!-- Left Column: Content -->
-            <div class="flex flex-col items-start text-left z-10">
+            <div class="hero-content flex flex-col items-start text-left z-10">
                 <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-full px-3 py-1 mb-6 fade-down" data-animate>
                     <span class="flex h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse"></span>
                     <span class="text-xs font-semibold text-blue-700 uppercase tracking-wider">The Future of Global Health</span>
@@ -67,7 +73,7 @@
                     providing a seamless, secure, and immediate consultation experience for everyone.
                 </p>
 
-                <div class="flex flex-col sm:flex-row gap-4 mb-12 fade-up delay-300" data-animate>
+                <div class="hero-cta-group flex flex-col sm:flex-row gap-4 mb-10 fade-up delay-300 w-full" data-animate>
                     <a asp-area="Identity" asp-page="/Account/Login"
                             class="group relative flex items-center justify-center gap-2 bg-blue-600 text-white text-base font-bold px-8 py-4 rounded-full hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-200 active:scale-95 overflow-hidden">
                         <span class="relative z-10 flex items-center gap-2">
@@ -82,7 +88,7 @@
                     </button>
                 </div>
 
-                <div class="flex items-center gap-6 fade-up delay-500" data-animate>
+                <div class="hero-trust-bar flex items-center gap-6 fade-up delay-500" data-animate>
                     <div class="flex -space-x-3">
                         @for (int i = 1; i <= 4; i++)
                         {
@@ -113,10 +119,10 @@
             </div>
 
             <!-- Right Column: Visual Composition -->
-            <div class="relative h-[350px] md:h-[400px] xl:h-[450px] flex items-center justify-center zoom-in duration-1000" data-animate
+            <div class="hero-visual-col relative h-[350px] md:h-[400px] xl:h-[450px] flex items-center justify-center zoom-in duration-1000" data-animate
                  onmouseenter="this.classList.add('hovered')" onmouseleave="this.classList.remove('hovered')">
-                <!-- Main Image Base - SMALLER SIZE -->
-                <div class="relative w-full max-w-xs xl:max-w-sm aspect-[4/5] bg-white rounded-[2rem] shadow-lg overflow-hidden border border-gray-100 transition-all duration-700 ease-out rotate-3 scale-100 hover:rotate-0 hover:scale-105 hover:shadow-blue-500/10">
+                <!-- Main Image Base -->
+                <div class="hero-main-image relative w-full max-w-xs xl:max-w-sm aspect-[4/5] bg-white rounded-[2rem] shadow-lg overflow-hidden border border-gray-100 transition-all duration-700 ease-out rotate-3 scale-100 hover:rotate-0 hover:scale-105 hover:shadow-blue-500/10">
                     <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=600"
                          alt="Modern Healthcare"
                          class="w-full h-full object-cover grayscale-[10%] transition-all duration-700 hover:grayscale-0">
@@ -136,7 +142,7 @@
 
                 <!-- Floating Glass Card 1 (Top Left) - ADJUSTED FOR SMALLER IMAGE -->
                 <a asp-area="Identity" asp-page="/Account/Login"
-                     class="absolute top-6 -left-3 md:-left-6 lg:-left-10 xl:-left-12 bg-white/90 backdrop-blur-xl p-4 rounded-xl shadow-lg border border-white/50 w-48 transform -rotate-6 animate-float cursor-pointer hover:bg-white transition-colors">
+                     class="hero-float-card-left absolute top-6 -left-3 md:-left-6 lg:-left-10 xl:-left-12 bg-white/90 backdrop-blur-xl p-4 rounded-xl shadow-lg border border-white/50 w-48 transform -rotate-6 animate-float cursor-pointer hover:bg-white transition-colors">
                     <div class="flex items-center gap-2 mb-2">
                         <img src="https://scontent.fkhi6-2.fna.fbcdn.net/v/t1.15752-9/617194772_894514363521845_3038485655411687524_n.png?stp=dst-png_p480x480&_nc_cat=109&ccb=1-7&_nc_sid=0024fc&_nc_ohc=5eOsMTm8vmIQ7kNvwHFY5yD&_nc_oc=AdlR0QwqI-GSOT3HkYuh52MBUtUtitt2bexW1vET2AojcILOnk36tVj1JPyGUfwlJHM&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.fkhi6-2.fna&oh=03_Q7cD4QFjnpF6zeUTVdwHP5Sf9hoW8O4PdJL-8a_hYKXJ19Qzww&oe=6997B00F"
                              class="w-10 h-10 rounded-lg object-cover" alt="Dr. Jenkins">
@@ -157,7 +163,7 @@
                 </a>
 
                 <!-- Floating Element 2: Stats Card (Bottom Right) - ADJUSTED -->
-                <div class="absolute bottom-6 -right-3 md:-right-6 lg:-right-10 xl:-right-12 bg-white/90 backdrop-blur-xl p-4 rounded-xl shadow-lg border border-white/50 w-56 transform rotate-6 animate-float-delayed cursor-pointer hover:bg-white transition-colors group/stats">
+                <div class="hero-float-card-right absolute bottom-6 -right-3 md:-right-6 lg:-right-10 xl:-right-12 bg-white/90 backdrop-blur-xl p-4 rounded-xl shadow-lg border border-white/50 w-56 transform rotate-6 animate-float-delayed cursor-pointer hover:bg-white transition-colors group/stats">
                     <div class="flex items-center justify-between mb-3">
                         <div class="bg-green-100 p-1.5 rounded-lg text-green-600 transition-transform group-hover/stats:scale-110">
                             <i data-lucide="activity" class="w-4 h-4"></i>
@@ -177,7 +183,7 @@
                 </div>
 
                 <!-- Floating Element 3: Security Badge (Middle Right) - ADJUSTED -->
-                <div class="absolute top-1/2 -right-4 transform -translate-y-1/2 bg-blue-600 text-white p-3 rounded-full shadow-md animate-bounce-slow cursor-help hover:scale-110 transition-transform">
+                <div class="hero-float-shield absolute top-1/2 -right-4 transform -translate-y-1/2 bg-blue-600 text-white p-3 rounded-full shadow-md animate-bounce-slow cursor-help hover:scale-110 transition-transform">
                     <i data-lucide="shield-check" class="w-5 h-5"></i>
                 </div>
             </div>
@@ -249,7 +255,7 @@
         <p class="text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-10">
             Trusted by over 500+ Leading Health Organizations
         </p>
-        <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-40 grayscale transition-all">
+        <div class="partners-scroll flex flex-wrap justify-center items-center gap-6 md:gap-16 opacity-40 grayscale transition-all">
             @foreach (var brand in new[] { "HealthCore", "GlobalClinic", "BioGuard", "LifeSystems", "NeuroLink", "PulseNetwork" })
             {
                 <div class="group cursor-pointer hover:grayscale-0 hover:opacity-100 transition-all duration-500">
@@ -293,7 +299,7 @@
 @await Html.PartialAsync("_Pricing")
 
 <!-- Doctor & Patient Experience -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-0 border-y border-gray-100">
+<div class="experience-grid grid grid-cols-1 lg:grid-cols-2 gap-0 border-y border-gray-100">
     @await Html.PartialAsync("_DoctorExperience")
     @await Html.PartialAsync("_PatientExperience")
 </div>

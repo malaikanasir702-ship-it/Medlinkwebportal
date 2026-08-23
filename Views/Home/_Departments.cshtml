@@ -1,4 +1,4 @@
-﻿@model List<MedLinkPortal.Models.Department>
+@model List<MedLinkPortal.Models.Department>
 
 <section id="departments" class="py-32 px-6 bg-white overflow-hidden">
     <div class="max-w-7xl mx-auto">
@@ -15,7 +15,7 @@
             </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 stagger-children" data-animate>
+        <div class="departments-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 stagger-children" data-animate>
             @foreach (var dept in Model)
             {
                 <div class="group relative bg-gray-50 rounded-[2rem] p-8 border border-gray-100 hover:bg-white hover:shadow-2xl hover:shadow-gray-200 transition-all duration-500 overflow-hidden fade-up" data-animate>

@@ -1,25 +1,25 @@
-﻿<section class="py-32 px-6 bg-white">
+<section class="py-16 md:py-32 px-6 bg-white">
     <div class="max-w-5xl mx-auto">
-        <div class="bg-gradient-to-br from-blue-50 to-white rounded-[3rem] border border-blue-100 p-12 md:p-24 text-center shadow-2xl shadow-blue-500/5 zoom-in" data-animate>
-            <h2 class="text-4xl md:text-6xl font-bold text-gray-900 mb-8 tracking-tight fade-up delay-100" data-animate>
+        <div class="final-cta-card bg-gradient-to-br from-blue-50 to-white rounded-[2.5rem] md:rounded-[3rem] border border-blue-100 p-8 md:p-24 text-center shadow-2xl shadow-blue-500/5 zoom-in" data-animate>
+            <h2 class="final-cta-heading text-3xl md:text-6xl font-bold text-gray-900 mb-6 md:mb-8 tracking-tight fade-up delay-100" data-animate>
                 Ready to experience <br /> better healthcare?
             </h2>
-            <p class="text-lg text-gray-600 mb-12 max-w-xl mx-auto fade-up delay-200" data-animate>
+            <p class="text-base md:text-lg text-gray-600 mb-8 md:mb-12 max-w-xl mx-auto fade-up delay-200" data-animate>
                 Join thousands of patients and providers already using MedLink to save lives
                 and streamline consultations. Global launch is live.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4 fade-up delay-300" data-animate>
+            <div class="final-cta-buttons flex flex-col sm:flex-row justify-center gap-4 fade-up delay-300" data-animate>
                 <button onclick="toggleModal('bookingModal')"
-                        class="bg-blue-600 text-white text-lg font-bold px-12 py-5 rounded-full hover:bg-blue-700 transition-all shadow-xl hover:shadow-blue-200 active:scale-95 flex items-center gap-3">
+                        class="bg-blue-600 text-white text-base md:text-lg font-bold px-8 md:px-12 py-4 md:py-5 rounded-full hover:bg-blue-700 transition-all shadow-xl hover:shadow-blue-200 active:scale-95 flex items-center justify-center gap-3">
                     Book a Consultation Now
                     <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </button>
-                <button class="bg-white border border-gray-200 text-gray-800 text-lg font-bold px-12 py-5 rounded-full hover:bg-gray-50 transition-all shadow-sm active:scale-95">
+                <button class="bg-white border border-gray-200 text-gray-800 text-base md:text-lg font-bold px-8 md:px-12 py-4 md:py-5 rounded-full hover:bg-gray-50 transition-all shadow-sm active:scale-95 flex items-center justify-center">
                     Contact Sales
                 </button>
             </div>
 
-            <div class="mt-16 flex items-center justify-center gap-8 grayscale opacity-50 fade-up delay-400" data-animate>
+            <div class="final-cta-trusted mt-12 md:mt-16 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 grayscale opacity-50 fade-up delay-400" data-animate>
                 <span class="font-bold text-gray-400 uppercase tracking-widest text-xs">Trusted By</span>
                 <div class="flex items-center gap-6">
                     @foreach (var brand in new[] { "Healthcare Pro", "Global Med", "LifeCare" })

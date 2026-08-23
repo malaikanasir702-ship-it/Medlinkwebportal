@@ -1,8 +1,8 @@
-﻿<section id="health-records" class="py-32 px-6 bg-[#F8FAFC]">
+<section id="health-records" class="py-32 px-6 bg-[#F8FAFC]">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div class="order-2 lg:order-1">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 stagger-children" data-animate>
+                <div class="health-records-benefits grid grid-cols-1 sm:grid-cols-2 gap-6 stagger-children" data-animate>
                     @{
                         var benefits = new[]
                         {
@@ -19,8 +19,8 @@
 
                     @foreach (var benefit in benefits)
                     {
-                        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 fade-up" data-animate>
-                            <div class="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-6">
+                        <div class="health-benefit-card bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 fade-up" data-animate>
+                            <div class="icon-box w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-6">
                                 <i data-lucide="@benefit.Icon" class="w-6 h-6 @benefit.Color"></i>
                             </div>
                             <h4 class="text-xl font-bold text-gray-900 mb-3">@benefit.Title</h4>
@@ -66,26 +66,26 @@
                     </div>
                 </div>
 
-                <a href="@Url.Action("VaultSecurity", "Home")" class="flex items-center gap-3 bg-gray-900 text-white px-10 py-5 rounded-full font-bold hover:bg-black transition-all shadow-xl hover:shadow-gray-200 group">
+                <a href="@Url.Action("VaultSecurity", "Home")" class="health-cta-btn flex items-center gap-3 bg-gray-900 text-white px-10 py-5 rounded-full font-bold hover:bg-black transition-all shadow-xl hover:shadow-gray-200 group">
                     Learn about our Vault Security
                     <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
                 </a>
             </div>
         </div>
 
-        <div class="mt-24 p-10 bg-white rounded-[3rem] border border-gray-100 shadow-sm flex flex-col md:flex-row items-center justify-around gap-12 fade-up delay-300" data-animate>
-            <div class="text-center">
-                <div class="text-4xl font-black text-gray-900 mb-1">100%</div>
+        <div class="health-stats-bar mt-16 md:mt-24 p-8 md:p-10 bg-white rounded-[3rem] border border-gray-100 shadow-sm flex flex-col md:flex-row items-center justify-around gap-8 md:gap-12 fade-up delay-300" data-animate>
+            <div class="health-stat-item text-center">
+                <div class="value text-3xl md:text-4xl font-black text-gray-900 mb-1">100%</div>
                 <div class="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Data Privacy</div>
             </div>
-            <div class="w-[1px] h-12 bg-gray-100 hidden md:block"></div>
-            <div class="text-center">
-                <div class="text-4xl font-black text-gray-900 mb-1">256-bit</div>
+            <div class="health-stats-divider w-[1px] h-12 bg-gray-100 hidden md:block"></div>
+            <div class="health-stat-item text-center">
+                <div class="value text-3xl md:text-4xl font-black text-gray-900 mb-1">256-bit</div>
                 <div class="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">AES Encryption</div>
             </div>
-            <div class="w-[1px] h-12 bg-gray-100 hidden md:block"></div>
-            <div class="text-center">
-                <div class="text-4xl font-black text-gray-900 mb-1">Global</div>
+            <div class="health-stats-divider w-[1px] h-12 bg-gray-100 hidden md:block"></div>
+            <div class="health-stat-item text-center">
+                <div class="value text-3xl md:text-4xl font-black text-gray-900 mb-1">Global</div>
                 <div class="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Record Mobility</div>
             </div>
         </div>

@@ -1,71 +1,63 @@
 /*
- * MedLink Portal — Mobile-First Responsive Stylesheet
+ * MedLink Portal — Native Mobile App Responsive Architecture
  * Breakpoints: sm=640px, md=768px, lg=1024px, xl=1280px
- * Strategy: Mobile styles are default, desktop overrides at md/lg/xl
  */
 
 /* ============================
    GLOBAL MOBILE BASE
    ============================ */
 
-/* Reduce default section padding on mobile */
 @media (max-width: 767px) {
-    /* Universal section padding reduction */
+    /* Universal mobile section padding */
     section {
-        padding-left: 1.25rem !important;
-        padding-right: 1.25rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
     }
 
-    /* Reduce oversize vertical padding */
-    .py-32 {
-        padding-top: 3.5rem !important;
-        padding-bottom: 3.5rem !important;
-    }
+    /* Reduce vertical padding */
+    .py-32 { padding-top: 2.5rem !important; padding-bottom: 2.5rem !important; }
+    .py-24 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+    .py-16 { padding-top: 1.75rem !important; padding-bottom: 1.75rem !important; }
 
-    .py-24 {
-        padding-top: 3rem !important;
-        padding-bottom: 3rem !important;
-    }
+    /* Heading typography */
+    .text-6xl { font-size: 2rem !important; line-height: 1.15 !important; }
+    .text-5xl { font-size: 1.75rem !important; line-height: 1.2 !important; }
+    .text-4xl { font-size: 1.5rem !important; line-height: 1.25 !important; }
+    .text-3xl { font-size: 1.35rem !important; line-height: 1.25 !important; }
 
-    /* Reduce heading sizes on mobile */
-    .text-6xl { font-size: 2.25rem !important; line-height: 1.15 !important; }
-    .text-5xl { font-size: 1.875rem !important; line-height: 1.2 !important; }
-    .text-4xl { font-size: 1.75rem !important; line-height: 1.25 !important; }
-
-    /* Fix gap-16 on mobile grids */
-    .gap-16 { gap: 2rem !important; }
-    .gap-20 { gap: 1.5rem !important; }
-    .mb-20 { margin-bottom: 2rem !important; }
-    .mb-16 { margin-bottom: 1.5rem !important; }
-    .mt-24 { margin-top: 2rem !important; }
+    /* Compact spacing */
+    .gap-16 { gap: 1.5rem !important; }
+    .gap-12 { gap: 1.25rem !important; }
+    .gap-8  { gap: 1rem !important; }
+    .mb-20 { margin-bottom: 1.5rem !important; }
+    .mb-16 { margin-bottom: 1.25rem !important; }
     .mt-20 { margin-top: 1.5rem !important; }
-    .p-10  { padding: 1.25rem !important; }
-    .p-12  { padding: 1.5rem !important; }
 }
 
 /* ============================
-   NAVIGATION
+   INFINITE MARQUEE ANIMATION
    ============================ */
 
-/* Mobile Menu — full-width buttons and proper login link */
-#mobileMenu {
-    gap: 0.75rem;
+@keyframes marqueeScroll {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-33.333%); }
 }
 
-#mobileMenu a,
-#mobileMenu button {
-    width: 100%;
-    text-align: center;
-    display: block;
+.partners-marquee-track {
+    display: flex !important;
+    white-space: nowrap !important;
+    animation: marqueeScroll 20s linear infinite !important;
+    will-change: transform;
 }
 
-#mobileMenu .login-link-mobile {
-    padding: 0.75rem 1rem;
-    border-radius: 0.75rem;
-    color: #374151;
-    font-weight: 600;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
+.partners-marquee-container:hover .partners-marquee-track {
+    animation-play-state: paused !important;
+}
+
+/* Gradient mask for smooth edge fading on marquee */
+.mask-gradient {
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
 
 /* ============================
@@ -73,34 +65,30 @@
    ============================ */
 
 @media (max-width: 767px) {
-    /* Hero text alignment center on mobile */
     .hero-content {
         align-items: center !important;
         text-align: center !important;
     }
 
-    /* Hero visual column — hide floating cards, simplify */
     .hero-visual-col {
-        height: 260px !important;
+        height: 240px !important;
     }
 
-    /* Hide off-screen floating cards on mobile to avoid overflow */
     .hero-float-card-left,
     .hero-float-card-right,
     .hero-float-shield {
         display: none !important;
     }
 
-    /* Hero image takes full width */
     .hero-main-image {
-        max-width: 200px !important;
+        max-width: 190px !important;
         margin: 0 auto;
     }
 
-    /* CTA buttons stack full width on mobile */
     .hero-cta-group {
         flex-direction: column !important;
         width: 100% !important;
+        gap: 0.75rem !important;
     }
 
     .hero-cta-group a,
@@ -108,118 +96,118 @@
         width: 100% !important;
         justify-content: center !important;
     }
-
-    /* Trust bar */
-    .hero-trust-bar {
-        justify-content: center !important;
-    }
 }
 
 /* ============================
-   PARTNERS SECTION
-   ============================ */
-
-@media (max-width: 767px) {
-    .partners-scroll {
-        gap: 1.25rem !important;
-    }
-
-    .partners-scroll span {
-        font-size: 1rem !important;
-    }
-}
-
-/* ============================
-   PROBLEM SECTION
+   PROBLEM SECTION ("The Challenge")
    ============================ */
 
 @media (max-width: 767px) {
     .problem-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1.25rem !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.625rem !important;
     }
 
     .problem-card {
-        padding: 1.25rem !important;
+        padding: 0.875rem !important;
         border-radius: 1.25rem !important;
+        background: #f9fafb !important;
     }
 
-    .problem-card .icon-wrap {
-        width: 2.5rem !important;
-        height: 2.5rem !important;
-        margin-bottom: 1rem !important;
+    .problem-card-icon {
+        width: 2.25rem !important;
+        height: 2.25rem !important;
+        margin-bottom: 0.5rem !important;
     }
 
     .problem-card h4 {
-        font-size: 1rem !important;
-        margin-bottom: 0.5rem !important;
-    }
-}
-
-/* ============================
-   SOLUTION SECTION
-   ============================ */
-
-@media (max-width: 767px) {
-    .solution-heading {
-        font-size: 1.875rem !important;
+        font-size: 0.8125rem !important;
         line-height: 1.2 !important;
+        margin-bottom: 0.25rem !important;
     }
 
-    .solution-pillars {
-        grid-template-columns: 1fr !important;
+    .problem-card p {
+        font-size: 0.6875rem !important;
+        line-height: 1.3 !important;
+        color: #6b7280 !important;
     }
 }
 
 /* ============================
-   DOCTOR SHOWCASE
+   DOCTOR SHOWCASE (Horizontal Swipe Carousel)
    ============================ */
 
 @media (max-width: 767px) {
     .doctor-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 1rem !important;
+        display: flex !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 0.75rem !important;
+        gap: 0.875rem !important;
+        scrollbar-width: none;
     }
 
-    /* Shorter doctor cards on mobile */
+    .doctor-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .doctor-card-wrapper {
+        width: 250px !important;
+        flex-shrink: 0 !important;
+        scroll-snap-align: start !important;
+    }
+
     .doctor-card-inner {
-        height: 320px !important;
+        height: 350px !important;
         border-radius: 1.5rem !important;
     }
 
-    /* Doctor card actions always visible on mobile (no hover) */
     .doctor-actions {
         opacity: 1 !important;
         transform: translateY(0) !important;
     }
 
+    .doctor-quick-action,
     .doctor-availability {
         display: none !important;
     }
 
-    /* Quick action panel off on mobile */
-    .doctor-quick-action {
-        display: none !important;
-    }
-
-    /* Stats bar wrap on mobile */
     .doctor-stats-bar {
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 1.25rem !important;
-        padding: 1.5rem 1rem !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: space-around !important;
+        gap: 1rem !important;
+        padding: 1.25rem 0.5rem !important;
+    }
+}
+
+/* ============================
+   DEPARTMENTS SECTION (Compact App Grid)
+   ============================ */
+
+@media (max-width: 767px) {
+    .departments-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.625rem !important;
     }
 
-    /* Doctor header — stack vertically */
-    .doctor-showcase-header {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 0.75rem !important;
-        margin-bottom: 1.5rem !important;
+    .department-card {
+        padding: 0.875rem !important;
+        border-radius: 1.25rem !important;
+        height: auto !important;
+        min-height: unset !important;
     }
 
-    .doctor-showcase-header a {
+    .department-card h4 {
         font-size: 0.875rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .department-card p {
+        font-size: 0.725rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 0.5rem !important;
     }
 }
 
@@ -228,42 +216,24 @@
    ============================ */
 
 @media (max-width: 767px) {
-    /* Stack AI section vertically */
     .ai-section-grid {
         grid-template-columns: 1fr !important;
-        gap: 2rem !important;
+        gap: 1.5rem !important;
     }
 
-    /* Reduce right visual panel size */
     .ai-visual-panel {
-        height: 280px !important;
-        border-radius: 1.5rem !important;
+        height: 240px !important;
+        border-radius: 1.25rem !important;
     }
 
     .ai-scan-image {
-        width: 8rem !important;
-        height: 8rem !important;
+        width: 7rem !important;
+        height: 7rem !important;
     }
 
-    /* Capability tabs more compact */
     .capability-tab {
-        padding: 0.75rem !important;
-        border-radius: 1rem !important;
-    }
-
-    .capability-tab h4 {
-        font-size: 0.9rem !important;
-    }
-}
-
-/* ============================
-   DEPARTMENTS SECTION
-   ============================ */
-
-@media (max-width: 767px) {
-    .departments-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 0.75rem !important;
+        padding: 0.625rem !important;
+        border-radius: 0.875rem !important;
     }
 }
 
@@ -272,215 +242,123 @@
    ============================ */
 
 @media (max-width: 767px) {
-    /* Benefits grid — 1 col on mobile */
     .health-records-benefits {
         grid-template-columns: 1fr !important;
-        gap: 1rem !important;
+        gap: 0.75rem !important;
     }
 
     .health-benefit-card {
-        padding: 1.25rem !important;
+        padding: 1rem !important;
         border-radius: 1.25rem !important;
     }
 
-    .health-benefit-card .icon-box {
-        width: 2.5rem !important;
-        height: 2.5rem !important;
-        margin-bottom: 0.75rem !important;
-    }
-
-    /* Stats row becomes 3-col compact */
     .health-stats-bar {
         flex-direction: row !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 1rem !important;
-        padding: 1.25rem !important;
-        border-radius: 1.5rem !important;
+        justify-content: space-around !important;
+        gap: 0.5rem !important;
+        padding: 1rem 0.5rem !important;
     }
 
     .health-stat-item {
-        flex: 1 1 30% !important;
-        min-width: 80px !important;
+        text-align: center !important;
     }
 
     .health-stat-item .value {
-        font-size: 1.5rem !important;
+        font-size: 1.35rem !important;
     }
 
     .health-stats-divider {
         display: none !important;
     }
-
-    /* CTA button full width on mobile */
-    .health-cta-btn {
-        width: 100% !important;
-        justify-content: center !important;
-        padding: 1rem 1.5rem !important;
-    }
 }
 
 /* ============================
-   TESTIMONIALS
+   TESTIMONIALS (Horizontal Swipe Carousel)
    ============================ */
 
 @media (max-width: 767px) {
-    /* Testimonials: single column on mobile, 2-col on sm */
     .testimonials-grid {
-        grid-template-columns: 1fr !important;
+        display: flex !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 0.875rem !important;
+        padding-bottom: 0.5rem !important;
+        scrollbar-width: none;
+    }
+
+    .testimonials-grid::-webkit-scrollbar {
+        display: none;
     }
 
     .testimonial-card {
-        padding: 1.5rem !important;
-        border-radius: 1.5rem !important;
+        width: 270px !important;
+        flex-shrink: 0 !important;
+        scroll-snap-align: start !important;
+        padding: 1.25rem !important;
+        border-radius: 1.25rem !important;
     }
 
     .testimonial-card p {
-        font-size: 0.95rem !important;
-        margin-bottom: 1rem !important;
+        font-size: 0.8125rem !important;
+        line-height: 1.4 !important;
     }
 }
 
 /* ============================
-   FEATURE GRID
+   FEATURE GRID (Compact 2-Column Grid)
    ============================ */
 
 @media (max-width: 767px) {
     .feature-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 1rem !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.625rem !important;
     }
 
     .feature-card {
+        padding: 0.875rem !important;
+        border-radius: 1.25rem !important;
+    }
+
+    .feature-card .icon-wrap {
+        width: 2.25rem !important;
+        height: 2.25rem !important;
+        border-radius: 0.625rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .feature-card h4 {
+        font-size: 0.8125rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .feature-card p {
+        font-size: 0.7rem !important;
+        line-height: 1.3 !important;
+    }
+}
+
+/* ============================
+   PRICING SECTION (Swipeable / Stacked)
+   ============================ */
+
+@media (max-width: 767px) {
+    .pricing-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .pricing-card {
         padding: 1.25rem !important;
         border-radius: 1.5rem !important;
     }
 
-    .feature-card .icon-wrap {
-        width: 2.75rem !important;
-        height: 2.75rem !important;
-        border-radius: 0.75rem !important;
-        margin-bottom: 0.75rem !important;
-    }
-
-    .feature-card .icon-wrap svg {
-        width: 1.25rem !important;
-        height: 1.25rem !important;
-    }
-
-    .feature-card h4 {
-        font-size: 0.95rem !important;
-        margin-bottom: 0.5rem !important;
-    }
-
-    .feature-card p {
-        font-size: 0.8rem !important;
-    }
-
-    .feature-card a {
-        display: none !important;
-    }
-}
-
-/* ============================
-   PROCESS FLOW / HOW IT WORKS
-   ============================ */
-
-@media (max-width: 767px) {
-    /* Process flow header — stack */
-    .process-header {
-        flex-direction: column !important;
-        gap: 0.75rem !important;
-        margin-bottom: 1.5rem !important;
-    }
-
-    /* Video section */
-    .process-video-wrap {
-        border-radius: 1.25rem !important;
-    }
-
-    .process-video-play-outer {
-        width: 4rem !important;
-        height: 4rem !important;
-    }
-
-    .process-video-play-inner {
-        width: 3.25rem !important;
-        height: 3.25rem !important;
-    }
-
-    .process-video-play-inner svg {
-        width: 1.5rem !important;
-        height: 1.5rem !important;
-    }
-
-    .process-video-labels {
-        bottom: 0.75rem !important;
-        left: 0.75rem !important;
-        right: 0.75rem !important;
-        font-size: 0.65rem !important;
-    }
-
-    /* Feature chips below video — single column */
-    .process-chips {
-        grid-template-columns: 1fr !important;
-        gap: 0.75rem !important;
-    }
-}
-
-/* ============================
-   PRICING SECTION
-   ============================ */
-
-@media (max-width: 767px) {
-    /* Pricing: single column, no scale on highlighted */
-    .pricing-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1.25rem !important;
-        align-items: start !important;
-    }
-
-    .pricing-card {
-        padding: 1.5rem !important;
-        border-radius: 1.75rem !important;
-    }
-
-    /* Remove the scale-105 on highlighted plan so it doesn't overflow */
     .pricing-card.highlighted {
         transform: none !important;
-        scale: none !important;
     }
 
     .pricing-card .price-value {
-        font-size: 2.5rem !important;
-    }
-
-    .pricing-card .cta-btn {
-        padding: 0.875rem 1rem !important;
-        border-radius: 1rem !important;
-    }
-}
-
-/* ============================
-   DOCTOR + PATIENT EXPERIENCE
-   ============================ */
-
-@media (max-width: 767px) {
-    /* Side-by-side grid becomes stacked */
-    .experience-grid {
-        grid-template-columns: 1fr !important;
-    }
-
-    .experience-section {
-        padding: 2rem 1.25rem !important;
-    }
-
-    .experience-heading {
-        font-size: 1.625rem !important;
-    }
-
-    .experience-tool-card {
-        padding: 0.875rem !important;
+        font-size: 2.25rem !important;
     }
 }
 
@@ -490,48 +368,25 @@
 
 @media (max-width: 767px) {
     .security-inner {
-        padding: 1.75rem !important;
-        border-radius: 1.5rem !important;
+        padding: 1.25rem !important;
+        border-radius: 1.25rem !important;
         flex-direction: column !important;
-        gap: 2rem !important;
+        gap: 1.5rem !important;
     }
 
     .security-shield-card {
-        padding: 1.5rem !important;
-    }
-
-    .security-heading {
-        font-size: 1.5rem !important;
+        padding: 1.25rem !important;
     }
 }
 
 /* ============================
-   FAQ SECTION
-   ============================ */
-
-@media (max-width: 767px) {
-    .faq-item button {
-        padding: 1rem 1.25rem !important;
-        font-size: 0.9rem !important;
-    }
-
-    .faq-content {
-        padding: 0 1.25rem 1.25rem !important;
-    }
-}
-
-/* ============================
-   FINAL CTA
+   FINAL CTA & FOOTER
    ============================ */
 
 @media (max-width: 767px) {
     .final-cta-card {
-        padding: 2rem 1.25rem !important;
-        border-radius: 1.75rem !important;
-    }
-
-    .final-cta-heading {
-        font-size: 1.75rem !important;
+        padding: 1.75rem 1rem !important;
+        border-radius: 1.5rem !important;
     }
 
     .final-cta-buttons {
@@ -539,107 +394,30 @@
         width: 100% !important;
     }
 
-    .final-cta-buttons button,
-    .final-cta-buttons a {
+    .final-cta-buttons button {
         width: 100% !important;
-        padding: 1rem 1.5rem !important;
-        font-size: 1rem !important;
-        justify-content: center !important;
+        padding: 0.875rem 1rem !important;
     }
 
-    .final-cta-trusted {
-        flex-direction: column !important;
-        gap: 0.5rem !important;
-        margin-top: 2rem !important;
-    }
-}
-
-/* ============================
-   FOOTER
-   ============================ */
-
-@media (max-width: 767px) {
-    /* Footer grid: 1 col on mobile */
     .footer-grid {
-        grid-template-columns: 1fr !important;
-        gap: 2rem !important;
-        margin-bottom: 2rem !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1.5rem !important;
     }
 
     .footer-brand {
-        grid-column: span 1 !important;
+        grid-column: span 2 !important;
     }
 
-    /* Footer bottom bar stacks */
     .footer-bottom {
         flex-direction: column !important;
         align-items: center !important;
-        gap: 0.75rem !important;
         text-align: center !important;
-    }
-
-    .footer-legal-links {
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 1rem !important;
+        gap: 0.75rem !important;
     }
 }
 
-/* ============================
-   MISC MOBILE FIXES
-   ============================ */
-
-/* Prevent horizontal overflow globally */
-body { overflow-x: hidden; }
-
-/* Touch-friendly tap targets */
-@media (max-width: 767px) {
-    a, button {
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-    }
-
-    /* Don't force min-height on inline decorative elements */
-    i[data-lucide], span, div { min-height: unset; }
-}
-
-/* Smooth scrolling */
-html { scroll-behavior: smooth; }
-
-/* ============================
-   TABLET (768px – 1023px) TWEAKS
-   ============================ */
-
-@media (min-width: 768px) and (max-width: 1023px) {
-    .py-32 {
-        padding-top: 5rem !important;
-        padding-bottom: 5rem !important;
-    }
-
-    /* Doctor cards: 2 columns on tablet */
-    .doctor-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-    }
-
-    /* Feature grid: 2 col on tablet */
-    .feature-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-    }
-
-    /* Hero visual: show but smaller floating cards */
-    .hero-float-card-left {
-        left: -0.5rem !important;
-    }
-
-    .hero-float-card-right {
-        right: -0.5rem !important;
-    }
-
-    /* Pricing: single col with nice width on tablet */
-    .pricing-grid {
-        grid-template-columns: 1fr !important;
-        max-width: 480px !important;
-        margin: 0 auto !important;
-    }
+/* Global Mobile Cleanups */
+body {
+    overflow-x: hidden !important;
+    -webkit-tap-highlight-color: transparent;
 }

@@ -1,45 +1,47 @@
-<section class="py-24 px-6 bg-white">
+<section class="py-12 md:py-24 px-4 md:px-6 bg-white">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div class="fade-right" data-animate>
-                <h2 class="text-sm font-bold text-blue-600 uppercase tracking-widest mb-4">The Challenge</h2>
-                <h3 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            <div class="fade-right text-center lg:text-left" data-animate>
+                <h2 class="text-xs md:text-sm font-bold text-blue-600 uppercase tracking-widest mb-2 md:mb-4">The Challenge</h2>
+                <h3 class="text-2xl md:text-5xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight">
                     Modern healthcare is <br />
                     <span class="text-gray-400">fundamentally broken.</span>
                 </h3>
-                <p class="text-lg text-gray-600 mb-8 max-w-lg">
+                <p class="text-gray-600 text-sm md:text-lg mb-6 md:mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0">
                     Despite technological leaps, the average patient still faces barriers that shouldn't exist in the 21st century.
                     Fragmented data and distance shouldn't dictate your health outcomes.
                 </p>
-                <div class="space-y-4">
-                    <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                        <div class="bg-white p-2 rounded-lg shadow-sm">
+                <div class="space-y-4 max-w-lg mx-auto lg:mx-0">
+                    <div class="flex items-center gap-3 bg-gray-50 p-3 md:p-4 rounded-2xl border border-gray-100">
+                        <div class="bg-white p-2 rounded-lg shadow-sm flex-shrink-0">
                             <i data-lucide="clock" class="w-5 h-5 text-blue-600"></i>
                         </div>
-                        <p class="text-gray-700 font-medium italic">"Average wait time for a specialist is currently 26 days."</p>
+                        <p class="text-gray-700 text-xs md:text-sm font-medium italic">"Average wait time for a specialist is currently 26 days."</p>
                     </div>
                 </div>
             </div>
 
-            <div class="problem-grid grid grid-cols-1 sm:grid-cols-2 gap-6 stagger-children" data-animate>
+            <div class="problem-grid grid grid-cols-2 gap-3 md:gap-6 stagger-children" data-animate>
                 @{
                     var problems = new[]
                     {
-                                new { Icon = "clock", Title = "Long Wait Times", Desc = "Traditional healthcare often involves agonizingly long wait times for even the simplest consultations.", Color = "text-orange-500" },
-                                new { Icon = "map-pin", Title = "Geographical Constraints", Desc = "Patients in remote or underserved locations struggle to access top-tier specialists and medical expertise.", Color = "text-red-500" },
-                                new { Icon = "database", Title = "Fragmented Records", Desc = "Scattered health histories across multiple institutions hinder efficient and personalized treatment.", Color = "text-blue-500" },
-                                new { Icon = "user-round-x", Title = "Limited Mobility", Desc = "For those with restricted mobility, a simple clinic visit can be an insurmountable physical hurdle.", Color = "text-purple-500" }
-                                };
+                        new { Icon = "clock", Title = "Long Wait Times", Desc = "Hours in waiting rooms for a 5-minute consultation.", Color = "text-orange-500", BgColor = "bg-orange-50" },
+                        new { Icon = "map-pin", Title = "Geographical Constraints", Desc = "Remote location barriers for top-tier specialists.", Color = "text-rose-500", BgColor = "bg-rose-50" },
+                        new { Icon = "database", Title = "Fragmented Records", Desc = "Scattered health records hinder personalized care.", Color = "text-blue-500", BgColor = "bg-blue-50" },
+                        new { Icon = "user-round-x", Title = "Limited Mobility", Desc = "Physical constraints preventing in-person clinic visits.", Color = "text-purple-500", BgColor = "bg-purple-50" }
+                    };
                 }
 
                 @foreach (var problem in problems)
                 {
-                    <div class="problem-card p-8 rounded-3xl bg-gray-50 border border-gray-100 hover:shadow-xl transition-all hover:-translate-y-1 fade-left" data-animate>
-                        <div class="bg-white w-12 h-12 flex items-center justify-center rounded-xl shadow-sm mb-6">
-                            <i data-lucide="@problem.Icon" class="w-6 h-6 @problem.Color"></i>
+                    <div class="problem-card p-4 md:p-8 rounded-2xl md:rounded-3xl bg-gray-50 border border-gray-100 hover:shadow-xl transition-all hover:-translate-y-1 fade-left flex flex-col justify-between" data-animate>
+                        <div>
+                            <div class="problem-card-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl shadow-sm mb-3 md:mb-6 @problem.BgColor">
+                                <i data-lucide="@problem.Icon" class="w-5 h-5 md:w-6 md:h-6 @problem.Color"></i>
+                            </div>
+                            <h4 class="text-xs md:text-xl font-bold text-gray-900 mb-1 md:mb-3 leading-snug">@problem.Title</h4>
+                            <p class="text-gray-500 text-[11px] md:text-sm leading-normal">@problem.Desc</p>
                         </div>
-                        <h4 class="text-xl font-bold text-gray-900 mb-3">@problem.Title</h4>
-                        <p class="text-gray-600 text-sm leading-relaxed">@problem.Desc</p>
                     </div>
                 }
             </div>

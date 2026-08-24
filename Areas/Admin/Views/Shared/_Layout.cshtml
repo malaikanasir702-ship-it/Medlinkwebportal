@@ -275,6 +275,15 @@
                                 <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
                             }
                         </a>
+                        <!-- Pharmacy Control -->
+                        <a href="/Admin/Pharmacy/Index"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Pharmacy" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-pills w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Pharmacy" ? "group-hover:text-blue-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Pharmacy</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Pharmacy") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
                         <!-- Rider Tracking -->
                         <a href="@Url.Action("Index", "Rider")"
                            class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Rider" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">

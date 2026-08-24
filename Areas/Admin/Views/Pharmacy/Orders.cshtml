@@ -1,0 +1,335 @@
+@using MedLinkPortal.Areas.Admin.Controllers
+@model IEnumerable<PharmacyOrderAdminViewModel>
+@{
+    ViewData["Title"] = "Pharmacy Orders";
+    string? pharmacistName = ViewBag.PharmacistName as string;
+    int totalCount = Model.Count();
+    int pendingCount = Model.Count(o => o.StatusCode == 0);
+    int deliveredCount = Model.Count(o => o.StatusCode == 6);
+    decimal totalRev = Model.Where(o => o.StatusCode == 6).Sum(o => o.TotalAmount);
+}
+
+@functions {
+    string StatusBadgeClass(int code) => code switch {
+        0 => "bg-amber-500/10 text-amber-600 border-amber-500/20",
+        1 => "bg-blue-500/10 text-blue-600 border-blue-500/20",
+        2 => "bg-purple-500/10 text-purple-600 border-purple-500/20",
+        3 => "bg-indigo-500/10 text-indigo-600 border-indigo-500/20",
+        4 => "bg-orange-500/10 text-orange-600 border-orange-500/20",
+        5 => "bg-teal-500/10 text-teal-600 border-teal-500/20",
+        6 => "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+        7 => "bg-red-500/10 text-red-600 border-red-500/20",
+        _ => "bg-slate-500/10 text-slate-600 border-slate-500/20"
+    };
+}
+
+<!-- Skeleton -->
+<div class="skeleton-container space-y-12 pb-20">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-10 py-6">
+        <div class="w-full max-w-xl">
+            <div class="skeleton skeleton-title w-full h-16 md:h-24"></div>
+            <div class="skeleton skeleton-text w-3/4 h-6"></div>
+        </div>
+        <div class="skeleton w-40 h-14 rounded-[24px]"></div>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        @for (int i = 0; i < 4; i++) { <div class="skeleton-card p-8 h-32"></div> }
+    </div>
+    <div class="skeleton-card p-5 md:p-12">
+        <div class="flex gap-4 mb-10">
+            <div class="skeleton w-full max-w-sm h-14 rounded-[20px]"></div>
+            <div class="skeleton w-40 h-14 rounded-[20px]"></div>
+        </div>
+        <div class="space-y-4">
+            @for (int i = 0; i < 6; i++) {
+                <div class="flex items-center gap-4 p-5 border-b border-slate-50">
+                    <div class="skeleton w-14 h-6 rounded-full"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="skeleton skeleton-text w-40 h-5"></div>
+                        <div class="skeleton skeleton-text w-28"></div>
+                    </div>
+                    <div class="skeleton w-20 h-8 rounded-full"></div>
+                    <div class="skeleton w-28 h-10 rounded-xl"></div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content-actual content-hidden space-y-12 pb-20">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-8 py-6 animate-in fade-in slide-in-from-left-8 duration-1000">
+        <div>
+            <div class="flex items-center gap-4 mb-4">
+                <a href="/Admin/Pharmacy/Index" class="w-11 h-11 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-slate-500 hover:text-blue-600 hover:shadow-lg transition-all">
+                    <i class="fas fa-arrow-left text-sm"></i>
+                </a>
+                <div>
+                    <h1 class="text-5xl md:text-6xl font-semibold text-slate-900 tracking-tighter">
+                        Pharmacy <span class="text-blue-600">Orders</span>
+                    </h1>
+                    @if (!string.IsNullOrEmpty(pharmacistName))
+                    {
+                        <p class="text-slate-500 text-base font-medium mt-1">Showing orders for <span class="text-blue-600 font-semibold">@pharmacistName</span></p>
+                    }
+                    else
+                    {
+                        <p class="text-slate-500 text-base font-medium mt-1">All pharmacy orders across the platform</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Badges -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div class="bento-card p-8">
+            <div class="flex items-center justify-between mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                    <i class="fas fa-receipt text-blue-600"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-slate-900">@totalCount</p>
+            <p class="text-slate-400 text-sm font-medium mt-1">Total Orders</p>
+        </div>
+        <div class="bento-card p-8">
+            <div class="flex items-center justify-between mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+                    <i class="fas fa-hourglass-half text-amber-500"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-slate-900">@pendingCount</p>
+            <p class="text-slate-400 text-sm font-medium mt-1">Pending Orders</p>
+        </div>
+        <div class="bento-card p-8">
+            <div class="flex items-center justify-between mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                    <i class="fas fa-check-circle text-emerald-600"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-slate-900">@deliveredCount</p>
+            <p class="text-slate-400 text-sm font-medium mt-1">Delivered</p>
+        </div>
+        <div class="bento-card p-8">
+            <div class="flex items-center justify-between mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+                    <i class="fas fa-coins text-purple-600"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-slate-900">PKR @string.Format("{0:N0}", totalRev)</p>
+            <p class="text-slate-400 text-sm font-medium mt-1">Revenue (Delivered)</p>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="bento-card p-5 md:p-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+        <!-- Filter Bar -->
+        <div class="flex flex-col lg:flex-row gap-4 mb-10">
+            <div class="relative flex-grow max-w-sm">
+                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="orderSearch" placeholder="Search by patient name..."
+                       class="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-100 rounded-[20px] text-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10 font-medium placeholder:text-slate-400" />
+            </div>
+            <select id="statusFilter" class="px-5 py-4 bg-slate-50 border border-slate-100 rounded-[20px] text-sm font-semibold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 cursor-pointer">
+                <option value="">All Statuses</option>
+                <option value="0">Pending</option>
+                <option value="1">Accepted</option>
+                <option value="2">Packed</option>
+                <option value="3">Rider Assigned</option>
+                <option value="4">Picked Up</option>
+                <option value="5">On The Way</option>
+                <option value="6">Delivered</option>
+                <option value="7">Cancelled</option>
+            </select>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-20">
+                <div class="w-24 h-24 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-shopping-cart text-slate-300 text-4xl"></i>
+                </div>
+                <p class="text-slate-500 font-medium text-lg">No orders found</p>
+                <p class="text-slate-400 text-sm mt-2">No pharmacy orders have been placed yet.</p>
+            </div>
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse min-w-[900px]">
+                    <thead>
+                        <tr class="text-slate-400 text-[10px] font-semibold uppercase tracking-[0.2em]">
+                            <th class="px-4 py-6 border-b border-slate-50 text-left">Order ID</th>
+                            <th class="px-4 py-6 border-b border-slate-50 text-left">Patient</th>
+                            <th class="px-4 py-6 border-b border-slate-50 text-left">Medicines</th>
+                            <th class="px-4 py-6 border-b border-slate-50 text-left">Amount</th>
+                            <th class="px-4 py-6 border-b border-slate-50 text-left">Payment</th>
+                            <th class="px-4 py-6 border-b border-slate-50 text-left">Status</th>
+                            <th class="px-4 py-6 border-b border-slate-50 text-left">Rider</th>
+                            <th class="px-4 py-6 border-b border-slate-50 text-left">Date</th>
+                            <th class="px-4 py-6 border-b border-slate-50 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        @foreach (var order in Model)
+                        {
+                            <tr class="group hover:bg-slate-50/80 transition-all duration-300 order-row" data-status="@order.StatusCode" data-patient="@order.PatientName.ToLower()">
+                                <td class="px-4 py-8">
+                                    <span class="text-sm font-bold text-slate-900">#@order.OrderId</span>
+                                </td>
+                                <td class="px-4 py-8">
+                                    <p class="text-sm font-semibold text-slate-900">@order.PatientName</p>
+                                    <p class="text-[11px] text-slate-400 font-medium">@order.PatientEmail</p>
+                                </td>
+                                <td class="px-4 py-8">
+                                    <p class="text-xs text-slate-600 font-medium max-w-[180px] line-clamp-2">@order.MedicinesSummary</p>
+                                </td>
+                                <td class="px-4 py-8">
+                                    <span class="text-sm font-bold text-slate-900">PKR @string.Format("{0:N0}", order.TotalAmount)</span>
+                                </td>
+                                <td class="px-4 py-8">
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-700">@order.PaymentMethod</p>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold mt-1 @(order.PaymentStatus == "Paid" ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600")">
+                                            @order.PaymentStatus
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-8">
+                                    <span class="status-badge-@order.OrderId inline-flex items-center px-3 py-1 rounded-full text-[10px] font-semibold border @StatusBadgeClass(order.StatusCode)">
+                                        @order.Status
+                                    </span>
+                                </td>
+                                <td class="px-4 py-8">
+                                    @if (!string.IsNullOrEmpty(order.RiderName))
+                                    {
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                                                <i class="fas fa-motorcycle text-blue-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-xs font-semibold text-slate-700">@order.RiderName</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-slate-400 text-xs font-medium">—</span>
+                                    }
+                                </td>
+                                <td class="px-4 py-8">
+                                    <p class="text-xs font-semibold text-slate-700">@order.CreatedAt.ToString("MMM dd, yyyy")</p>
+                                    <p class="text-[11px] text-slate-400 font-medium">@order.CreatedAt.ToString("hh:mm tt")</p>
+                                </td>
+                                <td class="px-4 py-8 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <select class="status-update-select text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                                                data-order-id="@order.OrderId">
+                                            <option value="">Update Status</option>
+                                            <option value="0">Pending</option>
+                                            <option value="1">Accepted</option>
+                                            <option value="2">Packed</option>
+                                            <option value="3">Rider Assigned</option>
+                                            <option value="4">Picked Up</option>
+                                            <option value="5">On The Way</option>
+                                            <option value="6">Delivered</option>
+                                            <option value="7">Cancelled</option>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-8 right-8 z-[200] hidden">
+    <div class="flex items-center gap-4 px-6 py-4 bg-slate-900 text-white rounded-2xl shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
+        <i id="toastIcon" class="fas fa-check-circle text-emerald-400 text-lg"></i>
+        <span id="toastMsg" class="text-sm font-semibold">Status updated</span>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const statusBadgeClasses = {
+        0: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+        1: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+        2: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
+        3: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20',
+        4: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
+        5: 'bg-teal-500/10 text-teal-600 border-teal-500/20',
+        6: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+        7: 'bg-red-500/10 text-red-600 border-red-500/20'
+    };
+    const statusLabels = ['Pending','Accepted','Packed','RiderAssigned','PickedUp','OnTheWay','Delivered','Cancelled'];
+
+    function showToast(msg, success) {
+        const $toast = $('#toast');
+        $('#toastMsg').text(msg);
+        $('#toastIcon').attr('class', 'fas ' + (success ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400') + ' text-lg');
+        $toast.removeClass('hidden');
+        setTimeout(() => $toast.addClass('hidden'), 3000);
+    }
+
+    $(document).ready(function () {
+        // Search filter
+        $('#orderSearch').on('input', function () {
+            const q = $(this).val().toLowerCase();
+            const status = $('#statusFilter').val();
+            filterRows(q, status);
+        });
+
+        $('#statusFilter').on('change', function () {
+            const q = $('#orderSearch').val().toLowerCase();
+            const status = $(this).val();
+            filterRows(q, status);
+        });
+
+        function filterRows(q, status) {
+            $('.order-row').each(function () {
+                const patient = $(this).data('patient') || '';
+                const rowStatus = $(this).data('status').toString();
+                const matchSearch = !q || patient.includes(q);
+                const matchStatus = !status || rowStatus === status;
+                $(this).toggle(matchSearch && matchStatus);
+            });
+        }
+
+        // Status update via AJAX
+        $('.status-update-select').on('change', function () {
+            const orderId = $(this).data('order-id');
+            const newStatus = $(this).val();
+            if (!newStatus && newStatus !== '0') return;
+
+            const $select = $(this);
+            $select.prop('disabled', true);
+
+            $.ajax({
+                url: '/Admin/Pharmacy/UpdateStatus',
+                type: 'POST',
+                data: { orderId: orderId, status: newStatus },
+                success: function (res) {
+                    if (res.success) {
+                        const statusInt = parseInt(newStatus);
+                        const $badge = $('.status-badge-' + orderId);
+                        $badge.attr('class', 'status-badge-' + orderId + ' inline-flex items-center px-3 py-1 rounded-full text-[10px] font-semibold border ' + (statusBadgeClasses[statusInt] || ''));
+                        $badge.text(statusLabels[statusInt] || 'Unknown');
+                        showToast('Order #' + orderId + ' status updated', true);
+                    } else {
+                        showToast('Update failed', false);
+                    }
+                    $select.prop('disabled', false);
+                },
+                error: function () {
+                    showToast('Server error. Please try again.', false);
+                    $select.prop('disabled', false);
+                }
+            });
+        });
+    });
+</script>
+}

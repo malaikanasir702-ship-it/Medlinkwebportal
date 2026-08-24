@@ -1,0 +1,211 @@
+@using MedLinkPortal.Areas.Admin.Controllers
+@model IEnumerable<PharmacyAdminViewModel>
+@{
+    ViewData["Title"] = "Pharmacy Control";
+    int totalPharmacies = Model.Count();
+    int totalOrders = Model.Sum(p => p.TotalOrders);
+    int pendingOrders = Model.Sum(p => p.PendingOrders);
+    decimal totalRevenue = Model.Sum(p => p.TotalRevenue);
+}
+
+<!-- Skeleton Loading -->
+<div class="skeleton-container space-y-12 pb-20">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-10 py-6">
+        <div class="w-full max-w-xl">
+            <div class="skeleton skeleton-title w-full h-16 md:h-24"></div>
+            <div class="skeleton skeleton-text w-3/4 h-6"></div>
+        </div>
+        <div class="skeleton w-48 h-16 rounded-[24px]"></div>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        @for (int i = 0; i < 4; i++) {
+            <div class="skeleton-card p-8 h-36"></div>
+        }
+    </div>
+    <div class="skeleton-card p-5 md:p-12">
+        <div class="space-y-4">
+            @for (int i = 0; i < 5; i++) {
+                <div class="flex items-center gap-6 p-6 border-b border-slate-50">
+                    <div class="skeleton w-16 h-16 rounded-[24px]"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="skeleton skeleton-text w-48 h-6"></div>
+                        <div class="skeleton skeleton-text w-32"></div>
+                    </div>
+                    <div class="skeleton w-24 h-8 rounded-full"></div>
+                    <div class="skeleton w-32 h-10"></div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content-actual content-hidden space-y-12 pb-20">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-10 py-6">
+        <div class="animate-in fade-in slide-in-from-left-8 duration-1000">
+            <h1 class="text-6xl md:text-7xl font-semibold text-slate-900 tracking-tighter mb-4">
+                Pharmacy <span class="text-blue-600">Control</span>
+            </h1>
+            <p class="text-slate-500 text-xl font-medium leading-relaxed max-w-2xl">
+                Monitor all pharmacists, their orders, revenue, and fulfillment performance.
+            </p>
+        </div>
+        <a href="/Admin/Pharmacy/Orders" class="flex items-center gap-3 px-10 py-5 bg-[#0F172A] text-white rounded-[24px] text-sm font-semibold hover:bg-black transition-all shadow-xl active:scale-95 group whitespace-nowrap">
+            <i class="fas fa-list-alt group-hover:scale-110 transition-transform"></i> View All Orders
+        </a>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div class="bento-card p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                    <i class="fas fa-pills text-blue-600 text-xl"></i>
+                </div>
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em]">Pharmacies</span>
+            </div>
+            <p class="text-4xl font-bold text-slate-900 tracking-tight">@totalPharmacies</p>
+            <p class="text-slate-400 text-sm font-medium mt-2">Registered Pharmacists</p>
+        </div>
+        <div class="bento-card p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+                    <i class="fas fa-shopping-cart text-indigo-600 text-xl"></i>
+                </div>
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em]">Orders</span>
+            </div>
+            <p class="text-4xl font-bold text-slate-900 tracking-tight">@totalOrders</p>
+            <p class="text-slate-400 text-sm font-medium mt-2">Total Orders Placed</p>
+        </div>
+        <div class="bento-card p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+                    <i class="fas fa-clock text-amber-500 text-xl"></i>
+                </div>
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em]">Pending</span>
+            </div>
+            <p class="text-4xl font-bold text-slate-900 tracking-tight">@pendingOrders</p>
+            <p class="text-slate-400 text-sm font-medium mt-2">Awaiting Fulfilment</p>
+        </div>
+        <div class="bento-card p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                    <i class="fas fa-coins text-emerald-600 text-xl"></i>
+                </div>
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em]">Revenue</span>
+            </div>
+            <p class="text-4xl font-bold text-slate-900 tracking-tight">PKR @string.Format("{0:N0}", totalRevenue)</p>
+            <p class="text-slate-400 text-sm font-medium mt-2">Total Revenue (Delivered)</p>
+        </div>
+    </div>
+
+    <!-- Pharmacists Table -->
+    <div class="bento-card p-5 md:p-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12">
+            <div class="relative flex-grow max-w-2xl">
+                <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="pharmSearch" placeholder="Search pharmacists by name or email..."
+                       class="w-full pl-14 pr-8 py-5 bg-slate-50 border border-slate-100 rounded-[28px] text-base focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium placeholder:text-slate-400" />
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-20">
+                <div class="w-24 h-24 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-pills text-slate-300 text-4xl"></i>
+                </div>
+                <p class="text-slate-500 font-medium text-lg">No pharmacists found</p>
+                <p class="text-slate-400 text-sm mt-2">No users with the Pharmacist role have been registered yet.</p>
+            </div>
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="text-slate-400 text-[10px] font-semibold uppercase tracking-[0.3em]">
+                            <th class="px-6 py-8 border-b border-slate-50 text-left">Pharmacist</th>
+                            <th class="px-6 py-8 border-b border-slate-50 text-left">Total Orders</th>
+                            <th class="px-6 py-8 border-b border-slate-50 text-left">Pending</th>
+                            <th class="px-6 py-8 border-b border-slate-50 text-left">Delivered</th>
+                            <th class="px-6 py-8 border-b border-slate-50 text-left">Revenue (PKR)</th>
+                            <th class="px-6 py-8 border-b border-slate-50 text-left">Last Activity</th>
+                            <th class="px-6 py-8 border-b border-slate-50 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        @foreach (var pharm in Model)
+                        {
+                            <tr class="group hover:bg-slate-50/80 transition-all duration-500 pharm-row">
+                                <td class="px-6 py-10">
+                                    <div class="flex items-center gap-5">
+                                        <div class="w-14 h-14 rounded-[22px] bg-blue-600 border-4 border-white shadow-xl flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform duration-700">
+                                            @(pharm.PharmacistName.Length > 0 ? pharm.PharmacistName[0].ToString().ToUpper() : "P")
+                                        </div>
+                                        <div>
+                                            <p class="text-base font-semibold text-slate-900 group-hover:text-blue-600 transition-colors pharm-name">@pharm.PharmacistName</p>
+                                            <p class="text-[11px] text-slate-400 font-medium pharm-email">@pharm.PharmacistEmail</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-10">
+                                    <span class="text-lg font-bold text-slate-900">@pharm.TotalOrders</span>
+                                </td>
+                                <td class="px-6 py-10">
+                                    <span class="inline-flex items-center px-3 py-1 bg-amber-500/10 text-amber-600 rounded-full text-xs font-semibold border border-amber-500/20">
+                                        @pharm.PendingOrders
+                                    </span>
+                                </td>
+                                <td class="px-6 py-10">
+                                    <span class="inline-flex items-center px-3 py-1 bg-emerald-500/10 text-emerald-600 rounded-full text-xs font-semibold border border-emerald-500/20">
+                                        @pharm.DeliveredOrders
+                                    </span>
+                                </td>
+                                <td class="px-6 py-10">
+                                    <span class="text-base font-bold text-slate-900">@string.Format("{0:N0}", pharm.TotalRevenue)</span>
+                                </td>
+                                <td class="px-6 py-10">
+                                    @if (pharm.LastOrderDate.HasValue)
+                                    {
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-700">@pharm.LastOrderDate.Value.ToString("MMM dd, yyyy")</p>
+                                            <p class="text-[11px] text-slate-400 font-medium">@pharm.LastOrderDate.Value.ToString("hh:mm tt")</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-slate-400 text-sm font-medium">No orders yet</span>
+                                    }
+                                </td>
+                                <td class="px-6 py-10 text-right">
+                                    <a href="/Admin/Pharmacy/Orders?pharmacistId=@pharm.PharmacistId"
+                                       class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+                                        <i class="fas fa-eye"></i> View Orders
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Search
+            $('#pharmSearch').on('input', function () {
+                const q = $(this).val().toLowerCase();
+                $('.pharm-row').each(function () {
+                    const name = $(this).find('.pharm-name').text().toLowerCase();
+                    const email = $(this).find('.pharm-email').text().toLowerCase();
+                    $(this).toggle(name.includes(q) || email.includes(q));
+                });
+            });
+        });
+    </script>
+}

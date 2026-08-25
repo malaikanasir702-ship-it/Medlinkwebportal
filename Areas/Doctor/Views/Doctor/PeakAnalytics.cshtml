@@ -1,0 +1,181 @@
+@{
+    ViewData["Title"] = "Peak Hours Analytics";
+    Layout = "~/Areas/Doctor/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-8 pb-20">
+    <div class="py-6">
+        <h1 class="text-5xl font-bold text-slate-900 tracking-tight">Peak Hours <span class="text-blue-600">Analytics</span></h1>
+        <p class="text-slate-500 mt-2 font-medium">Understand when your patients book most — optimise your availability and income.</p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="summaryCards">
+        <div class="bg-white rounded-2xl p-5 border border-slate-100">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Last 90 Days</p>
+            <p id="cardTotal" class="text-3xl font-black text-slate-800 mt-1">—</p>
+            <p class="text-xs text-slate-400 mt-1">Total bookings</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-slate-100">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Daily Average</p>
+            <p id="cardAvg" class="text-3xl font-black text-blue-600 mt-1">—</p>
+            <p class="text-xs text-slate-400 mt-1">Patients per day</p>
+        </div>
+        <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 text-white">
+            <p class="text-xs font-bold text-blue-200 uppercase tracking-wider">Peak Hour</p>
+            <p id="cardPeakHour" class="text-3xl font-black mt-1">—</p>
+            <p class="text-xs text-blue-200 mt-1">Most bookings at this time</p>
+        </div>
+        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white">
+            <p class="text-xs font-bold text-emerald-100 uppercase tracking-wider">Busiest Day</p>
+            <p id="cardPeakDay" class="text-3xl font-black mt-1">—</p>
+            <p class="text-xs text-emerald-100 mt-1">Most bookings this weekday</p>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Hourly Distribution -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-6">
+            <h3 class="font-bold text-slate-900 text-lg mb-1">Hourly Booking Distribution</h3>
+            <p class="text-slate-400 text-sm mb-6">Bookings per hour of day</p>
+            <canvas id="hourChart" height="200"></canvas>
+        </div>
+
+        <!-- Day of Week -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-6">
+            <h3 class="font-bold text-slate-900 text-lg mb-1">Day of Week Distribution</h3>
+            <p class="text-slate-400 text-sm mb-6">Bookings by weekday</p>
+            <canvas id="dayChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Monthly Trend -->
+    <div class="bg-white rounded-2xl border border-slate-100 p-6">
+        <h3 class="font-bold text-slate-900 text-lg mb-1">6-Month Booking Trend</h3>
+        <p class="text-slate-400 text-sm mb-6">Monthly patient volume</p>
+        <canvas id="monthChart" height="100"></canvas>
+    </div>
+
+    <!-- Actionable Insights -->
+    <div id="insights" class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 text-white hidden">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-3">
+            <span class="w-8 h-8 bg-blue-500 rounded-xl flex items-center justify-center"><i class="fas fa-lightbulb text-sm"></i></span>
+            AI Recommendations
+        </h3>
+        <ul id="insightsList" class="space-y-3"></ul>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let hourChart, dayChart, monthChart;
+
+async function loadAnalytics() {
+    const res = await fetch('/api/doctor/analytics/peak-hours', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    document.getElementById('cardTotal').textContent = data.totalLast90;
+    document.getElementById('cardAvg').textContent = data.avgPerDay;
+    document.getElementById('cardPeakHour').textContent = data.peakHour ? data.peakHour.label : '—';
+    document.getElementById('cardPeakDay').textContent = data.peakDay ? data.peakDay.day.substring(0, 3) : '—';
+
+    buildHourChart(data.byHour || []);
+    buildDayChart(data.byDay || []);
+    buildMonthChart(data.monthly || []);
+    buildInsights(data);
+}
+
+function buildHourChart(byHour) {
+    const ctx = document.getElementById('hourChart').getContext('2d');
+    if (hourChart) hourChart.destroy();
+    const max = Math.max(...byHour.map(x => x.count), 1);
+    hourChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: byHour.map(x => x.label),
+            datasets: [{
+                data: byHour.map(x => x.count),
+                backgroundColor: byHour.map(x => x.count === max ? '#2563EB' : '#DBEAFE'),
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
+        }
+    });
+}
+
+function buildDayChart(byDay) {
+    const ctx = document.getElementById('dayChart').getContext('2d');
+    if (dayChart) dayChart.destroy();
+    const max = Math.max(...byDay.map(x => x.count), 1);
+    const dayColors = { Monday:'#8B5CF6', Tuesday:'#3B82F6', Wednesday:'#10B981', Thursday:'#F59E0B', Friday:'#EF4444', Saturday:'#06B6D4', Sunday:'#EC4899' };
+    dayChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: byDay.map(x => x.day.substring(0, 3)),
+            datasets: [{
+                data: byDay.map(x => x.count),
+                backgroundColor: byDay.map(x => x.count === max ? '#2563EB' : '#DBEAFE'),
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
+        }
+    });
+}
+
+function buildMonthChart(monthly) {
+    const ctx = document.getElementById('monthChart').getContext('2d');
+    if (monthChart) monthChart.destroy();
+    monthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: monthly.map(x => x.month),
+            datasets: [{
+                label: 'Bookings',
+                data: monthly.map(x => x.count),
+                borderColor: '#2563EB',
+                backgroundColor: 'rgba(37,99,235,0.07)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#2563EB',
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
+        }
+    });
+}
+
+function buildInsights(data) {
+    const box = document.getElementById('insights');
+    const list = document.getElementById('insightsList');
+    const insights = [];
+
+    if (data.peakHour) insights.push(`Your busiest hour is <strong>${data.peakHour.label}</strong>. Make sure you have no breaks scheduled during this time.`);
+    if (data.peakDay) insights.push(`<strong>${data.peakDay.day}</strong> is your busiest day. Consider adding extra slots or reducing buffer time to maximise appointments.`);
+    if (data.avgPerDay < 5) insights.push(`Your average is only ${data.avgPerDay} patients/day. Adding 2 more availability slots could increase monthly revenue significantly.`);
+    if (data.totalLast90 > 0) insights.push(`You've handled <strong>${data.totalLast90}</strong> appointments in the last 90 days. Keep your schedule updated for consistent bookings.`);
+
+    if (insights.length) {
+        list.innerHTML = insights.map(i => `<li class="flex gap-3 text-sm text-slate-300"><span class="text-blue-400 flex-shrink-0 mt-0.5">→</span><span>${i}</span></li>`).join('');
+        box.classList.remove('hidden');
+    }
+}
+
+function getToken() { return localStorage.getItem('jwt_token') || ''; }
+document.addEventListener('DOMContentLoaded', loadAnalytics);
+</script>
+}

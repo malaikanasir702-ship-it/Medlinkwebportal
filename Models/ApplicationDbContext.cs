@@ -71,6 +71,16 @@ namespace MedLinkPortal.Models
         public DbSet<PharmacyOrder> PharmacyOrders { get; set; }
         public DbSet<PharmacyOrderItem> PharmacyOrderItems { get; set; }
 
+        // --- Doctor Enhancement Entities ---
+        public DbSet<PrescriptionTemplate> PrescriptionTemplates { get; set; }
+        public DbSet<PatientFollowUpReminder> PatientFollowUpReminders { get; set; }
+        public DbSet<WaitingRoomEntry> WaitingRoomEntries { get; set; }
+        public DbSet<DoctorReferral> DoctorReferrals { get; set; }
+        public DbSet<CpdActivity> CpdActivities { get; set; }
+        public DbSet<ClinicStaff> ClinicStaff { get; set; }
+        public DbSet<ReviewReply> ReviewReplies { get; set; }
+        public DbSet<DoctorVoiceNote> DoctorVoiceNotes { get; set; }
+
         // --- Rider Tracking Entities ---
         public DbSet<Rider> Riders { get; set; }
         public DbSet<RiderSession> RiderSessions { get; set; }
@@ -224,6 +234,20 @@ namespace MedLinkPortal.Models
                 new Doctor { Id = 124, Name = "Dr. Junaid Akram", Specialty = "Hematologist", Rating = 4.8, Reviews = 27, Experience = "9 Years", Qualification = "MBBS, FCPS (Hematology)", Languages = "English, Urdu", Availability = "Tue - Sat", Online = true, Description = "Specialist in blood disorders and transfusion medicine.", Image = "https://img.icons8.com/color/96/doctor-male.png" },
                 new Doctor { Id = 125, Name = "Dr. Mahira Noor", Specialty = "Rheumatologist", Rating = 4.9, Reviews = 52, Experience = "13 Years", Qualification = "MBBS, MRCP", Languages = "English, Urdu", Availability = "Available Today", Online = true, Description = "Expert in autoimmune diseases and joint health.", Image = "https://img.icons8.com/color/96/doctor-female.png" }
             );
+
+            // --- Doctor Enhancement Indexes ---
+            modelBuilder.Entity<PrescriptionTemplate>().HasIndex(t => t.DoctorId);
+            modelBuilder.Entity<PatientFollowUpReminder>().HasIndex(r => r.DoctorId);
+            modelBuilder.Entity<PatientFollowUpReminder>().HasIndex(r => r.PatientId);
+            modelBuilder.Entity<PatientFollowUpReminder>().HasIndex(r => r.IsSent);
+            modelBuilder.Entity<WaitingRoomEntry>().HasIndex(e => e.DoctorDbId);
+            modelBuilder.Entity<WaitingRoomEntry>().HasIndex(e => e.Status);
+            modelBuilder.Entity<DoctorReferral>().HasIndex(r => r.ReferringDoctorUserId);
+            modelBuilder.Entity<DoctorReferral>().HasIndex(r => r.ReceivingDoctorUserId);
+            modelBuilder.Entity<CpdActivity>().HasIndex(a => a.DoctorId);
+            modelBuilder.Entity<ClinicStaff>().HasIndex(s => s.DoctorId);
+            modelBuilder.Entity<ReviewReply>().HasIndex(r => r.ReviewId);
+            modelBuilder.Entity<DoctorVoiceNote>().HasIndex(n => n.DoctorId);
 
             // --- Performance Indexes ---
             modelBuilder.Entity<Doctor>().HasIndex(d => d.UserId);

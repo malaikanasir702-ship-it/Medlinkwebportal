@@ -1,0 +1,183 @@
+@{
+    ViewData["Title"] = "My Reviews";
+    Layout = "~/Areas/Doctor/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-8 pb-20">
+    <div class="py-6">
+        <h1 class="text-5xl font-bold text-slate-900 tracking-tight">Patient <span class="text-blue-600">Reviews</span></h1>
+        <p class="text-slate-500 mt-2 font-medium">Read what your patients say and reply publicly to build trust.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-5 border border-slate-100 text-center">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Reviews</p>
+            <p id="statTotal" class="text-3xl font-black text-slate-800 mt-1">—</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-slate-100 text-center">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Avg Rating</p>
+            <p id="statAvg" class="text-3xl font-black text-amber-500 mt-1">—</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-slate-100 text-center">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Replied</p>
+            <p id="statReplied" class="text-3xl font-black text-green-500 mt-1">—</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-slate-100 text-center">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Reply</p>
+            <p id="statPending" class="text-3xl font-black text-blue-600 mt-1">—</p>
+        </div>
+    </div>
+
+    <!-- Reviews List -->
+    <div id="reviewsList" class="space-y-5"></div>
+</div>
+
+<!-- Reply Modal -->
+<div id="replyModal" class="fixed inset-0 hidden items-center justify-center modal-overlay p-4 z-[100]">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-slate-900">Reply to Review</h3>
+            <button onclick="closeReplyModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200">
+                <i class="fas fa-times text-slate-500"></i>
+            </button>
+        </div>
+        <div id="reviewPreview" class="p-6 bg-slate-50 border-b border-slate-100"></div>
+        <form id="replyForm" class="p-6 space-y-4">
+            <input type="hidden" id="replyReviewId">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Your Reply</label>
+                <textarea id="replyText" rows="4" required placeholder="Thank you for your feedback. We're glad..."
+                          class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800 resize-none"></textarea>
+                <p class="text-xs text-slate-400 mt-1">This reply will be visible to all patients who see this review.</p>
+            </div>
+            <div class="flex gap-3">
+                <button type="button" onclick="closeReplyModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold">Cancel</button>
+                <button type="submit" class="flex-1 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-black">Publish Reply</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+let reviews = [];
+
+const stars = (n) => '★'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n));
+const ratingColor = (n) => n >= 4 ? 'text-green-500' : n >= 3 ? 'text-amber-500' : 'text-red-400';
+
+async function loadReviews() {
+    const res = await fetch('/api/doctor/reviews', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    reviews = res.ok ? await res.json() : [];
+    updateStats();
+    renderReviews();
+}
+
+function updateStats() {
+    const total = reviews.length;
+    const avg = total > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / total).toFixed(1) : '—';
+    const replied = reviews.filter(r => r.doctorReply).length;
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statAvg').textContent = avg;
+    document.getElementById('statReplied').textContent = replied;
+    document.getElementById('statPending').textContent = total - replied;
+}
+
+function renderReviews() {
+    const list = document.getElementById('reviewsList');
+    if (!reviews.length) {
+        list.innerHTML = `<div class="text-center py-16 text-slate-400">
+            <i class="fas fa-star text-5xl mb-4 opacity-30"></i>
+            <p class="font-bold text-xl text-slate-500">No reviews yet</p>
+            <p class="text-sm mt-1">Patient reviews will appear here once they rate your consultations.</p>
+        </div>`;
+        return;
+    }
+    list.innerHTML = reviews.map(r => `
+        <div class="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">
+                            ${r.patientName?.charAt(0) || 'P'}
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900">${r.patientName}</p>
+                            <p class="text-xs text-slate-400">${new Date(r.createdAt).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-lg ${ratingColor(r.rating)}">${stars(r.rating)}</span>
+                    <p class="text-xs text-slate-400 font-semibold">${r.rating}/5</p>
+                </div>
+            </div>
+            ${r.comment ? `<p class="text-slate-700 leading-relaxed">${r.comment}</p>` : '<p class="text-slate-400 italic text-sm">No written comment</p>'}
+            
+            ${r.doctorReply ? `
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fas fa-reply text-blue-500 text-xs"></i>
+                    <span class="text-xs font-bold text-blue-700 uppercase tracking-wider">Doctor's Reply</span>
+                </div>
+                <p class="text-slate-700 text-sm">${r.doctorReply}</p>
+            </div>` : ''}
+
+            <div class="flex justify-end">
+                <button onclick="openReply(${r.id})" class="flex items-center gap-2 px-4 py-2 ${r.doctorReply ? 'bg-slate-100 text-slate-600' : 'bg-blue-600 text-white'} rounded-xl text-sm font-bold hover:opacity-90 transition-all">
+                    <i class="fas fa-reply text-xs"></i>
+                    ${r.doctorReply ? 'Edit Reply' : 'Reply Publicly'}
+                </button>
+            </div>
+        </div>`).join('');
+}
+
+function openReply(reviewId) {
+    const r = reviews.find(x => x.id === reviewId);
+    if (!r) return;
+    document.getElementById('replyReviewId').value = reviewId;
+    document.getElementById('replyText').value = r.doctorReply || '';
+    document.getElementById('reviewPreview').innerHTML = `
+        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Replying to:</p>
+        <div class="flex items-center gap-2 mb-2">
+            <span class="font-bold text-slate-800">${r.patientName}</span>
+            <span class="${ratingColor(r.rating)} text-sm">${stars(r.rating)}</span>
+        </div>
+        <p class="text-slate-700 text-sm italic">"${r.comment || 'No comment'}"</p>`;
+    document.getElementById('replyModal').classList.remove('hidden');
+    document.getElementById('replyModal').classList.add('flex');
+}
+
+function closeReplyModal() {
+    document.getElementById('replyModal').classList.add('hidden');
+    document.getElementById('replyModal').classList.remove('flex');
+}
+
+document.getElementById('replyForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.textContent = 'Publishing...'; btn.disabled = true;
+    const payload = {
+        reviewId: parseInt(document.getElementById('replyReviewId').value),
+        replyText: document.getElementById('replyText').value
+    };
+    const res = await fetch('/api/doctor/reviews/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify(payload)
+    });
+    btn.textContent = 'Publish Reply'; btn.disabled = false;
+    if (res.ok) { closeReplyModal(); showToast('Reply published!', 'success'); loadReviews(); }
+    else showToast('Failed to publish reply', 'error');
+});
+
+function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.className = `fixed bottom-6 right-6 px-6 py-4 rounded-2xl shadow-xl font-bold text-white z-[200] ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+    t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
+}
+
+function getToken() { return localStorage.getItem('jwt_token') || ''; }
+document.addEventListener('DOMContentLoaded', loadReviews);
+</script>
+}

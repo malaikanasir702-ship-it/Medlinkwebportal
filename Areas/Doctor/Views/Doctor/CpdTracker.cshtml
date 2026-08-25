@@ -1,0 +1,242 @@
+@{
+    ViewData["Title"] = "CPD / CME Tracker";
+    Layout = "~/Areas/Doctor/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-8 pb-20">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 py-6">
+        <div>
+            <h1 class="text-5xl font-bold text-slate-900 tracking-tight">CPD / CME <span class="text-blue-600">Tracker</span></h1>
+            <p class="text-slate-500 mt-2 font-medium">Log continuing medical education activities. PMDC requires 20 CPD points per year.</p>
+        </div>
+        <div class="flex gap-3">
+            <select id="yearFilter" onchange="loadCpd()" class="px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 focus:outline-none">
+            </select>
+            <button onclick="openCpdModal()" class="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-black transition-all shadow-lg">
+                <i class="fas fa-plus"></i> Log Activity
+            </button>
+        </div>
+    </div>
+
+    <!-- Progress Card -->
+    <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 text-white">
+        <div class="flex flex-col md:flex-row md:items-center gap-8">
+            <div class="flex-1">
+                <p class="text-blue-200 text-sm font-semibold uppercase tracking-wider">Annual CPD Progress</p>
+                <div class="flex items-end gap-4 mt-3">
+                    <span id="totalPoints" class="text-6xl font-black">0</span>
+                    <span class="text-blue-200 text-xl mb-2">/ 20 points</span>
+                </div>
+                <div class="mt-4 bg-white/20 rounded-full h-3 overflow-hidden">
+                    <div id="progressBar" class="h-full bg-white rounded-full transition-all duration-700" style="width:0%"></div>
+                </div>
+                <p id="progressLabel" class="text-blue-200 text-sm mt-2">0% of annual requirement</p>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-white/10 rounded-2xl p-4 text-center">
+                    <p id="statWebinar" class="text-2xl font-black">0</p>
+                    <p class="text-blue-200 text-xs mt-1">Webinars</p>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-4 text-center">
+                    <p id="statConf" class="text-2xl font-black">0</p>
+                    <p class="text-blue-200 text-xs mt-1">Conferences</p>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-4 text-center">
+                    <p id="statCourse" class="text-2xl font-black">0</p>
+                    <p class="text-blue-200 text-xs mt-1">Courses</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activities List -->
+    <div id="activitiesList" class="space-y-3"></div>
+</div>
+
+<!-- Log Activity Modal -->
+<div id="cpdModal" class="fixed inset-0 hidden items-center justify-center modal-overlay p-4 z-[100]">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-slate-900" id="cpdModalTitle">Log CPD Activity</h3>
+            <button onclick="closeCpdModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200">
+                <i class="fas fa-times text-slate-500"></i>
+            </button>
+        </div>
+        <form id="cpdForm" class="p-6 space-y-5">
+            <input type="hidden" id="cpdId" value="0">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Activity Title *</label>
+                <input type="text" id="cpdTitle" required placeholder="e.g. Cardiology Update 2026 Webinar"
+                       class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Type *</label>
+                    <select id="cpdType" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+                        <option>Webinar</option><option>Conference</option><option>Course</option>
+                        <option>Workshop</option><option>Publication</option><option>Self-Study</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Credit Points *</label>
+                    <input type="number" id="cpdPoints" value="1" min="1" max="10" required
+                           class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Provider / Organiser</label>
+                    <input type="text" id="cpdProvider" placeholder="e.g. PMDC, AKU, CPSP"
+                           class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Activity Date *</label>
+                    <input type="date" id="cpdDate" required
+                           class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description (Optional)</label>
+                <textarea id="cpdDesc" rows="2" placeholder="Brief description of the activity..."
+                          class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800 resize-none"></textarea>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeCpdModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold">Cancel</button>
+                <button type="submit" class="flex-1 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-black">Save Activity</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const typeIcons = { Webinar:'fa-video', Conference:'fa-users', Course:'fa-graduation-cap', Workshop:'fa-tools', Publication:'fa-book', 'Self-Study':'fa-book-open' };
+const typeColors = { Webinar:'bg-blue-50 text-blue-700', Conference:'bg-purple-50 text-purple-700', Course:'bg-green-50 text-green-700', Workshop:'bg-orange-50 text-orange-700', Publication:'bg-pink-50 text-pink-700', 'Self-Study':'bg-slate-50 text-slate-700' };
+
+function initYears() {
+    const sel = document.getElementById('yearFilter');
+    const now = new Date().getFullYear();
+    for (let y = now; y >= now - 3; y--) {
+        const opt = document.createElement('option');
+        opt.value = y; opt.textContent = y;
+        sel.appendChild(opt);
+    }
+}
+
+async function loadCpd() {
+    const year = document.getElementById('yearFilter').value;
+    const res = await fetch(`/api/doctor/cpd?year=${year}`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    document.getElementById('totalPoints').textContent = data.totalPoints;
+    document.getElementById('progressBar').style.width = data.progress + '%';
+    document.getElementById('progressLabel').textContent = `${data.progress}% of ${data.goalPoints} point annual requirement`;
+
+    const byType = data.byType || [];
+    document.getElementById('statWebinar').textContent = (byType.find(x=>x.type==='Webinar')?.points||0);
+    document.getElementById('statConf').textContent = (byType.find(x=>x.type==='Conference')?.points||0);
+    document.getElementById('statCourse').textContent = (byType.find(x=>x.type==='Course')?.points||0);
+
+    renderActivities(data.activities || []);
+}
+
+function renderActivities(activities) {
+    const list = document.getElementById('activitiesList');
+    if (!activities.length) {
+        list.innerHTML = `<div class="text-center py-16 text-slate-400">
+            <i class="fas fa-graduation-cap text-5xl mb-4 opacity-30"></i>
+            <p class="font-bold text-xl text-slate-500">No activities logged</p>
+            <p class="text-sm mt-1">Log your CPD activities to track your progress.</p>
+        </div>`;
+        return;
+    }
+    list.innerHTML = activities.map(a => `
+        <div class="bg-white rounded-2xl border border-slate-100 p-5 flex items-center gap-5">
+            <div class="w-12 h-12 flex-shrink-0 rounded-2xl ${typeColors[a.activityType] || 'bg-slate-50 text-slate-600'} flex items-center justify-center">
+                <i class="fas ${typeIcons[a.activityType] || 'fa-certificate'}"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-900 truncate">${a.title}</p>
+                <p class="text-sm text-slate-500">${a.provider || a.activityType} &bull; ${new Date(a.activityDate).toLocaleDateString()}</p>
+            </div>
+            <div class="text-center flex-shrink-0">
+                <span class="text-2xl font-black text-blue-600">${a.creditPoints}</span>
+                <p class="text-xs text-slate-400 font-semibold">pts</p>
+            </div>
+            ${a.isVerified ? '<span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold flex-shrink-0">Verified</span>' : ''}
+            <div class="flex gap-2 flex-shrink-0">
+                <button onclick="editCpd(${a.id})" class="w-9 h-9 flex items-center justify-center bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all">
+                    <i class="fas fa-edit text-xs"></i>
+                </button>
+                <button onclick="deleteCpd(${a.id})" class="w-9 h-9 flex items-center justify-center bg-red-50 text-red-400 rounded-xl hover:bg-red-100 transition-all">
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            </div>
+        </div>`).join('');
+}
+
+let editingActivity = null;
+
+function openCpdModal(a) {
+    editingActivity = a || null;
+    document.getElementById('cpdId').value = a ? a.id : 0;
+    document.getElementById('cpdTitle').value = a ? a.title : '';
+    document.getElementById('cpdType').value = a ? a.activityType : 'Webinar';
+    document.getElementById('cpdPoints').value = a ? a.creditPoints : 1;
+    document.getElementById('cpdProvider').value = a ? (a.provider || '') : '';
+    document.getElementById('cpdDate').value = a ? a.activityDate?.slice(0,10) : new Date().toISOString().slice(0,10);
+    document.getElementById('cpdDesc').value = a ? (a.description || '') : '';
+    document.getElementById('cpdModalTitle').textContent = a ? 'Edit Activity' : 'Log CPD Activity';
+    const modal = document.getElementById('cpdModal');
+    modal.classList.remove('hidden'); modal.classList.add('flex');
+}
+
+function closeCpdModal() {
+    document.getElementById('cpdModal').classList.add('hidden');
+    document.getElementById('cpdModal').classList.remove('flex');
+}
+
+async function editCpd(id) {
+    const res = await fetch(`/api/doctor/cpd?year=${document.getElementById('yearFilter').value}`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    if (res.ok) {
+        const data = await res.json();
+        const a = (data.activities || []).find(x => x.id === id);
+        if (a) openCpdModal(a);
+    }
+}
+
+async function deleteCpd(id) {
+    if (!confirm('Delete this activity?')) return;
+    await fetch(`/api/doctor/cpd/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
+    loadCpd();
+}
+
+document.getElementById('cpdForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.textContent = 'Saving...'; btn.disabled = true;
+    const payload = {
+        id: parseInt(document.getElementById('cpdId').value),
+        title: document.getElementById('cpdTitle').value,
+        provider: document.getElementById('cpdProvider').value || null,
+        activityType: document.getElementById('cpdType').value,
+        creditPoints: parseInt(document.getElementById('cpdPoints').value),
+        activityDate: document.getElementById('cpdDate').value,
+        description: document.getElementById('cpdDesc').value || null
+    };
+    const res = await fetch('/api/doctor/cpd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify(payload)
+    });
+    btn.textContent = 'Save Activity'; btn.disabled = false;
+    if (res.ok) { closeCpdModal(); document.getElementById('cpdForm').reset(); loadCpd(); }
+    else alert('Failed to save activity');
+});
+
+function getToken() { return localStorage.getItem('jwt_token') || ''; }
+
+document.addEventListener('DOMContentLoaded', () => { initYears(); loadCpd(); });
+</script>
+}

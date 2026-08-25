@@ -1,0 +1,207 @@
+@{
+    ViewData["Title"] = "Follow-Up Reminders";
+    Layout = "~/Areas/Doctor/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-8 pb-20">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 py-6">
+        <div>
+            <h1 class="text-5xl font-bold text-slate-900 tracking-tight">Follow-Up <span class="text-blue-600">Reminders</span></h1>
+            <p class="text-slate-500 mt-2 font-medium">Schedule personalised follow-up messages for your patients.</p>
+        </div>
+        <button onclick="openReminderModal()" class="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-black transition-all shadow-lg">
+            <i class="fas fa-plus"></i> New Reminder
+        </button>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div id="statTotal" class="bg-white rounded-2xl p-5 border border-slate-100">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total</p>
+            <p class="text-3xl font-black text-slate-800 mt-1">—</p>
+        </div>
+        <div id="statPending" class="bg-white rounded-2xl p-5 border border-slate-100">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending</p>
+            <p class="text-3xl font-black text-amber-500 mt-1">—</p>
+        </div>
+        <div id="statSent" class="bg-white rounded-2xl p-5 border border-slate-100">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sent</p>
+            <p class="text-3xl font-black text-green-500 mt-1">—</p>
+        </div>
+        <div id="statToday" class="bg-white rounded-2xl p-5 border border-slate-100">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Due Today</p>
+            <p class="text-3xl font-black text-blue-600 mt-1">—</p>
+        </div>
+    </div>
+
+    <!-- Reminders List -->
+    <div id="remindersList" class="space-y-4"></div>
+</div>
+
+<!-- New Reminder Modal -->
+<div id="reminderModal" class="fixed inset-0 hidden items-center justify-center modal-overlay p-4 z-[100]">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-slate-900">New Follow-Up Reminder</h3>
+            <button onclick="closeReminderModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200">
+                <i class="fas fa-times text-slate-500"></i>
+            </button>
+        </div>
+        <form id="reminderForm" class="p-6 space-y-5">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Patient *</label>
+                <select id="reminderPatientId" required class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-semibold text-slate-800">
+                    <option value="">Select patient...</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Message *</label>
+                <textarea id="reminderMessage" rows="3" required placeholder="Dear patient, please book your follow-up appointment..."
+                          class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-semibold text-slate-800 resize-none"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Schedule Date & Time *</label>
+                <input type="datetime-local" id="reminderDate" required
+                       class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-semibold text-slate-800">
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeReminderModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold">Cancel</button>
+                <button type="submit" class="flex-1 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-black">Schedule Reminder</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+let reminders = [], patients = [];
+
+async function loadReminders() {
+    const res = await fetch('/api/doctor/follow-up-reminders', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    reminders = res.ok ? await res.json() : [];
+    updateStats();
+    renderReminders();
+}
+
+async function loadPatients() {
+    const res = await fetch('/api/doctor/patients', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    if (!res.ok) return;
+    const data = await res.json();
+    patients = data.map(d => ({ id: d.patient.id, name: d.patient.name }));
+    const sel = document.getElementById('reminderPatientId');
+    patients.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id; opt.textContent = p.name;
+        sel.appendChild(opt);
+    });
+}
+
+function updateStats() {
+    const total = reminders.length;
+    const sent = reminders.filter(r => r.isSent).length;
+    const pending = total - sent;
+    const today = new Date().toDateString();
+    const dueToday = reminders.filter(r => !r.isSent && new Date(r.scheduledAt).toDateString() === today).length;
+    document.getElementById('statTotal').querySelector('.text-3xl').textContent = total;
+    document.getElementById('statPending').querySelector('.text-3xl').textContent = pending;
+    document.getElementById('statSent').querySelector('.text-3xl').textContent = sent;
+    document.getElementById('statToday').querySelector('.text-3xl').textContent = dueToday;
+}
+
+function renderReminders() {
+    const list = document.getElementById('remindersList');
+    if (!reminders.length) {
+        list.innerHTML = `<div class="flex flex-col items-center justify-center py-24 text-slate-400">
+            <i class="fas fa-bell-slash text-5xl mb-4 opacity-30"></i>
+            <p class="font-bold text-xl text-slate-500">No reminders yet</p>
+        </div>`;
+        return;
+    }
+    list.innerHTML = reminders.map(r => {
+        const scheduled = new Date(r.scheduledAt);
+        const isPast = scheduled < new Date();
+        const statusColor = r.isSent ? 'bg-green-50 text-green-700' : (isPast ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-700');
+        const statusLabel = r.isSent ? 'Sent' : (isPast ? 'Overdue' : 'Scheduled');
+        return `<div class="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col md:flex-row md:items-center gap-5">
+            <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                    <p class="font-bold text-slate-900 text-lg">${r.patientName}</p>
+                    <span class="px-3 py-1 ${statusColor} rounded-full text-xs font-bold">${statusLabel}</span>
+                </div>
+                <p class="text-slate-600 text-sm leading-relaxed">${r.message}</p>
+                <p class="text-slate-400 text-xs mt-2"><i class="far fa-clock mr-1"></i>${scheduled.toLocaleString()}</p>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+                ${!r.isSent ? `<button onclick="sendNow(${r.id})" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-all">
+                    <i class="fas fa-paper-plane mr-1"></i> Send Now
+                </button>` : ''}
+                <button onclick="deleteReminder(${r.id})" class="w-9 h-9 flex items-center justify-center bg-red-50 text-red-400 hover:bg-red-100 rounded-xl transition-all">
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function sendNow(id) {
+    const btn = event.target.closest('button');
+    btn.textContent = 'Sending...'; btn.disabled = true;
+    const res = await fetch(`/api/doctor/follow-up-reminders/${id}/send`, {
+        method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() }
+    });
+    if (res.ok) { showToast('Reminder sent!', 'success'); loadReminders(); }
+    else { showToast('Failed to send', 'error'); btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Send Now'; btn.disabled = false; }
+}
+
+async function deleteReminder(id) {
+    if (!confirm('Delete this reminder?')) return;
+    await fetch(`/api/doctor/follow-up-reminders/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
+    loadReminders();
+}
+
+function openReminderModal() {
+    document.getElementById('reminderModal').classList.remove('hidden');
+    document.getElementById('reminderModal').classList.add('flex');
+    // Default to tomorrow
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('reminderDate').value = tomorrow.toISOString().slice(0,16);
+}
+
+function closeReminderModal() {
+    document.getElementById('reminderModal').classList.add('hidden');
+    document.getElementById('reminderModal').classList.remove('flex');
+}
+
+document.getElementById('reminderForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.textContent = 'Scheduling...'; btn.disabled = true;
+    const payload = {
+        patientId: document.getElementById('reminderPatientId').value,
+        message: document.getElementById('reminderMessage').value,
+        scheduledAt: document.getElementById('reminderDate').value,
+        appointmentId: null
+    };
+    const res = await fetch('/api/doctor/follow-up-reminders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify(payload)
+    });
+    btn.textContent = 'Schedule Reminder'; btn.disabled = false;
+    if (res.ok) { closeReminderModal(); document.getElementById('reminderForm').reset(); loadReminders(); showToast('Reminder scheduled!', 'success'); }
+    else showToast('Failed to schedule reminder', 'error');
+});
+
+function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.className = `fixed bottom-6 right-6 px-6 py-4 rounded-2xl shadow-xl font-bold text-white z-[200] ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+function getToken() { return localStorage.getItem('jwt_token') || ''; }
+
+document.addEventListener('DOMContentLoaded', () => { loadReminders(); loadPatients(); });
+</script>
+}

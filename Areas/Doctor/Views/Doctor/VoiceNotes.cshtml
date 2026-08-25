@@ -1,0 +1,224 @@
+@{
+    ViewData["Title"] = "Voice Notes";
+    Layout = "~/Areas/Doctor/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-8 pb-20">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 py-6">
+        <div>
+            <h1 class="text-5xl font-bold text-slate-900 tracking-tight">Voice <span class="text-blue-600">Notes</span></h1>
+            <p class="text-slate-500 mt-2 font-medium">Dictate clinical observations instantly — transcribed and saved automatically.</p>
+        </div>
+        <button onclick="openNoteModal()" class="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-black transition-all shadow-lg">
+            <i class="fas fa-microphone"></i> New Voice Note
+        </button>
+    </div>
+
+    <!-- Notes List -->
+    <div id="notesList" class="space-y-4"></div>
+</div>
+
+<!-- Voice Note Modal -->
+<div id="noteModal" class="fixed inset-0 hidden items-center justify-center modal-overlay p-4 z-[100]">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-slate-900">New Voice Note</h3>
+            <button onclick="closeNoteModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200">
+                <i class="fas fa-times text-slate-500"></i>
+            </button>
+        </div>
+        <div class="p-6 space-y-5">
+            <!-- Patient (optional) -->
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Patient (Optional)</label>
+                <select id="notePatientId" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+                    <option value="">No specific patient</option>
+                </select>
+            </div>
+
+            <!-- Recording Section -->
+            <div class="bg-slate-50 rounded-2xl p-6 text-center">
+                <div id="recordingStatus" class="mb-4">
+                    <div id="idleIcon" class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto cursor-pointer hover:bg-blue-100 transition-all" onclick="toggleRecording()">
+                        <i class="fas fa-microphone text-slate-500 text-2xl"></i>
+                    </div>
+                    <p id="statusText" class="text-slate-500 text-sm font-semibold mt-3">Tap to start recording</p>
+                    <p id="timerDisplay" class="text-slate-400 text-xs mt-1 hidden">00:00</p>
+                </div>
+                <div id="recordingIcon" class="hidden w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto cursor-pointer animate-pulse" onclick="stopRecording()">
+                    <i class="fas fa-stop text-white text-xl"></i>
+                </div>
+            </div>
+
+            <!-- Transcribed Text -->
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Transcribed Text</label>
+                <textarea id="noteText" rows="5" placeholder="Your voice will be transcribed here, or type directly..."
+                          class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800 resize-none"></textarea>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="closeNoteModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold">Cancel</button>
+                <button onclick="saveNote()" id="saveNoteBtn" class="flex-1 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-black">Save Note</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+let isRecording = false;
+let recognition = null;
+let timerInterval = null;
+let elapsed = 0;
+
+async function loadNotes() {
+    const res = await fetch('/api/doctor/voice-notes', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    const notes = res.ok ? await res.json() : [];
+    renderNotes(notes);
+}
+
+function renderNotes(notes) {
+    const list = document.getElementById('notesList');
+    if (!notes.length) {
+        list.innerHTML = `<div class="text-center py-16 text-slate-400">
+            <i class="fas fa-microphone-alt text-5xl mb-4 opacity-30"></i>
+            <p class="font-bold text-xl text-slate-500">No voice notes yet</p>
+            <p class="text-sm mt-1">Record clinical observations with your voice — transcribed automatically.</p>
+        </div>`;
+        return;
+    }
+    list.innerHTML = notes.map(n => `
+        <div class="bg-white rounded-2xl border border-slate-100 p-6">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    ${n.patientName ? `<p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Patient: ${n.patientName}</p>` : ''}
+                    <p class="text-xs text-slate-400">${new Date(n.createdAt).toLocaleString()}</p>
+                </div>
+                <button onclick="deleteNote(${n.id})" class="w-9 h-9 flex items-center justify-center bg-red-50 text-red-400 hover:bg-red-100 rounded-xl transition-all">
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            </div>
+            <p class="text-slate-700 leading-relaxed">${n.transcribedText}</p>
+        </div>`).join('');
+}
+
+async function deleteNote(id) {
+    if (!confirm('Delete this voice note?')) return;
+    await fetch(`/api/doctor/voice-notes/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
+    loadNotes();
+}
+
+async function loadPatients() {
+    const res = await fetch('/api/doctor/patients', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    if (!res.ok) return;
+    const data = await res.json();
+    const sel = document.getElementById('notePatientId');
+    data.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.patient.id; opt.textContent = d.patient.name;
+        sel.appendChild(opt);
+    });
+}
+
+function openNoteModal() {
+    document.getElementById('noteModal').classList.remove('hidden');
+    document.getElementById('noteModal').classList.add('flex');
+    document.getElementById('noteText').value = '';
+}
+
+function closeNoteModal() {
+    stopRecording();
+    document.getElementById('noteModal').classList.add('hidden');
+    document.getElementById('noteModal').classList.remove('flex');
+}
+
+function toggleRecording() {
+    if (isRecording) stopRecording();
+    else startRecording();
+}
+
+function startRecording() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert('Speech recognition not supported in this browser. Please use Chrome.');
+        return;
+    }
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    let finalTranscript = document.getElementById('noteText').value;
+
+    recognition.onresult = (e) => {
+        let interim = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+            const t = e.results[i].transcript;
+            if (e.results[i].isFinal) finalTranscript += t + ' ';
+            else interim += t;
+        }
+        document.getElementById('noteText').value = finalTranscript + interim;
+    };
+
+    recognition.onerror = (e) => { console.error('Speech error:', e.error); stopRecording(); };
+    recognition.start();
+    isRecording = true;
+
+    document.getElementById('idleIcon').classList.add('hidden');
+    document.getElementById('recordingIcon').classList.remove('hidden');
+    document.getElementById('recordingIcon').classList.add('flex');
+    document.getElementById('statusText').textContent = 'Recording... tap red button to stop';
+    document.getElementById('timerDisplay').classList.remove('hidden');
+
+    elapsed = 0;
+    timerInterval = setInterval(() => {
+        elapsed++;
+        const m = String(Math.floor(elapsed/60)).padStart(2,'0');
+        const s = String(elapsed%60).padStart(2,'0');
+        document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+    }, 1000);
+}
+
+function stopRecording() {
+    if (recognition) { recognition.stop(); recognition = null; }
+    isRecording = false;
+    clearInterval(timerInterval);
+    document.getElementById('idleIcon').classList.remove('hidden');
+    document.getElementById('recordingIcon').classList.add('hidden');
+    document.getElementById('recordingIcon').classList.remove('flex');
+    document.getElementById('statusText').textContent = 'Tap to start recording';
+    document.getElementById('timerDisplay').classList.add('hidden');
+}
+
+async function saveNote() {
+    const text = document.getElementById('noteText').value.trim();
+    if (!text) { alert('Please record or type a note first.'); return; }
+    const btn = document.getElementById('saveNoteBtn');
+    btn.textContent = 'Saving...'; btn.disabled = true;
+    const payload = {
+        transcribedText: text,
+        patientId: document.getElementById('notePatientId').value || null,
+        appointmentId: null,
+        audioUrl: null
+    };
+    const res = await fetch('/api/doctor/voice-notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify(payload)
+    });
+    btn.textContent = 'Save Note'; btn.disabled = false;
+    if (res.ok) { closeNoteModal(); showToast('Note saved!', 'success'); loadNotes(); }
+    else showToast('Failed to save note', 'error');
+}
+
+function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.className = `fixed bottom-6 right-6 px-6 py-4 rounded-2xl shadow-xl font-bold text-white z-[200] ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+    t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
+}
+
+function getToken() { return localStorage.getItem('jwt_token') || ''; }
+document.addEventListener('DOMContentLoaded', () => { loadNotes(); loadPatients(); });
+</script>
+}

@@ -1,0 +1,168 @@
+@{
+    ViewData["Title"] = "Clinic Staff";
+    Layout = "~/Areas/Doctor/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-8 pb-20">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 py-6">
+        <div>
+            <h1 class="text-5xl font-bold text-slate-900 tracking-tight">Clinic <span class="text-blue-600">Staff</span></h1>
+            <p class="text-slate-500 mt-2 font-medium">Manage your receptionist, nurses, and assistants. Each gets their own login.</p>
+        </div>
+        <button onclick="openStaffModal()" class="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-black transition-all shadow-lg">
+            <i class="fas fa-user-plus"></i> Add Staff Member
+        </button>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="bg-blue-50 border border-blue-100 rounded-2xl p-5 flex gap-4">
+        <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-info-circle text-blue-600"></i>
+        </div>
+        <div>
+            <p class="font-bold text-blue-800">Staff members get their own MedLink login</p>
+            <p class="text-blue-600 text-sm mt-1">A welcome email with temporary credentials is sent automatically. Staff can book appointments and manage the waiting room on your behalf.</p>
+        </div>
+    </div>
+
+    <!-- Staff Grid -->
+    <div id="staffGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+</div>
+
+<!-- Add Staff Modal -->
+<div id="staffModal" class="fixed inset-0 hidden items-center justify-center modal-overlay p-4 z-[100]">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-slate-900">Add Staff Member</h3>
+            <button onclick="closeStaffModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200">
+                <i class="fas fa-times text-slate-500"></i>
+            </button>
+        </div>
+        <form id="staffForm" class="p-6 space-y-5">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Full Name *</label>
+                <input type="text" id="staffName" required placeholder="Ahmed Ali"
+                       class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Email Address *</label>
+                <input type="email" id="staffEmail" required placeholder="staff@clinic.com"
+                       class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+                <p class="text-xs text-slate-400 mt-1">Login credentials will be sent to this email.</p>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Phone</label>
+                <input type="tel" id="staffPhone" placeholder="+92 300 0000000"
+                       class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Role *</label>
+                <select id="staffRole" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+                    <option value="Receptionist">Receptionist</option>
+                    <option value="Nurse">Nurse</option>
+                    <option value="Assistant">Medical Assistant</option>
+                </select>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeStaffModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold">Cancel</button>
+                <button type="submit" id="staffSubmitBtn" class="flex-1 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-black">Add Staff</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const roleIcons = { Receptionist:'fa-headset', Nurse:'fa-user-nurse', Assistant:'fa-stethoscope' };
+const roleColors = { Receptionist:'bg-blue-50 text-blue-700', Nurse:'bg-green-50 text-green-700', Assistant:'bg-purple-50 text-purple-700' };
+
+async function loadStaff() {
+    const res = await fetch('/api/doctor/staff', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    const staff = res.ok ? await res.json() : [];
+    renderStaff(staff);
+}
+
+function renderStaff(staff) {
+    const grid = document.getElementById('staffGrid');
+    if (!staff.length) {
+        grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-24 text-slate-400">
+            <i class="fas fa-users text-5xl mb-4 opacity-30"></i>
+            <p class="font-bold text-xl text-slate-500">No staff members yet</p>
+            <p class="text-sm mt-1">Add your receptionist or nurse to help manage your clinic.</p>
+        </div>`;
+        return;
+    }
+    grid.innerHTML = staff.map(s => `
+        <div class="bg-white rounded-2xl border border-slate-100 p-6">
+            <div class="flex items-start justify-between mb-5">
+                <div class="w-14 h-14 ${roleColors[s.role] || 'bg-slate-50 text-slate-500'} rounded-2xl flex items-center justify-center text-xl">
+                    <i class="fas ${roleIcons[s.role] || 'fa-user'}"></i>
+                </div>
+                <button onclick="removeStaff(${s.id})" class="text-slate-300 hover:text-red-400 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p class="font-bold text-slate-900 text-lg">${s.name}</p>
+            <p class="text-slate-500 text-sm">${s.email}</p>
+            <p class="text-slate-400 text-xs mt-1">${s.phone || '—'}</p>
+            <div class="mt-4 flex justify-between items-center">
+                <span class="px-3 py-1 ${roleColors[s.role] || 'bg-slate-50 text-slate-600'} rounded-full text-xs font-bold">${s.role}</span>
+                <span class="text-xs text-slate-400">Added ${new Date(s.addedAt).toLocaleDateString()}</span>
+            </div>
+        </div>`).join('');
+}
+
+async function removeStaff(id) {
+    if (!confirm('Remove this staff member?')) return;
+    const res = await fetch(`/api/doctor/staff/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
+    if (res.ok) { showToast('Staff member removed', 'success'); loadStaff(); }
+    else showToast('Failed to remove', 'error');
+}
+
+function openStaffModal() {
+    document.getElementById('staffModal').classList.remove('hidden');
+    document.getElementById('staffModal').classList.add('flex');
+}
+function closeStaffModal() {
+    document.getElementById('staffModal').classList.add('hidden');
+    document.getElementById('staffModal').classList.remove('flex');
+}
+
+document.getElementById('staffForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('staffSubmitBtn');
+    btn.textContent = 'Adding...'; btn.disabled = true;
+    const payload = {
+        name: document.getElementById('staffName').value,
+        email: document.getElementById('staffEmail').value,
+        phone: document.getElementById('staffPhone').value,
+        role: document.getElementById('staffRole').value
+    };
+    const res = await fetch('/api/doctor/staff', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify(payload)
+    });
+    btn.textContent = 'Add Staff'; btn.disabled = false;
+    if (res.ok) {
+        closeStaffModal(); document.getElementById('staffForm').reset();
+        showToast('Staff member added successfully!', 'success');
+        loadStaff();
+    } else {
+        const data = await res.json().catch(() => ({}));
+        showToast(data.message || 'Failed to add staff', 'error');
+    }
+});
+
+function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.className = `fixed bottom-6 right-6 px-6 py-4 rounded-2xl shadow-xl font-bold text-white z-[200] ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+function getToken() { return localStorage.getItem('jwt_token') || ''; }
+document.addEventListener('DOMContentLoaded', loadStaff);
+</script>
+}

@@ -1165,6 +1165,36 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
             return View(model);
         }
 
+        // ── Enhancement Views ─────────────────────────────────────────────────
+
+        public IActionResult PrescriptionTemplates() => View();
+        public IActionResult WaitingRoom() => View();
+        public IActionResult FollowUpReminders() => View();
+        public IActionResult CpdTracker() => View();
+        public IActionResult ClinicStaff() => View();
+        public IActionResult Referrals() => View();
+        public IActionResult MyReviews() => View();
+        public IActionResult VoiceNotes() => View();
+        public IActionResult PeakAnalytics() => View();
+
+        // Public profile — no auth required
+        [AllowAnonymous]
+        public async Task<IActionResult> PublicProfile(int id)
+        {
+            var doctor = await _context.Doctors
+                .Include(d => d.PatientReviews)
+                .FirstOrDefaultAsync(d => d.Id == id);
+            if (doctor == null) return NotFound();
+
+            var replyIds = doctor.PatientReviews?.Select(r => r.Id).ToList() ?? new List<int>();
+            var replies = await _context.ReviewReplies
+                .Where(rp => replyIds.Contains(rp.ReviewId))
+                .ToDictionaryAsync(rp => rp.ReviewId, rp => rp.ReplyText);
+
+            ViewBag.Replies = replies;
+            return View(doctor);
+        }
+
         public async Task<IActionResult> Availability()
         {
             var userId = _userManager.GetUserId(User);

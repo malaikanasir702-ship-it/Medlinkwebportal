@@ -1,0 +1,250 @@
+@{
+    ViewData["Title"] = "Referrals";
+    Layout = "~/Areas/Doctor/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-8 pb-20">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 py-6">
+        <div>
+            <h1 class="text-5xl font-bold text-slate-900 tracking-tight">Patient <span class="text-blue-600">Referrals</span></h1>
+            <p class="text-slate-500 mt-2 font-medium">Refer patients to specialists and track incoming referrals.</p>
+        </div>
+        <button onclick="openReferralModal()" class="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-black transition-all shadow-lg">
+            <i class="fas fa-share-square"></i> New Referral
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 border-b border-slate-200 pb-0">
+        <button onclick="switchTab('received')" id="tab-received"
+                class="tab-btn px-6 py-3 text-sm font-bold rounded-t-xl border-b-2 border-blue-600 text-blue-600">
+            Received <span id="receivedCount" class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs">0</span>
+        </button>
+        <button onclick="switchTab('sent')" id="tab-sent"
+                class="tab-btn px-6 py-3 text-sm font-bold rounded-t-xl border-b-2 border-transparent text-slate-500 hover:text-slate-700">
+            Sent
+        </button>
+    </div>
+
+    <!-- Received Tab -->
+    <div id="pane-received" class="space-y-4"></div>
+
+    <!-- Sent Tab -->
+    <div id="pane-sent" class="space-y-4 hidden"></div>
+</div>
+
+<!-- New Referral Modal -->
+<div id="referralModal" class="fixed inset-0 hidden items-center justify-center modal-overlay p-4 z-[100]">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-slate-900">Refer Patient to Specialist</h3>
+            <button onclick="closeReferralModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200">
+                <i class="fas fa-times text-slate-500"></i>
+            </button>
+        </div>
+        <form id="referralForm" class="p-6 space-y-5">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Patient *</label>
+                <select id="refPatientId" required class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+                    <option value="">Select patient...</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Refer to Specialty *</label>
+                <select id="refSpecialty" onchange="loadDoctorsBySpecialty()" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+                    <option value="">Select specialty...</option>
+                    <option>Cardiologist</option><option>Neurologist</option><option>Dermatologist</option>
+                    <option>Orthopedic Surgeon</option><option>Gastroenterologist</option><option>Endocrinologist</option>
+                    <option>Psychiatrist</option><option>Pediatrician</option><option>Gynecologist</option>
+                    <option>Ophthalmologist</option><option>ENT Specialist</option><option>Urologist</option>
+                    <option>Pulmonologist</option><option>Rheumatologist</option><option>Hematologist</option>
+                    <option>Nephrologist</option><option>Oncologist</option><option>General Surgeon</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Select Doctor *</label>
+                <select id="refDoctorId" required class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800">
+                    <option value="">Select specialty first...</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Reason for Referral *</label>
+                <textarea id="refReason" rows="2" required placeholder="Brief clinical reason..."
+                          class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800 resize-none"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Clinical Notes (Optional)</label>
+                <textarea id="refNotes" rows="3" placeholder="Relevant history, lab results, medications..."
+                          class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none font-semibold text-slate-800 resize-none"></textarea>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeReferralModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold">Cancel</button>
+                <button type="submit" class="flex-1 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-black">Send Referral</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+let activeTab = 'received';
+
+async function loadAll() {
+    const [recRes, sentRes] = await Promise.all([
+        fetch('/api/doctor/referrals/received', { headers: { 'Authorization': 'Bearer ' + getToken() } }),
+        fetch('/api/doctor/referrals/sent', { headers: { 'Authorization': 'Bearer ' + getToken() } })
+    ]);
+    const received = recRes.ok ? await recRes.json() : [];
+    const sent = sentRes.ok ? await sentRes.json() : [];
+    document.getElementById('receivedCount').textContent = received.length;
+    renderReceived(received);
+    renderSent(sent);
+}
+
+function renderReceived(items) {
+    const pane = document.getElementById('pane-received');
+    if (!items.length) {
+        pane.innerHTML = `<div class="text-center py-16 text-slate-400"><i class="fas fa-inbox text-5xl mb-4 opacity-30"></i><p class="font-bold text-xl text-slate-500">No incoming referrals</p></div>`;
+        return;
+    }
+    pane.innerHTML = items.map(r => `
+        <div class="bg-white rounded-2xl border border-blue-100 p-6 space-y-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center gap-3 mb-1">
+                        <span class="w-8 h-8 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center text-sm"><i class="fas fa-user-md"></i></span>
+                        <span class="font-bold text-slate-900">From Dr. ${r.referrerName}</span>
+                    </div>
+                    <p class="text-sm text-slate-500 ml-11">Patient: <strong>${r.patientName}</strong></p>
+                </div>
+                <span class="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold">Pending</span>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-4">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Reason</p>
+                <p class="text-slate-700 font-semibold text-sm">${r.reason}</p>
+                ${r.clinicalNotes ? `<p class="text-slate-500 text-sm mt-2">${r.clinicalNotes}</p>` : ''}
+            </div>
+            <div class="flex gap-3">
+                <button onclick="respond(${r.id},'Accepted')" class="flex-1 py-3 bg-green-600 text-white rounded-xl text-sm font-bold hover:bg-green-700 transition-all">
+                    <i class="fas fa-check mr-2"></i>Accept Referral
+                </button>
+                <button onclick="respond(${r.id},'Declined')" class="flex-1 py-3 bg-red-50 text-red-600 rounded-xl text-sm font-bold hover:bg-red-100 transition-all">
+                    <i class="fas fa-times mr-2"></i>Decline
+                </button>
+            </div>
+        </div>`).join('');
+}
+
+function renderSent(items) {
+    const pane = document.getElementById('pane-sent');
+    if (!items.length) {
+        pane.innerHTML = `<div class="text-center py-16 text-slate-400"><i class="fas fa-share-square text-5xl mb-4 opacity-30"></i><p class="font-bold text-xl text-slate-500">No referrals sent</p></div>`;
+        return;
+    }
+    const statusColor = { Pending:'bg-amber-50 text-amber-700', Accepted:'bg-green-50 text-green-700', Declined:'bg-red-50 text-red-600', Completed:'bg-blue-50 text-blue-700' };
+    pane.innerHTML = items.map(r => `
+        <div class="bg-white rounded-2xl border border-slate-100 p-6">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <p class="font-bold text-slate-900">${r.patientName}</p>
+                    <p class="text-sm text-slate-500">Referred to Dr. ${r.receiverName}</p>
+                    <p class="text-xs text-slate-400 mt-1">${new Date(r.createdAt).toLocaleDateString()}</p>
+                </div>
+                <span class="px-3 py-1 ${statusColor[r.status] || 'bg-slate-50 text-slate-600'} rounded-full text-xs font-bold">${r.status}</span>
+            </div>
+            <p class="text-slate-600 text-sm bg-slate-50 rounded-xl p-3">${r.reason}</p>
+        </div>`).join('');
+}
+
+async function respond(id, status) {
+    const res = await fetch('/api/doctor/referrals/respond', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify({ referralId: id, status })
+    });
+    if (res.ok) { showToast(`Referral ${status.toLowerCase()}`, 'success'); loadAll(); }
+    else showToast('Failed to respond', 'error');
+}
+
+function switchTab(tab) {
+    activeTab = tab;
+    document.getElementById('pane-received').classList.toggle('hidden', tab !== 'received');
+    document.getElementById('pane-sent').classList.toggle('hidden', tab !== 'sent');
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        const isActive = btn.id === `tab-${tab}`;
+        btn.classList.toggle('border-blue-600', isActive);
+        btn.classList.toggle('text-blue-600', isActive);
+        btn.classList.toggle('border-transparent', !isActive);
+        btn.classList.toggle('text-slate-500', !isActive);
+    });
+}
+
+async function loadPatients() {
+    const res = await fetch('/api/doctor/patients', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    if (!res.ok) return;
+    const data = await res.json();
+    const sel = document.getElementById('refPatientId');
+    data.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.patient.id; opt.textContent = d.patient.name;
+        sel.appendChild(opt);
+    });
+}
+
+async function loadDoctorsBySpecialty() {
+    const specialty = document.getElementById('refSpecialty').value;
+    if (!specialty) return;
+    const res = await fetch(`/api/doctors?specialty=${encodeURIComponent(specialty)}`);
+    const sel = document.getElementById('refDoctorId');
+    sel.innerHTML = '<option value="">Loading...</option>';
+    if (res.ok) {
+        const doctors = await res.json();
+        sel.innerHTML = '<option value="">Select doctor...</option>';
+        doctors.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.userId; opt.textContent = `Dr. ${d.name} (${d.experience})`;
+            sel.appendChild(opt);
+        });
+    } else { sel.innerHTML = '<option value="">No doctors found</option>'; }
+}
+
+function openReferralModal() {
+    document.getElementById('referralModal').classList.remove('hidden');
+    document.getElementById('referralModal').classList.add('flex');
+}
+function closeReferralModal() {
+    document.getElementById('referralModal').classList.add('hidden');
+    document.getElementById('referralModal').classList.remove('flex');
+}
+
+document.getElementById('referralForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.textContent = 'Sending...'; btn.disabled = true;
+    const payload = {
+        receivingDoctorUserId: document.getElementById('refDoctorId').value,
+        patientId: document.getElementById('refPatientId').value,
+        appointmentId: null,
+        reason: document.getElementById('refReason').value,
+        clinicalNotes: document.getElementById('refNotes').value || null
+    };
+    const res = await fetch('/api/doctor/referrals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify(payload)
+    });
+    btn.textContent = 'Send Referral'; btn.disabled = false;
+    if (res.ok) { closeReferralModal(); document.getElementById('referralForm').reset(); showToast('Referral sent!', 'success'); loadAll(); }
+    else showToast('Failed to send referral', 'error');
+});
+
+function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.className = `fixed bottom-6 right-6 px-6 py-4 rounded-2xl shadow-xl font-bold text-white z-[200] ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+    t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
+}
+
+function getToken() { return localStorage.getItem('jwt_token') || ''; }
+document.addEventListener('DOMContentLoaded', () => { loadAll(); loadPatients(); });
+</script>
+}

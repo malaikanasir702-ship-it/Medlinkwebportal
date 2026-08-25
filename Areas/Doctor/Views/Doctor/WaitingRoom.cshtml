@@ -1,0 +1,144 @@
+@{
+    ViewData["Title"] = "Waiting Room";
+    Layout = "~/Areas/Doctor/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-8 pb-20">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 py-6">
+        <div>
+            <h1 class="text-5xl font-bold text-slate-900 tracking-tight">Waiting <span class="text-blue-600">Room</span></h1>
+            <p class="text-slate-500 mt-2 font-medium">Patients waiting for today's session — call them in order.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="totalBadge" class="px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-bold">0 Waiting</span>
+            <button onclick="loadQueue()" class="flex items-center gap-2 px-6 py-3 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Live Queue -->
+    <div id="queueList" class="space-y-4">
+        <div class="flex flex-col items-center justify-center py-20 text-slate-400">
+            <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+            <p class="font-semibold">Loading queue...</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+let autoRefreshInterval;
+
+async function loadQueue() {
+    try {
+        const res = await fetch('/api/doctor/waiting-room', {
+            headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        renderQueue(data);
+    } catch {
+        document.getElementById('queueList').innerHTML = `<div class="text-center text-slate-400 py-16">
+            <i class="fas fa-wifi-slash text-4xl mb-3 opacity-30"></i>
+            <p class="font-semibold">Could not load waiting room</p>
+        </div>`;
+    }
+}
+
+function renderQueue(data) {
+    const list = document.getElementById('queueList');
+    document.getElementById('totalBadge').textContent = `${data.totalWaiting} Waiting`;
+
+    if (!data.queue || !data.queue.length) {
+        list.innerHTML = `<div class="flex flex-col items-center justify-center py-24 text-slate-400">
+            <div class="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center mb-6">
+                <i class="fas fa-check-circle text-3xl text-green-400"></i>
+            </div>
+            <p class="font-bold text-xl text-slate-600">All clear!</p>
+            <p class="text-sm mt-1">No patients are currently waiting.</p>
+        </div>`;
+        return;
+    }
+
+    list.innerHTML = data.queue.map((p, i) => {
+        const isFirst = i === 0;
+        return `<div class="bg-white rounded-2xl border ${isFirst ? 'border-blue-200 shadow-blue-100 shadow-lg' : 'border-slate-100'} p-6 flex flex-col md:flex-row md:items-center gap-5">
+            <!-- Position Badge -->
+            <div class="w-14 h-14 flex-shrink-0 rounded-2xl ${isFirst ? 'bg-blue-600' : 'bg-slate-100'} flex items-center justify-center">
+                <span class="text-2xl font-black ${isFirst ? 'text-white' : 'text-slate-500'}">${p.queuePosition}</span>
+            </div>
+            <!-- Patient Info -->
+            <div class="flex-1">
+                <div class="flex items-center gap-3 mb-1">
+                    <p class="font-bold text-slate-900 text-lg">${p.patientName}</p>
+                    ${isFirst ? '<span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold">NEXT UP</span>' : ''}
+                </div>
+                <p class="text-slate-500 text-sm">${p.appointmentType} &bull; Joined ${formatTime(p.joinedAt)}</p>
+            </div>
+            <!-- Wait Time -->
+            <div class="text-center">
+                <p class="text-2xl font-black text-slate-800">${p.estimatedWaitMinutes}<span class="text-sm font-semibold text-slate-400 ml-1">min</span></p>
+                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Est. Wait</p>
+            </div>
+            <!-- Actions -->
+            <div class="flex gap-3">
+                <button onclick="callPatient(${p.id})" class="flex items-center gap-2 px-5 py-3 ${isFirst ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} rounded-xl text-sm font-bold transition-all">
+                    <i class="fas fa-phone"></i> Call In
+                </button>
+                <button onclick="markDone(${p.id})" class="flex items-center gap-2 px-5 py-3 bg-green-50 text-green-700 hover:bg-green-100 rounded-xl text-sm font-bold transition-all">
+                    <i class="fas fa-check"></i> Done
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function callPatient(entryId) {
+    const btn = event.target.closest('button');
+    btn.textContent = 'Calling...'; btn.disabled = true;
+    try {
+        const res = await fetch('/api/doctor/waiting-room/call', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+            body: JSON.stringify({ entryId })
+        });
+        if (res.ok) {
+            showToast('Patient has been notified to join!', 'success');
+            await loadQueue();
+        } else { showToast('Failed to call patient', 'error'); }
+    } finally { btn.textContent = 'Call In'; btn.disabled = false; }
+}
+
+async function markDone(entryId) {
+    await fetch(`/api/doctor/waiting-room/done/${entryId}`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + getToken() }
+    });
+    showToast('Session marked as complete', 'success');
+    await loadQueue();
+}
+
+function formatTime(dt) {
+    const d = new Date(dt);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.className = `fixed bottom-6 right-6 px-6 py-4 rounded-2xl shadow-xl font-bold text-white z-[200] ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+function getToken() { return localStorage.getItem('jwt_token') || ''; }
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadQueue();
+    autoRefreshInterval = setInterval(loadQueue, 30000); // Auto-refresh every 30s
+});
+window.addEventListener('beforeunload', () => clearInterval(autoRefreshInterval));
+</script>
+}

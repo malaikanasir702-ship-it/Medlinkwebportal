@@ -1,8 +1,8 @@
+using MedLinkPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace MedLinkPortal.Controllers.Api
@@ -12,11 +12,11 @@ namespace MedLinkPortal.Controllers.Api
     [Authorize(AuthenticationSchemes = "Bearer")]
     public class UploadController : ControllerBase
     {
-        private readonly IWebHostEnvironment _environment;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public UploadController(IWebHostEnvironment environment)
+        public UploadController(ICloudinaryService cloudinaryService)
         {
-            _environment = environment;
+            _cloudinaryService = cloudinaryService;
         }
 
         [HttpPost("Image")]
@@ -27,22 +27,18 @@ namespace MedLinkPortal.Controllers.Api
 
             try
             {
-                string uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "chat");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
+                var fileUrl = await _cloudinaryService.UploadImageAsync(file, "chat_uploads");
+                if (string.IsNullOrEmpty(fileUrl))
+                    return StatusCode(500, "Failed to upload image.");
 
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                string filePath = Path.Combine(uploadsFolder, fileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                // If relative path returned by local fallback, prepend host
+                if (fileUrl.StartsWith("/"))
                 {
-                    await file.CopyToAsync(fileStream);
+                    var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                    fileUrl = $"{baseUrl}{fileUrl}";
                 }
 
-                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
-                var url = $"{baseUrl}/uploads/chat/{fileName}";
-
-                return Ok(new { url = url });
+                return Ok(new { url = fileUrl });
             }
             catch (Exception ex)
             {

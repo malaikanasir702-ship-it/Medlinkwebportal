@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MedLinkPortal.Models;
+using MedLinkPortal.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System;
@@ -13,10 +14,12 @@ namespace MedLinkPortal.Areas.Lab.Controllers
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public DashboardController(ApplicationDbContext context)
+        public DashboardController(ApplicationDbContext context, ICloudinaryService cloudinaryService)
         {
             _context = context;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<IActionResult> Index()
@@ -62,18 +65,11 @@ namespace MedLinkPortal.Areas.Lab.Controllers
 
             if (logoFile != null && logoFile.Length > 0)
             {
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "lab-logos");
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(logoFile.FileName);
-                string filePath = Path.Combine(uploadsFolder, fileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                var uploadedUrl = await _cloudinaryService.UploadImageAsync(logoFile, "lab_logos");
+                if (!string.IsNullOrEmpty(uploadedUrl))
                 {
-                    await logoFile.CopyToAsync(fileStream);
+                    lab.LogoUrl = uploadedUrl;
                 }
-
-                lab.LogoUrl = "/uploads/lab-logos/" + fileName;
             }
 
             lab.Address = labInfo.Address;
@@ -330,21 +326,14 @@ namespace MedLinkPortal.Areas.Lab.Controllers
             var booking = await _context.LabBookings.FirstOrDefaultAsync(b => b.Id == bookingId && b.LaboratoryId == lab.Id);
             if (booking == null) return Json(new { success = false, message = "Booking not found or access denied" });
 
-            string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "lab-reports");
-            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-            string fileName = Guid.NewGuid().ToString() + "_" + reportFile.FileName;
-            string filePath = Path.Combine(uploadsFolder, fileName);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await reportFile.CopyToAsync(fileStream);
-            }
+            var reportUrl = await _cloudinaryService.UploadRawFileAsync(reportFile, "lab_reports");
+            if (string.IsNullOrEmpty(reportUrl))
+                return Json(new { success = false, message = "Failed to upload report" });
 
             var result = new LabTestResult
             {
                 LabBookingId = bookingId,
-                ReportUrl = "/uploads/lab-reports/" + fileName,
+                ReportUrl = reportUrl,
                 UploadedDate = DateTime.Now
             };
 

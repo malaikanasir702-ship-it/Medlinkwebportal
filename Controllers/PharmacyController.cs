@@ -24,13 +24,15 @@ namespace MedLinkPortal.Controllers
         private readonly IConfiguration _configuration;
         private readonly Microsoft.AspNetCore.SignalR.IHubContext<MedLinkPortal.Hubs.ChatHub> _hubContext;
         private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+        private readonly ICloudinaryService _cloudinaryService;
 
         public PharmacyController(ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             MedLinkPortal.Services.INotificationService notificationService,
             IConfiguration configuration,
             Microsoft.AspNetCore.SignalR.IHubContext<MedLinkPortal.Hubs.ChatHub> hubContext,
-            IDbContextFactory<ApplicationDbContext> contextFactory)
+            IDbContextFactory<ApplicationDbContext> contextFactory,
+            ICloudinaryService cloudinaryService)
         {
             _context = context;
             _userManager = userManager;
@@ -38,6 +40,7 @@ namespace MedLinkPortal.Controllers
             _configuration = configuration;
             _hubContext = hubContext;
             _contextFactory = contextFactory;
+            _cloudinaryService = cloudinaryService;
         }
 
         // --- Master Data APIs (Used by Doctor in Consultation Room) ---
@@ -583,15 +586,9 @@ namespace MedLinkPortal.Controllers
                 model.IsActive = true;
                 if (imageFile != null && imageFile.Length > 0)
                 {
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/medicines", fileName);
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await imageFile.CopyToAsync(stream);
-                    }
-                    model.ImageUrl = "/images/medicines/" + fileName;
+                    var uploadedUrl = await _cloudinaryService.UploadImageAsync(imageFile, "pharmacy_medicines");
+                    if (!string.IsNullOrEmpty(uploadedUrl))
+                        model.ImageUrl = uploadedUrl;
                 }
                 _context.Medicines.Add(model);
             }
@@ -610,15 +607,9 @@ namespace MedLinkPortal.Controllers
 
                 if (imageFile != null && imageFile.Length > 0)
                 {
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/medicines", fileName);
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await imageFile.CopyToAsync(stream);
-                    }
-                    existing.ImageUrl = "/images/medicines/" + fileName;
+                    var uploadedUrl = await _cloudinaryService.UploadImageAsync(imageFile, "pharmacy_medicines");
+                    if (!string.IsNullOrEmpty(uploadedUrl))
+                        existing.ImageUrl = uploadedUrl;
                 }
 
                 _context.Medicines.Update(existing);
@@ -880,17 +871,13 @@ namespace MedLinkPortal.Controllers
             // Handle Image Upload
             if (model.ProfileImage != null && model.ProfileImage.Length > 0)
             {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProfileImage.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/profiles", fileName);
-
                 try
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    var uploadedUrl = await _cloudinaryService.UploadImageAsync(model.ProfileImage, "pharmacist_profiles");
+                    if (!string.IsNullOrEmpty(uploadedUrl))
                     {
-                        await model.ProfileImage.CopyToAsync(stream);
+                        user.ProfileImage = uploadedUrl;
                     }
-                    user.ProfileImage = "/images/profiles/" + fileName;
                 }
                 catch (Exception ex)
                 {

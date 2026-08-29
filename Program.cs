@@ -178,6 +178,7 @@ builder.Services.AddScoped<MedLinkPortal.Services.INeuralReportService, MedLinkP
 builder.Services.AddScoped<MedLinkPortal.Services.GeofenceService>();
 builder.Services.AddScoped<MedLinkPortal.Services.GoogleDirectionsService>();
 builder.Services.AddScoped<MedLinkPortal.Services.TrackingAuditService>();
+builder.Services.AddScoped<MedLinkPortal.Services.ICloudinaryService, MedLinkPortal.Services.CloudinaryService>();
 builder.Services.AddHostedService<MedLinkPortal.BackgroundServices.NotificationBackgroundService>();
 
 // Session

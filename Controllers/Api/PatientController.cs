@@ -30,6 +30,7 @@ namespace MedLinkPortal.Controllers.Api
         private readonly IAiChatService _aiChatService;
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly IEmailSender _emailSender;
+        private readonly ICloudinaryService _cloudinaryService;
 
         public PatientController(
             ApplicationDbContext context,
@@ -40,7 +41,8 @@ namespace MedLinkPortal.Controllers.Api
             IConfiguration configuration,
             IAiChatService aiChatService,
             IHubContext<NotificationHub> hubContext,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            ICloudinaryService cloudinaryService)
         {
             _context = context;
             _userManager = userManager;
@@ -51,6 +53,7 @@ namespace MedLinkPortal.Controllers.Api
             _aiChatService = aiChatService;
             _hubContext = hubContext;
             _emailSender = emailSender;
+            _cloudinaryService = cloudinaryService;
         }
 
         private static string GetAbsoluteUrl(string relativeUrl, string baseUrl)
@@ -1811,16 +1814,9 @@ namespace MedLinkPortal.Controllers.Api
 
             try
             {
-                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "health-records");
-                if (!Directory.Exists(uploadsPath)) Directory.CreateDirectory(uploadsPath);
-
-                var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
-                var filePath = Path.Combine(uploadsPath, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
+                var uploadedUrl = await _cloudinaryService.UploadRawFileAsync(file, "health_records");
+                if (string.IsNullOrEmpty(uploadedUrl))
+                    return Ok(new { success = false, message = "Failed to upload health record file" });
 
                 var fileSizeInMB = (file.Length / 1024.0 / 1024.0).ToString("0.0") + " MB";
                 var type = category switch
@@ -1841,7 +1837,7 @@ namespace MedLinkPortal.Controllers.Api
                     Provider = provider ?? "Self Uploaded",
                     FileSize = fileSizeInMB,
                     FileType = Path.GetExtension(file.FileName).TrimStart('.').ToUpper(),
-                    FilePath = $"/uploads/health-records/{fileName}",
+                    FilePath = uploadedUrl,
                     CreatedAt = DateTime.Now
                 };
 
@@ -2157,18 +2153,11 @@ namespace MedLinkPortal.Controllers.Api
 
             try
             {
-                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "profiles");
-                if (!Directory.Exists(uploadsPath)) Directory.CreateDirectory(uploadsPath);
+                var imageUrl = await _cloudinaryService.UploadImageAsync(file, "profile_pictures");
+                if (string.IsNullOrEmpty(imageUrl))
+                    return StatusCode(500, "Failed to upload profile picture.");
 
-                var fileName = $"profile_{userId}_{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-                var filePath = Path.Combine(uploadsPath, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                user.ProfileImage = $"/uploads/profiles/{fileName}";
+                user.ProfileImage = imageUrl;
                 await _userManager.UpdateAsync(user);
 
                 var request = HttpContext.Request;

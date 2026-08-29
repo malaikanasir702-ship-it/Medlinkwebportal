@@ -23,15 +23,18 @@ namespace MedLinkPortal.Controllers.Api
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly INotificationService _notificationService;
+        private readonly ICloudinaryService _cloudinaryService;
 
         public DoctorController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            ICloudinaryService cloudinaryService)
         {
             _context = context;
             _userManager = userManager;
             _notificationService = notificationService;
+            _cloudinaryService = cloudinaryService;
         }
 
         [HttpGet("suspension-status")]
@@ -618,15 +621,11 @@ namespace MedLinkPortal.Controllers.Api
 
                 if (profileImage != null && profileImage.Length > 0)
                 {
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(profileImage.FileName);
-                    var filePath = Path.Combine("wwwroot/uploads/profiles", fileName);
-                    
-                    Directory.CreateDirectory("wwwroot/uploads/profiles");
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    var uploadedUrl = await _cloudinaryService.UploadImageAsync(profileImage, "doctor_profiles");
+                    if (!string.IsNullOrEmpty(uploadedUrl))
                     {
-                        await profileImage.CopyToAsync(stream);
+                        user.ProfileImage = uploadedUrl;
                     }
-                    user.ProfileImage = "/uploads/profiles/" + fileName;
                 }
 
                 await _context.SaveChangesAsync();

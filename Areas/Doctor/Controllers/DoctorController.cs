@@ -2,6 +2,7 @@ using MedLinkPortal.Areas.Identity.Pages.Account;
 using MedLinkPortal.Areas.Doctor.Models;
 using Appointment = MedLinkPortal.Areas.Doctor.Models.Appointment;
 using MedLinkPortal.Models;
+using MedLinkPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -27,8 +28,9 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
         private readonly Services.INotificationService _notificationService;
         private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
         private readonly IMemoryCache _cache;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public DoctorController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IWebHostEnvironment webHostEnvironment, Services.INotificationService notificationService, IDbContextFactory<ApplicationDbContext> contextFactory, IMemoryCache cache)
+        public DoctorController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IWebHostEnvironment webHostEnvironment, Services.INotificationService notificationService, IDbContextFactory<ApplicationDbContext> contextFactory, IMemoryCache cache, ICloudinaryService cloudinaryService)
         {
             _context = context;
             _userManager = userManager;
@@ -36,6 +38,7 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
             _notificationService = notificationService;
             _contextFactory = contextFactory;
             _cache = cache;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<IActionResult> TranscriptionHistory()
@@ -1069,51 +1072,39 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
                 await _context.SaveChangesAsync(); // Persist Doctor entity changes
             }
 
-            // Helper for file uploads
-            async Task<string> SaveFileAsync(IFormFile file, string folderName)
+            // Handle File Uploads via Cloudinary
+            if (model.ProfilePicture != null)
             {
-                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", folderName);
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-                string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                var uploadedUrl = await _cloudinaryService.UploadImageAsync(model.ProfilePicture, "doctor_profiles");
+                if (!string.IsNullOrEmpty(uploadedUrl))
                 {
-                    await file.CopyToAsync(fileStream);
+                    user.ProfilePictureUrl = uploadedUrl;
+                    user.ProfileImage = uploadedUrl;
+                    if (doctor != null) doctor.Image = uploadedUrl;
                 }
-                return "uploads/" + folderName + "/" + uniqueFileName;
             }
 
-            // Handle File Uploads
-            if (model.ProfilePicture != null) 
-            {
-                var uploadedPath = await SaveFileAsync(model.ProfilePicture, "profiles");
-                user.ProfilePictureUrl = uploadedPath;
-                user.ProfileImage = "/" + uploadedPath; // Sync redundant field
-                if (doctor != null) doctor.Image = "/" + uploadedPath; // Sync Doctor entity field
-            }
-            
-            // For Documents - Reset to Pending if any sensitive doc is updated
             bool docsUpdated = false;
-            
-            if (model.CNICFront != null) 
+
+            if (model.CNICFront != null)
             {
-                user.CNICFrontUrl = await SaveFileAsync(model.CNICFront, "documents");
-                docsUpdated = true;
+                var url = await _cloudinaryService.UploadRawFileAsync(model.CNICFront, "doctor_documents");
+                if (!string.IsNullOrEmpty(url)) { user.CNICFrontUrl = url; docsUpdated = true; }
             }
-            if (model.CNICBack != null) 
+            if (model.CNICBack != null)
             {
-                user.CNICBackUrl = await SaveFileAsync(model.CNICBack, "documents");
-                docsUpdated = true;
+                var url = await _cloudinaryService.UploadRawFileAsync(model.CNICBack, "doctor_documents");
+                if (!string.IsNullOrEmpty(url)) { user.CNICBackUrl = url; docsUpdated = true; }
             }
-            if (model.PMDCCertificate != null) 
+            if (model.PMDCCertificate != null)
             {
-                user.PMDCCertificateUrl = await SaveFileAsync(model.PMDCCertificate, "documents");
-                docsUpdated = true;
+                var url = await _cloudinaryService.UploadRawFileAsync(model.PMDCCertificate, "doctor_documents");
+                if (!string.IsNullOrEmpty(url)) { user.PMDCCertificateUrl = url; docsUpdated = true; }
             }
-            if (model.DegreeCertificate != null) 
+            if (model.DegreeCertificate != null)
             {
-                user.DegreeCertificateUrl = await SaveFileAsync(model.DegreeCertificate, "documents");
-                docsUpdated = true;
+                var url = await _cloudinaryService.UploadRawFileAsync(model.DegreeCertificate, "doctor_documents");
+                if (!string.IsNullOrEmpty(url)) { user.DegreeCertificateUrl = url; docsUpdated = true; }
             }
 
             if (docsUpdated)

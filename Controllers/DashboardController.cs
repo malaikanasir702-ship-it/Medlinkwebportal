@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MedLinkPortal.Services;
 using MedLinkPortal.Models;
 using MedLinkPortal.Areas.Identity.Pages.Account;
@@ -21,8 +21,8 @@ namespace MedLinkPortal.Controllers
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager; // Changed from Microsoft.AspNetCore.Identity.UserManager
-        private readonly SignInManager<ApplicationUser> _signInManager; // Added
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IAiChatService _aiChatService;
         private readonly IEmailSender _emailSender;
         private readonly Microsoft.AspNetCore.SignalR.IHubContext<MedLinkPortal.Hubs.ChatHub> _hubContext;
@@ -32,6 +32,7 @@ namespace MedLinkPortal.Controllers
         private readonly INeuralReportService _reportService;
         private readonly IMemoryCache _cache;
         private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+        private readonly ICloudinaryService _cloudinaryService;
 
         public DashboardController(ApplicationDbContext context, 
             UserManager<ApplicationUser> userManager,
@@ -44,7 +45,8 @@ namespace MedLinkPortal.Controllers
             ILogger<DashboardController> logger,
             INeuralReportService reportService,
             IMemoryCache cache,
-            IDbContextFactory<ApplicationDbContext> contextFactory)
+            IDbContextFactory<ApplicationDbContext> contextFactory,
+            ICloudinaryService cloudinaryService)
         {
             _context = context;
             _userManager = userManager;
@@ -58,6 +60,7 @@ namespace MedLinkPortal.Controllers
             _reportService = reportService;
             _cache = cache;
             _contextFactory = contextFactory;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<IActionResult> Index()
@@ -563,21 +566,17 @@ namespace MedLinkPortal.Controllers
 
             if (attachment != null)
             {
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-                
-                string uniqueFileName = Guid.NewGuid().ToString() + "_" + attachment.FileName;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await attachment.CopyToAsync(fileStream);
-                }
+                var attachUrl = attachment.ContentType.StartsWith("image/")
+                    ? await _cloudinaryService.UploadImageAsync(attachment, "chat_attachments")
+                    : await _cloudinaryService.UploadRawFileAsync(attachment, "chat_attachments");
 
-                message.AttachmentUrl = "/uploads/" + uniqueFileName;
-                message.AttachmentName = attachment.FileName;
-                message.AttachmentType = attachment.ContentType.Contains("image") ? "image" : 
-                                       attachment.ContentType.Contains("video") ? "video" : "document";
+                if (!string.IsNullOrEmpty(attachUrl))
+                {
+                    message.AttachmentUrl = attachUrl;
+                    message.AttachmentName = attachment.FileName;
+                    message.AttachmentType = attachment.ContentType.Contains("image") ? "image" :
+                                           attachment.ContentType.Contains("video") ? "video" : "document";
+                }
             }
 
             _context.ChatMessages.Add(message);
@@ -761,17 +760,9 @@ namespace MedLinkPortal.Controllers
 
             try 
             {
-                // 1. Save File
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ai_uploads");
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-                
-                string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
+                // 1. Upload to Cloudinary
+                var uploadedUrl = await _cloudinaryService.UploadRawFileAsync(file, "ai_analyses");
+                string filePath = uploadedUrl ?? "/ai_uploads/" + file.FileName;
 
                 // 2. Prepare for Gemini
                 string base64Content;
@@ -798,7 +789,7 @@ namespace MedLinkPortal.Controllers
                 {
                     UserId = userId,
                     FileName = file.FileName,
-                    FilePath = "/ai_uploads/" + uniqueFileName,
+                    FilePath = filePath,
                     FileType = file.ContentType.Contains("image") ? "Imaging" : "Report",
                     Status = status,
                     AnalysisResult = analysisText,
@@ -959,18 +950,10 @@ namespace MedLinkPortal.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Json(new { success = false });
 
-            string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "profiles");
-            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-            
-            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            string filePath = Path.Combine(uploadsFolder, fileName);
-            
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(fileStream);
-            }
+            var imageUrl = await _cloudinaryService.UploadImageAsync(file, "profile_pictures");
+            if (string.IsNullOrEmpty(imageUrl)) return Json(new { success = false, message = "Upload failed" });
 
-            user.ProfileImage = "/uploads/profiles/" + fileName;
+            user.ProfileImage = imageUrl;
             await _userManager.UpdateAsync(user);
 
             return Json(new { success = true, imageUrl = user.ProfileImage });
@@ -1569,24 +1552,12 @@ namespace MedLinkPortal.Controllers
 
             var userId = _userManager.GetUserId(User);
             
-            // Create uploads directory if it doesn't exist
-            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "health-records");
-            Directory.CreateDirectory(uploadsPath);
+            var uploadedUrl = await _cloudinaryService.UploadRawFileAsync(file, "health_records");
+            if (string.IsNullOrEmpty(uploadedUrl))
+                return Json(new { success = false, message = "File upload failed" });
 
-            // Generate unique filename
-            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
-            var filePath = Path.Combine(uploadsPath, fileName);
-
-            // Save file
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            // Calculate file size
             var fileSizeInMB = (file.Length / 1024.0 / 1024.0).ToString("0.0") + " MB";
 
-            // Determine type based on category
             var type = category switch
             {
                 "Laboratory" => "Laboratory",
@@ -1595,7 +1566,6 @@ namespace MedLinkPortal.Controllers
                 _ => "Certification"
             };
 
-            // Create health record
             var record = new HealthRecord
             {
                 UserId = userId,
@@ -1606,7 +1576,7 @@ namespace MedLinkPortal.Controllers
                 Provider = provider ?? "Self Uploaded",
                 FileSize = fileSizeInMB,
                 FileType = Path.GetExtension(file.FileName).TrimStart('.').ToUpper(),
-                FilePath = $"/uploads/health-records/{fileName}",
+                FilePath = uploadedUrl,
                 CreatedAt = DateTime.Now
             };
 
@@ -2084,12 +2054,9 @@ namespace MedLinkPortal.Controllers
                 return Json(new { success = false, message = "No file uploaded" });
             try
             {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/consultation", fileName);
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                    await file.CopyToAsync(stream);
-                var url  = "/uploads/consultation/" + fileName;
+                var url = file.ContentType.StartsWith("image/")
+                    ? await _cloudinaryService.UploadImageAsync(file, "consultation_files")
+                    : await _cloudinaryService.UploadRawFileAsync(file, "consultation_files");
                 var type = file.ContentType.StartsWith("image/") ? "image" : "file";
                 return Json(new { success = true, url, type, name = file.FileName });
             }

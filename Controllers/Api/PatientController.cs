@@ -1065,16 +1065,8 @@ namespace MedLinkPortal.Controllers.Api
 
             try
             {
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ai_uploads");
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-                string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
+                var uploadedUrl = await _cloudinaryService.UploadRawFileAsync(file, "ai_analyses");
+                string storedPath = uploadedUrl ?? "/ai_uploads/" + file.FileName;
 
                 string analysisText = $"Analyzed medical document: {file.FileName}. Preliminary check shows results within typical ranges. Please consult a doctor for official interpretation.";
                 if (file.FileName.ToLower().Contains("blood") || file.ContentType.Contains("image"))
@@ -1088,7 +1080,7 @@ namespace MedLinkPortal.Controllers.Api
                 {
                     UserId = userId,
                     FileName = file.FileName,
-                    FilePath = "/ai_uploads/" + uniqueFileName,
+                    FilePath = storedPath,
                     FileType = file.ContentType.Contains("image") ? "Imaging" : "Report",
                     Status = status,
                     AnalysisResult = analysisText,

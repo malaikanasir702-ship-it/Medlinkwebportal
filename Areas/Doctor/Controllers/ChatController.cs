@@ -1,6 +1,7 @@
 using MedLinkPortal.Areas.Identity.Pages.Account;
 using MedLinkPortal.Areas.Doctor.Models;
 using MedLinkPortal.Models;
+using MedLinkPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,13 +22,15 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _environment;
         private readonly IHubContext<MedLinkPortal.Hubs.ChatHub> _hubContext;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public ChatController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IWebHostEnvironment environment, IHubContext<MedLinkPortal.Hubs.ChatHub> hubContext)
+        public ChatController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IWebHostEnvironment environment, IHubContext<MedLinkPortal.Hubs.ChatHub> hubContext, ICloudinaryService cloudinaryService)
         {
             _context = context;
             _userManager = userManager;
             _environment = environment;
             _hubContext = hubContext;
+            _cloudinaryService = cloudinaryService;
         }
 
         [HttpGet]
@@ -77,25 +80,18 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
 
             if (attachment != null && attachment.Length > 0)
             {
-                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "chat");
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+                var attachUrl = attachment.ContentType.StartsWith("image/")
+                    ? await _cloudinaryService.UploadImageAsync(attachment, "doctor_chat")
+                    : await _cloudinaryService.UploadRawFileAsync(attachment, "doctor_chat");
 
-                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(attachment.FileName);
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                if (!string.IsNullOrEmpty(attachUrl))
                 {
-                    await attachment.CopyToAsync(fileStream);
-                }
-
-                message.AttachmentUrl = "/uploads/chat/" + uniqueFileName;
-                message.AttachmentType = attachment.ContentType.StartsWith("image/") ? "image" : "file";
-                message.AttachmentName = attachment.FileName;
-                message.MessageType = "Document";
-                
-                if (string.IsNullOrEmpty(message.Content))
-                {
-                    message.Content = message.AttachmentType == "image" ? "Sent an image" : $"Sent a file: {attachment.FileName}";
+                    message.AttachmentUrl = attachUrl;
+                    message.AttachmentType = attachment.ContentType.StartsWith("image/") ? "image" : "file";
+                    message.AttachmentName = attachment.FileName;
+                    message.MessageType = "Document";
+                    if (string.IsNullOrEmpty(message.Content))
+                        message.Content = message.AttachmentType == "image" ? "Sent an image" : $"Sent a file: {attachment.FileName}";
                 }
             }
 

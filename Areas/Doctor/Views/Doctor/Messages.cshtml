@@ -6,6 +6,14 @@
     ViewData["Title"] = "Messages";
     ViewData["HideGlobalCall"] = true;
 }
+@functions {
+    static string GetPatientName(MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser p) {
+        if (!string.IsNullOrWhiteSpace(p.Name)) return p.Name;
+        var full = $"{p.FirstName} {p.LastName}".Trim();
+        if (!string.IsNullOrWhiteSpace(full)) return full;
+        return p.UserName?.Split('@')[0] ?? "Patient";
+    }
+}
 
 
 <div class="chat-container premium-card flex overflow-hidden reveal bg-white/50 backdrop-blur-xl h-[calc(100vh-140px)] relative">
@@ -33,19 +41,19 @@
                 var disabledClass = "";
                 var statusIcon = canChatToday ? "fa-circle-check text-emerald-500" : (isStarted ? "fa-clock text-amber-500" : "fa-lock text-slate-400");
                 
-                <button onclick="loadConversation('@patient.Id', '@(patient.Name ?? patient.UserName ?? "Patient")', @(item.AppointmentId?.ToString() ?? "null"), @(canChatToday.ToString().ToLower()), '@(item.NextAppointmentTime?.ToString("MMM dd, yyyy") ?? "")')" 
+                <button onclick="loadConversation('@patient.Id', '@(GetPatientName(patient))', @(item.AppointmentId?.ToString() ?? "null"), @(canChatToday.ToString().ToLower()), '@(item.NextAppointmentTime?.ToString("MMM dd, yyyy") ?? "")')" 
                         class="w-full p-6 flex items-center gap-4 hover:bg-white dark:hover:bg-white/5 transition-all text-left group contact-item @disabledClass" 
                         id="contact-@patient.Id">
                     <div class="relative">
                         <div class="w-14 h-14 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-2xl flex items-center justify-center text-slate-600 dark:text-slate-300 font-semibold text-lg shadow-inner group-hover:scale-105 transition-transform">
-                            @((patient.Name ?? patient.UserName ?? "PT").Substring(0, 1).ToUpper())
+                            @(GetPatientName(patient).Substring(0, 1).ToUpper())
                         </div>
                         <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center shadow-lg">
                             <i class="fas @statusIcon text-[8px]"></i>
                         </div>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h4 class="text-sm font-semibold text-slate-900 dark:text-white truncate tracking-tight">@(patient.Name ?? patient.UserName ?? "Patient")</h4>
+                        <h4 class="text-sm font-semibold text-slate-900 dark:text-white truncate tracking-tight">@GetPatientName(patient)</h4>
                         <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tighter truncate">
                             @(isStarted ? "Signal Live" : item.NextAppointmentTime.HasValue ? $"ETA {item.NextAppointmentTime.Value.ToString("HH:mm")}" : "Node Standby")
                         </p>

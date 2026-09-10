@@ -4,6 +4,14 @@
     ViewData["Title"] = "Patient Records";
     Layout = "~/Areas/Doctor/Views/Shared/_DocDash.cshtml";
 }
+@functions {
+    static string GetPatientName(MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser p) {
+        if (!string.IsNullOrWhiteSpace(p.Name)) return p.Name;
+        var full = $"{p.FirstName} {p.LastName}".Trim();
+        if (!string.IsNullOrWhiteSpace(full)) return full;
+        return p.UserName?.Split('@')[0] ?? "Patient";
+    }
+}
 
 <div class="space-y-10 reveal">
     <!-- Grid Header -->
@@ -31,10 +39,10 @@
              <div class="premium-card p-5 space-y-4">
                 <div class="flex items-center gap-4">
                     <div class="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-blue-600 dark:text-blue-400 font-semibold text-lg shadow-inner">
-                        @((patient.Name ?? patient.UserName ?? "PT").Substring(0, 1).ToUpper())
+                        @(GetPatientName(patient).Substring(0, 1).ToUpper())
                     </div>
                     <div>
-                        <div class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">@(patient.Name ?? patient.UserName ?? "Patient")</div>
+                        <div class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">@GetPatientName(patient)</div>
                         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">ID: @patient.Id.Substring(0, 8)</div>
                     </div>
                 </div>
@@ -118,10 +126,10 @@
                             <td class="px-10 py-8">
                                 <div class="flex items-center gap-5">
                                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-blue-600 dark:text-blue-400 font-semibold text-lg shadow-inner group-hover:scale-105 transition-transform">
-                                        @((patient.Name ?? patient.UserName ?? "PT").Substring(0, 1).ToUpper())
+                                        @(GetPatientName(patient).Substring(0, 1).ToUpper())
                                     </div>
                                     <div>
-                                        <div class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">@(patient.Name ?? patient.UserName ?? "Patient")</div>
+                                        <div class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">@GetPatientName(patient)</div>
                                         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">ID: @patient.Id.Substring(0, 8)</div>
                                     </div>
                                 </div>

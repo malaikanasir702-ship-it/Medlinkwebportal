@@ -545,7 +545,9 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
 
-            ViewBag.PatientName = patient.Name ?? patient.UserName ?? "Patient";
+            ViewBag.PatientName = !string.IsNullOrWhiteSpace(patient.Name) ? patient.Name
+                : !string.IsNullOrWhiteSpace(patient.FirstName) ? $"{patient.FirstName} {patient.LastName}".Trim()
+                : patient.UserName?.Split('@')[0] ?? "Patient";
             ViewBag.PatientId = patientId;
             return View(records);
         }
@@ -734,7 +736,9 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
                 Prescription = prescription
             };
 
-            ViewBag.PatientName = patient.Name ?? patient.UserName ?? "Patient";
+            ViewBag.PatientName = !string.IsNullOrWhiteSpace(patient.Name) ? patient.Name
+                : !string.IsNullOrWhiteSpace(patient.FirstName) ? $"{patient.FirstName} {patient.LastName}".Trim()
+                : patient.UserName?.Split('@')[0] ?? "Patient";
             return View(model);
         }
 

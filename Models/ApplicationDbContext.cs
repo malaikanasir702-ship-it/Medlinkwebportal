@@ -100,6 +100,7 @@ namespace MedLinkPortal.Models
         public DbSet<DoctorModels.PatientRecord> DoctorPatientRecords { get; set; }
         public DbSet<DoctorModels.Appointment> DoctorAppointments { get; set; }
         public DbSet<DoctorModels.DoctorAvailabilitySlot> DoctorAvailabilitySlots { get; set; }
+        public DbSet<DoctorModels.WalkInPatient> WalkInPatients { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -131,6 +132,10 @@ namespace MedLinkPortal.Models
                 .HasOne(a => a.Doctor).WithMany().HasForeignKey(a => a.DoctorId).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DoctorModels.DoctorAvailabilitySlot>().ToTable("Doc_DoctorAvailabilitySlots");
+
+            modelBuilder.Entity<DoctorModels.WalkInPatient>().ToTable("Doc_WalkInPatients");
+            modelBuilder.Entity<DoctorModels.WalkInPatient>().HasIndex(w => w.DoctorUserId);
+            modelBuilder.Entity<DoctorModels.WalkInPatient>().HasIndex(w => w.VisitDate);
 
             // --- ApplicationUser Mappings ---
             modelBuilder.Entity<ApplicationUser>()

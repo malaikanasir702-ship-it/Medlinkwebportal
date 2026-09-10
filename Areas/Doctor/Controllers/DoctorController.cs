@@ -518,6 +518,150 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
             return View(viewModel);
         }
 
+        // ─────────────────────────────────────────────
+        //  PATIENT INVENTORY (online + walk-in combined)
+        // ─────────────────────────────────────────────
+        public async Task<IActionResult> PatientInventory()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            var coreDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
+            var coreDocId = coreDoctor?.Id;
+
+            // --- Online patients (from appointments) ---
+            var patientIds = await _context.Appointments
+                .Where(a => a.DoctorId == coreDocId)
+                .Select(a => a.UserId)
+                .Distinct()
+                .ToListAsync();
+
+            var onlinePatients = await _userManager.Users
+                .Where(u => patientIds.Contains(u.Id))
+                .ToListAsync();
+
+            var onlineViewModel = new List<PatientRecordListViewModel>();
+            foreach (var patient in onlinePatients)
+            {
+                var nextAppt = await _context.Appointments
+                    .Where(a => a.UserId == patient.Id && a.DoctorId == coreDocId && a.AppointmentDate >= DateTime.Today.AddDays(-1) && a.Status != "Completed")
+                    .OrderByDescending(a => a.AppointmentDate)
+                    .FirstOrDefaultAsync();
+
+                onlineViewModel.Add(new PatientRecordListViewModel
+                {
+                    Patient = patient,
+                    NextAppointmentTime = nextAppt?.AppointmentDate,
+                    AppointmentId = nextAppt?.Id
+                });
+            }
+
+            // --- Walk-in patients ---
+            var walkIns = await _context.WalkInPatients
+                .Where(w => w.DoctorUserId == userId)
+                .OrderByDescending(w => w.VisitDate)
+                .ToListAsync();
+
+            ViewBag.OnlinePatients = onlineViewModel;
+            ViewBag.WalkInPatients = walkIns;
+            ViewBag.TotalOnline = onlineViewModel.Count;
+            ViewBag.TotalWalkIn = walkIns.Count;
+
+            return View();
+        }
+
+        // Add walk-in patient
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddWalkIn(
+            string fullName, string? phone, int? ageYears,
+            string? gender, string? visitReason)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(fullName))
+            {
+                TempData["Error"] = "Patient name is required.";
+                return RedirectToAction(nameof(PatientInventory));
+            }
+
+            var walkIn = new WalkInPatient
+            {
+                DoctorUserId = userId,
+                FullName     = fullName.Trim(),
+                Phone        = phone?.Trim(),
+                AgeYears     = ageYears,
+                Gender       = gender,
+                VisitReason  = visitReason?.Trim(),
+                VisitDate    = DateTime.UtcNow,
+                CreatedAt    = DateTime.UtcNow
+            };
+
+            _context.WalkInPatients.Add(walkIn);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Walk-in patient '{walkIn.FullName}' added successfully.";
+            return RedirectToAction(nameof(PatientInventory));
+        }
+
+        // Show record form for walk-in patient
+        public async Task<IActionResult> WalkInRecord(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var walkIn = await _context.WalkInPatients
+                .FirstOrDefaultAsync(w => w.Id == id && w.DoctorUserId == userId);
+
+            if (walkIn == null) return NotFound();
+
+            return View(walkIn);
+        }
+
+        // Save record for walk-in patient
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> WalkInRecord(int id,
+            string? diagnosis, string? prescription,
+            string? notes, string? vitals, string? allergies)
+        {
+            var userId = _userManager.GetUserId(User);
+            var walkIn = await _context.WalkInPatients
+                .FirstOrDefaultAsync(w => w.Id == id && w.DoctorUserId == userId);
+
+            if (walkIn == null) return NotFound();
+
+            walkIn.Diagnosis    = diagnosis?.Trim();
+            walkIn.Prescription = prescription?.Trim();
+            walkIn.Notes        = notes?.Trim();
+            walkIn.Vitals       = vitals?.Trim();
+            walkIn.Allergies    = allergies?.Trim();
+            walkIn.HasRecord    = !string.IsNullOrWhiteSpace(diagnosis);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Record saved successfully.";
+            return RedirectToAction(nameof(PatientInventory));
+        }
+
+        // Delete walk-in patient
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteWalkIn(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var walkIn = await _context.WalkInPatients
+                .FirstOrDefaultAsync(w => w.Id == id && w.DoctorUserId == userId);
+
+            if (walkIn != null)
+            {
+                _context.WalkInPatients.Remove(walkIn);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Walk-in patient removed.";
+            }
+
+            return RedirectToAction(nameof(PatientInventory));
+        }
+
         public async Task<IActionResult> ViewHistory(string patientId)
         {
             if (string.IsNullOrEmpty(patientId)) return NotFound();

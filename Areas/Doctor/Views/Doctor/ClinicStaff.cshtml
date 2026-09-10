@@ -103,11 +103,11 @@ function renderStaff(staff) {
                 </button>
             </div>
             <p class="font-bold text-slate-900 text-lg">${s.name}</p>
-            <p class="text-slate-500 text-sm">${s.email}</p>
+            <p class="text-slate-500 text-sm mt-0.5">${s.email || '—'}</p>
             <p class="text-slate-400 text-xs mt-1">${s.phone || '—'}</p>
             <div class="mt-4 flex justify-between items-center">
                 <span class="px-3 py-1 ${roleColors[s.role] || 'bg-slate-50 text-slate-600'} rounded-full text-xs font-bold">${s.role}</span>
-                <span class="text-xs text-slate-400">Added ${new Date(s.addedAt).toLocaleDateString()}</span>
+                <span class="text-xs text-slate-400">Added ${s.addedAt ? new Date(s.addedAt).toLocaleDateString() : '—'}</span>
             </div>
         </div>`).join('');
 }

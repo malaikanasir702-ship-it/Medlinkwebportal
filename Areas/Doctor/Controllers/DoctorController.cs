@@ -667,20 +667,6 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
             if (string.IsNullOrEmpty(patientId)) return NotFound();
 
             var userId = _userManager.GetUserId(User);
-            var coreDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
-            var coreDocId = coreDoctor?.Id;
-            var now = DateTime.Now;
-            
-            // Check core appointments
-            var hasStartedAppointment = await _context.Appointments
-                .AnyAsync(a => a.DoctorId == coreDocId && a.UserId == patientId && a.AppointmentDate <= now);
-
-            if (!hasStartedAppointment)
-            {
-                TempData["ErrorMessage"] = "You can only view patient history once their appointment has started.";
-                return RedirectToAction(nameof(Schedule));
-            }
-
             var patient = await _userManager.FindByIdAsync(patientId);
             if (patient == null) return NotFound();
 

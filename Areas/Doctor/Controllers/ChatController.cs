@@ -66,7 +66,23 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
             if (string.IsNullOrEmpty(senderId)) return Unauthorized();
 
             var now = DateTime.UtcNow;
+            var today = now.Date;
             var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == senderId);
+            var doctorId = doctor?.Id;
+
+            // APPOINTMENT DAY ACCESS CHECK
+            var hasTodayAppointment = await _context.Appointments
+                .AnyAsync(a => a.AppointmentDate.Date == today &&
+                               a.Status != "Cancelled" && a.Status != "Rejected" &&
+                               (
+                                   (a.UserId == receiverId && (a.DoctorId == doctorId || _context.Doctors.Any(d => d.Id == a.DoctorId && d.UserId == senderId))) ||
+                                   (a.UserId == senderId && (a.DoctorId == doctorId || _context.Doctors.Any(d => d.Id == a.DoctorId && d.UserId == receiverId)))
+                               ));
+
+            if (!hasTodayAppointment)
+            {
+                return Json(new { success = false, message = "Messaging is only allowed on the scheduled appointment day." });
+            }
 
             var message = new ChatMessage
             {

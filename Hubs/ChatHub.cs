@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using MedLinkPortal.Models;
 
 namespace MedLinkPortal.Hubs
@@ -18,6 +19,28 @@ namespace MedLinkPortal.Hubs
             _notificationService = notificationService;
         }
 
+        /// <summary>
+        /// Checks whether sender and receiver have an active appointment TODAY.
+        /// Returns true if chat is permitted.
+        /// </summary>
+        private async Task<bool> IsChatPermitted(string senderId, string receiverId)
+        {
+            var today = DateTime.UtcNow.Date;
+            // Check direct user-to-user appointment (patient UserId <-> doctor UserId)
+            var hasAppointment = await _context.Appointments
+                .AnyAsync(a =>
+                    a.AppointmentDate.Date == today &&
+                    a.Status != "Cancelled" && a.Status != "Rejected" &&
+                    (
+                        // Patient (senderId) messaging Doctor (receiverId)
+                        (a.UserId == senderId && _context.Doctors.Any(d => d.Id == a.DoctorId && d.UserId == receiverId)) ||
+                        // Doctor (senderId) messaging Patient (receiverId)
+                        (a.UserId == receiverId && _context.Doctors.Any(d => d.Id == a.DoctorId && d.UserId == senderId))
+                    )
+                );
+            return hasAppointment;
+        }
+
         // Send a message to a specific user
         public async Task SendMessageToUser(string receiverId, string message, string type = "text", string attachmentUrl = "", string attachmentName = "")
         {
@@ -25,6 +48,12 @@ namespace MedLinkPortal.Hubs
             if (string.IsNullOrEmpty(senderId) || string.IsNullOrEmpty(receiverId))
             {
                 throw new HubException("Sender or Receiver ID cannot be null.");
+            }
+
+            // Appointment-based chat access check
+            if (!await IsChatPermitted(senderId, receiverId))
+            {
+                throw new HubException("Messaging is only allowed between appointed patients and doctors on the scheduled appointment day.");
             }
 
             var normalizedType = type?.ToLower() ?? "text";
@@ -101,6 +130,12 @@ namespace MedLinkPortal.Hubs
             
             if (string.IsNullOrEmpty(senderId)) {
                 Console.WriteLine("[ChatHub] Warning: senderId is null. User might not be fully authenticated in SignalR context.");
+            }
+
+            // Appointment-based call access check
+            if (!string.IsNullOrEmpty(senderId) && !await IsChatPermitted(senderId, receiverId))
+            {
+                throw new HubException("Calls are only allowed between appointed patients and doctors on the scheduled appointment day.");
             }
 
             // Also send the caller's name so the receiver can display it

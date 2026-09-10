@@ -77,7 +77,7 @@ const roleIcons = { Receptionist:'fa-headset', Nurse:'fa-user-nurse', Assistant:
 const roleColors = { Receptionist:'bg-blue-50 text-blue-700', Nurse:'bg-green-50 text-green-700', Assistant:'bg-purple-50 text-purple-700' };
 
 async function loadStaff() {
-    const res = await fetch('/api/doctor/staff', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    const res = await fetch('/api/doctor/staff', { credentials: 'include', headers: getAuthHeaders() });
     const staff = res.ok ? await res.json() : [];
     renderStaff(staff);
 }
@@ -114,7 +114,7 @@ function renderStaff(staff) {
 
 async function removeStaff(id) {
     if (!confirm('Remove this staff member?')) return;
-    const res = await fetch(`/api/doctor/staff/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
+    const res = await fetch(`/api/doctor/staff/${id}`, { method: 'DELETE', credentials: 'include', headers: getAuthHeaders() });
     if (res.ok) { showToast('Staff member removed', 'success'); loadStaff(); }
     else showToast('Failed to remove', 'error');
 }
@@ -140,7 +140,8 @@ document.getElementById('staffForm').addEventListener('submit', async e => {
     };
     const res = await fetch('/api/doctor/staff', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        credentials: 'include',
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload)
     });
     btn.textContent = 'Add Staff'; btn.disabled = false;

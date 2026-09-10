@@ -19,7 +19,6 @@ public record ReferralRespondRequest(int ReferralId, string Status);
 public record CpdActivityRequest(int Id, string Title, string? Provider, string ActivityType, int CreditPoints, DateTime ActivityDate, string? Description);
 public record StaffAddRequest(string Name, string Email, string Phone, string Role);
 public record ReviewReplyRequest(int ReviewId, string ReplyText);
-public record VoiceNoteRequest(string TranscribedText, string? PatientId, int? AppointmentId, string? AudioUrl);
 public record WaitRoomCallRequest(int EntryId);
 public record PatientReportRequest(string PatientId);
 
@@ -27,7 +26,7 @@ namespace MedLinkPortal.Controllers.Api
 {
     [Route("api/doctor")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = "Bearer,Identity.Application")]
     public class DoctorEnhancementsController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
@@ -398,8 +397,7 @@ namespace MedLinkPortal.Controllers.Api
                     PatientName = r.Patient != null
                         ? r.Patient.FirstName + " " + r.Patient.LastName : "Unknown",
                     ReceiverName = r.ReceivingDoctor != null
-                        ? r.ReceivingDoctor.FirstName + " " + r.ReceivingDoctor.LastName : "Unknown",
-                    ReceiverEmail = r.ReceivingDoctor != null ? r.ReceivingDoctor.Email : ""
+                        ? r.ReceivingDoctor.FirstName + " " + r.ReceivingDoctor.LastName : "Unknown"
                 })
                 .ToListAsync();
 
@@ -653,7 +651,7 @@ namespace MedLinkPortal.Controllers.Api
                 if (!result.Succeeded)
                     return BadRequest(new { message = "Failed to create staff account", errors = result.Errors.Select(e => e.Description) });
 
-                await _userManager.AddToRoleAsync(newUser, "Staff");
+                await _userManager.AddToRoleAsync(newUser, "Patient");
                 staffUserId = newUser.Id;
 
                 // Send welcome email
@@ -781,75 +779,7 @@ namespace MedLinkPortal.Controllers.Api
         }
 
         // ══════════════════════════════════════════════════════════════════════
-        // 8. VOICE NOTES
-        // ══════════════════════════════════════════════════════════════════════
-
-        [HttpGet("voice-notes")]
-        public async Task<IActionResult> GetVoiceNotes([FromQuery] string? patientId)
-        {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-            var query = _db.DoctorVoiceNotes
-                .Include(n => n.Patient)
-                .Where(n => n.DoctorId == userId);
-
-            if (!string.IsNullOrEmpty(patientId))
-                query = query.Where(n => n.PatientId == patientId);
-
-            var notes = await query
-                .OrderByDescending(n => n.CreatedAt)
-                .Select(n => new
-                {
-                    n.Id,
-                    n.TranscribedText,
-                    n.AudioUrl,
-                    n.PatientId,
-                    PatientName = n.Patient != null
-                        ? n.Patient.FirstName + " " + n.Patient.LastName : null,
-                    n.AppointmentId,
-                    n.CreatedAt
-                })
-                .ToListAsync();
-
-            return Ok(notes);
-        }
-
-        [HttpPost("voice-notes")]
-        public async Task<IActionResult> SaveVoiceNote([FromBody] VoiceNoteRequest req)
-        {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-            var note = new DoctorVoiceNote
-            {
-                DoctorId       = userId,
-                PatientId      = req.PatientId,
-                AppointmentId  = req.AppointmentId,
-                TranscribedText = req.TranscribedText,
-                AudioUrl       = req.AudioUrl,
-                CreatedAt      = DateTime.UtcNow
-            };
-
-            _db.DoctorVoiceNotes.Add(note);
-            await _db.SaveChangesAsync();
-            return Ok(new { success = true, id = note.Id });
-        }
-
-        [HttpDelete("voice-notes/{id}")]
-        public async Task<IActionResult> DeleteVoiceNote(int id)
-        {
-            var userId = _userManager.GetUserId(User);
-            var n = await _db.DoctorVoiceNotes
-                .FirstOrDefaultAsync(x => x.Id == id && x.DoctorId == userId);
-            if (n == null) return NotFound();
-            _db.DoctorVoiceNotes.Remove(n);
-            await _db.SaveChangesAsync();
-            return Ok(new { success = true });
-        }
-
-        // ══════════════════════════════════════════════════════════════════════
-        // 9. PEAK HOURS ANALYTICS
+        // 8. PEAK HOURS ANALYTICS
         // ══════════════════════════════════════════════════════════════════════
 
         [HttpGet("analytics/peak-hours")]
@@ -1007,7 +937,6 @@ namespace MedLinkPortal.Controllers.Api
                 {
                     Id      = patientId,
                     Name    = patient.FirstName + " " + patient.LastName,
-                    Email   = patient.Email,
                     Phone   = patient.PhoneNumber,
                     Gender  = patient.Gender,
                     DateOfBirth = patient.DateOfBirth
@@ -1145,7 +1074,7 @@ namespace MedLinkPortal.Controllers.Api
                 return StatusCode(500, new { success = false, message = $"Email failed: {ex.Message}" });
             }
 
-            return Ok(new { success = true, sentTo = patient.Email });
+            return Ok(new { success = true, message = "Consultation summary sent to patient." });
         }
 
         // ─────────────────────────────────────────────────────────────────────

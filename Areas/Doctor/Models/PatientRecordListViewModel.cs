@@ -9,5 +9,6 @@ namespace MedLinkPortal.Areas.Doctor.Models
         public DateTime? NextAppointmentTime { get; set; }
         public int? AppointmentId { get; set; }
         public bool IsAppointmentStarted => NextAppointmentTime.HasValue && (DateTime.Now >= NextAppointmentTime.Value || NextAppointmentTime.Value.Date == DateTime.Today);
+        public bool CanChatToday => NextAppointmentTime.HasValue && NextAppointmentTime.Value.Date == DateTime.Today;
     }
 }

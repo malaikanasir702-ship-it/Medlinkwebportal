@@ -73,7 +73,10 @@
 let hourChart, dayChart, monthChart;
 
 async function loadAnalytics() {
-    const res = await fetch('/api/doctor/analytics/peak-hours', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    const res = await fetch('/api/doctor/analytics/peak-hours', {
+        credentials: 'include',
+        headers: getAuthHeaders()
+    });
     if (!res.ok) return;
     const data = await res.json();
 
@@ -176,6 +179,10 @@ function buildInsights(data) {
 }
 
 function getToken() { return localStorage.getItem('jwt_token') || ''; }
+function getAuthHeaders() {
+    const token = localStorage.getItem('jwt_token');
+    return token ? { 'Authorization': 'Bearer ' + token } : {};
+}
 document.addEventListener('DOMContentLoaded', loadAnalytics);
 </script>
 }

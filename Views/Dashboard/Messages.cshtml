@@ -20,6 +20,19 @@
         </div>
 
         <div class="flex-1 overflow-y-auto px-2 lg:px-3 pb-6 space-y-1 custom-scrollbar">
+            <template x-if="filteredDoctors.length === 0">
+                <div class="p-6 text-center text-gray-400">
+                    <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gray-400">
+                        <i data-lucide="calendar-x" class="w-6 h-6"></i>
+                    </div>
+                    <p class="text-xs font-bold text-gray-700">No Appointed Doctors</p>
+                    <p class="text-[11px] text-gray-400 mt-1 leading-relaxed">Messaging is only available with doctors you have an appointment with.</p>
+                    <a href="/Dashboard/Doctors" class="inline-flex items-center gap-1.5 mt-4 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-all">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        <span>Book Appointment</span>
+                    </a>
+                </div>
+            </template>
             <template x-for="doctor in filteredDoctors" :key="doctor.id">
                 <button type="button" @@click="selectDoctor(doctor)" 
                         class="w-full p-3 lg:p-4 rounded-2xl flex items-center gap-3 lg:gap-4 transition-all duration-300 group"
@@ -33,8 +46,25 @@
                         </template>
                     </div>
                     <div class="flex-1 text-left min-w-0">
-                        <h4 class="font-semibold text-sm truncate" x-text="doctor.name"></h4>
-                        <p class="text-[10px] font-bold uppercase tracking-widest opacity-60 truncate" x-text="doctor.specialty"></p>
+                        <div class="flex items-center justify-between gap-1">
+                            <h4 class="font-semibold text-sm truncate" x-text="doctor.name"></h4>
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <p class="text-[10px] font-bold uppercase tracking-widest opacity-60 truncate" x-text="doctor.specialty"></p>
+                            <template x-if="doctor.canChatToday">
+                                <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider"
+                                      :class="activeDoctorId === doctor.id ? 'bg-emerald-400/30 text-emerald-100' : 'bg-emerald-50 text-emerald-600'">
+                                    Today
+                                </span>
+                            </template>
+                            <template x-if="!doctor.canChatToday && doctor.displayDate">
+                                <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-0.5"
+                                      :class="activeDoctorId === doctor.id ? 'bg-amber-400/30 text-amber-100' : 'bg-amber-50 text-amber-600'">
+                                    <i data-lucide="lock" class="w-2.5 h-2.5"></i>
+                                    <span x-text="doctor.displayDate"></span>
+                                </span>
+                            </template>
+                        </div>
                     </div>
                     <div class="flex flex-col items-end gap-1 shrink-0">
                         <template x-if="doctor.unreadCount > 0">
@@ -80,10 +110,18 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-0.5 lg:gap-3 shrink-0">
-                        <button type="button" @@click="startCall('audio')" class="p-2 lg:p-3 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-2xl transition-all">
+                        <button type="button" @@click="startCall('audio')" 
+                                :disabled="!activeDoctor.canChatToday"
+                                :class="!activeDoctor.canChatToday ? 'opacity-30 cursor-not-allowed text-gray-300' : 'text-gray-400 hover:text-emerald-600 hover:bg-emerald-50'"
+                                :title="!activeDoctor.canChatToday ? 'Calls are only allowed on appointment day' : 'Start Audio Call'"
+                                class="p-2 lg:p-3 rounded-2xl transition-all">
                             <i data-lucide="phone" class="w-4 h-4 lg:w-5 lg:h-5"></i>
                         </button>
-                        <button type="button" @@click="startCall('video')" class="p-2 lg:p-3 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all">
+                        <button type="button" @@click="startCall('video')" 
+                                :disabled="!activeDoctor.canChatToday"
+                                :class="!activeDoctor.canChatToday ? 'opacity-30 cursor-not-allowed text-gray-300' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'"
+                                :title="!activeDoctor.canChatToday ? 'Calls are only allowed on appointment day' : 'Start Video Call'"
+                                class="p-2 lg:p-3 rounded-2xl transition-all">
                             <i data-lucide="video" class="w-4 h-4 lg:w-5 lg:h-5"></i>
                         </button>
                         <div class="relative" x-data="{ open: false }" @@click.away="open = false">
@@ -202,13 +240,35 @@
                 </div>
                 <!-- Input Area - Fixed at Bottom with Safe Area -->
                 <footer class="p-2 md:p-4 lg:p-6 bg-white border-t border-gray-100 shrink-0 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]" style="padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 10px));">
+                    <!-- Lock Banner when not appointment day -->
+                    <div x-show="!activeDoctor.canChatToday" class="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-amber-900 text-xs animate-fade-in-up">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                                <i data-lucide="lock" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-[11px] uppercase tracking-wider text-amber-800" x-text="activeDoctor.appointmentStatus === 'upcoming' ? 'Chat Locked' : 'Appointment Required'"></p>
+                                <p class="text-[11px] text-amber-700 font-medium" x-text="activeDoctor.appointmentStatus === 'upcoming' 
+                                    ? ('Messaging activates on appointment day: ' + activeDoctor.displayDate + (activeDoctor.appointmentTime ? ' at ' + activeDoctor.appointmentTime : ''))
+                                    : 'You need an active appointment scheduled for today to message this doctor.'"></p>
+                            </div>
+                        </div>
+                        <a href="/Dashboard/Doctors" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-[10px] uppercase tracking-wider transition-all shrink-0">
+                            Book Appointment
+                        </a>
+                    </div>
+
                     <form @@submit.prevent="sendMessage" class="relative">
-                        <div class="flex items-end gap-2 bg-gray-50 rounded-[1.5rem] lg:rounded-[2rem] px-3 md:px-3 lg:px-4 py-2 md:py-2 lg:py-2 border border-gray-200 md:border-gray-100 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/10 shadow-sm transition-all">
+                        <div class="flex items-end gap-2 bg-gray-50 rounded-[1.5rem] lg:rounded-[2rem] px-3 md:px-3 lg:px-4 py-2 md:py-2 lg:py-2 border border-gray-200 md:border-gray-100 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/10 shadow-sm transition-all"
+                             :class="{ 'opacity-60 bg-gray-100 cursor-not-allowed': !activeDoctor.canChatToday }">
                             <div class="relative pb-0.5">
-                                <button type="button" @@click="showAttachmentPicker = !showAttachmentPicker" class="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                                <button type="button" @@click="if (activeDoctor.canChatToday) showAttachmentPicker = !showAttachmentPicker" 
+                                        :disabled="!activeDoctor.canChatToday"
+                                        :class="!activeDoctor.canChatToday ? 'opacity-30 cursor-not-allowed' : 'text-gray-400 hover:text-blue-600'"
+                                        class="p-2 transition-colors">
                                     <i data-lucide="plus" class="w-5 h-5"></i>
                                 </button>
-                                <div x-show="showAttachmentPicker" @@click.away="showAttachmentPicker = false" 
+                                <div x-show="showAttachmentPicker && activeDoctor.canChatToday" @@click.away="showAttachmentPicker = false" 
                                      x-transition class="absolute bottom-full left-0 mb-3 bg-white rounded-2xl shadow-2xl border p-3 w-56 lg:w-64 z-50">
                                     <div class="space-y-1">
                                         <button type="button" @@click="selectAttachmentType('image')" class="w-full flex items-center gap-3 p-2 lg:p-3 hover:bg-purple-50 rounded-xl group transition-colors">
@@ -236,12 +296,14 @@
                                 <input type="file" x-ref="documentInput" class="hidden" accept=".pdf,.doc,.docx,.txt" @@change="handleFile">
                             </div>
                             <textarea x-model="newMessage" @@keydown="handleKeyDown" 
-                                     placeholder="Type message..." 
+                                     :disabled="!activeDoctor.canChatToday"
+                                     :placeholder="activeDoctor.canChatToday ? 'Type message...' : 'Chat is locked until your scheduled appointment day...'" 
                                      class="flex-1 bg-transparent border-none text-sm font-medium focus:ring-0 outline-none resize-none max-h-20 md:max-h-24 lg:max-h-32 min-h-[44px] py-3"
+                                     :class="{ 'cursor-not-allowed': !activeDoctor.canChatToday }"
                                      rows="1"></textarea>
                             <div class="pb-0.5">
-                                <button type="button" @@click="sendMessage" :disabled="!newMessage.trim() && !pendingFile"
-                                        class="p-2 md:p-2 lg:p-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-blue-500/30">
+                                <button type="button" @@click="sendMessage" :disabled="!activeDoctor.canChatToday || (!newMessage.trim() && !pendingFile)"
+                                        class="p-2 md:p-2 lg:p-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-blue-500/30">
                                     <i data-lucide="send" class="w-4 h-4"></i>
                                 </button>
                             </div>
@@ -272,6 +334,7 @@
             searchQuery: '',
             activeDoctorId: '@(ViewBag.SelectedDoctorId ?? "")',
             doctors: @Html.Raw(Json.Serialize(Model.AvailableDoctors)),
+            doctorStatus: @Html.Raw(Json.Serialize(ViewBag.DoctorAppointmentStatus ?? new Dictionary<int, object>())),
             messages: [],
             newMessage: '',
             pendingFile: null,
@@ -282,6 +345,18 @@
             typingTimeout: null,
             
             async init() {
+                // Enrich doctors with appointment permission flags
+                this.doctors = (this.doctors || []).map(d => {
+                    const st = this.doctorStatus[d.id] || {};
+                    return {
+                        ...d,
+                        canChatToday: st.canChat === true,
+                        appointmentStatus: st.status || 'no_appointment',
+                        displayDate: st.displayDate || '',
+                        appointmentTime: st.time || ''
+                    };
+                });
+
                 lucide.createIcons();
                 
                 try {
@@ -443,8 +518,11 @@
                     }
                 } catch (err) { console.error(err); }
             },
-
             async sendMessage() {
+                if (!this.activeDoctor.canChatToday) {
+                    alert('Messaging is only allowed on your scheduled appointment day.');
+                    return;
+                }
                 if ((!this.newMessage.trim() && !this.pendingFile) || !this.activeDoctorId) return;
 
                 const fd = new FormData();
@@ -465,12 +543,16 @@
                         if (data.success) {
                             if (Array.isArray(this.messages)) this.messages.push(data.message);
                             else this.messages = [data.message];
+                        } else {
+                            alert(data.message || 'Unable to send message.');
+                            this.newMessage = temp;
                         }
                     } else { this.newMessage = temp; }
                 } catch (err) { this.newMessage = temp; }
             },
 
             selectAttachmentType(type) {
+                if (!this.activeDoctor.canChatToday) return;
                 this.showAttachmentPicker = false;
                 if (type === 'image') this.$refs.photoInput.click();
                 else if (type === 'video') this.$refs.videoInput.click();
@@ -478,7 +560,11 @@
             },
 
             handleFile(e) {
-                if (e.target.files.length) this.pendingFile = e.target.files[0];
+                const file = e.target.files[0];
+                if (file) {
+                    this.pendingFile = file;
+                    e.target.value = '';
+                }
             },
 
             getFileIcon(file) {
@@ -491,6 +577,10 @@
             startCall(type) {
                 if (!this.activeDoctorId) return;
                 const doc = this.doctors.find(d => d.id == this.activeDoctorId);
+                if (!doc?.canChatToday) {
+                    alert('Calls are only permitted on your scheduled appointment day.');
+                    return;
+                }
                 if (doc) {
                     window.dispatchEvent(new CustomEvent('call-initiated', { 
                         detail: { 

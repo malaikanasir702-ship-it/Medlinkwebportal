@@ -77,14 +77,14 @@
 let reminders = [], patients = [];
 
 async function loadReminders() {
-    const res = await fetch('/api/doctor/follow-up-reminders', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    const res = await fetch('/api/doctor/follow-up-reminders', { credentials: 'include', headers: getAuthHeaders() });
     reminders = res.ok ? await res.json() : [];
     updateStats();
     renderReminders();
 }
 
 async function loadPatients() {
-    const res = await fetch('/api/doctor/patients', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    const res = await fetch('/api/doctor/patients', { credentials: 'include', headers: getAuthHeaders() });
     if (!res.ok) return;
     const data = await res.json();
     patients = data.map(d => ({ id: d.patient.id, name: d.patient.name }));
@@ -147,7 +147,7 @@ async function sendNow(id) {
     const btn = event.target.closest('button');
     btn.textContent = 'Sending...'; btn.disabled = true;
     const res = await fetch(`/api/doctor/follow-up-reminders/${id}/send`, {
-        method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() }
+        method: 'POST', credentials: 'include', headers: getAuthHeaders()
     });
     if (res.ok) { showToast('Reminder sent!', 'success'); loadReminders(); }
     else { showToast('Failed to send', 'error'); btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Send Now'; btn.disabled = false; }
@@ -155,7 +155,7 @@ async function sendNow(id) {
 
 async function deleteReminder(id) {
     if (!confirm('Delete this reminder?')) return;
-    await fetch(`/api/doctor/follow-up-reminders/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
+    await fetch(`/api/doctor/follow-up-reminders/${id}`, { method: 'DELETE', credentials: 'include', headers: getAuthHeaders() });
     loadReminders();
 }
 
@@ -184,7 +184,8 @@ document.getElementById('reminderForm').addEventListener('submit', async e => {
     };
     const res = await fetch('/api/doctor/follow-up-reminders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        credentials: 'include',
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload)
     });
     btn.textContent = 'Schedule Reminder'; btn.disabled = false;

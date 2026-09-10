@@ -17,7 +17,7 @@ namespace MedLinkPortal.Controllers.Api
 {
     [Route("api/doctor")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = "Bearer,Identity.Application")]
     public class DoctorController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -253,7 +253,6 @@ namespace MedLinkPortal.Controllers.Api
                     .Select(u => new {
                         u.Id,
                         Name = u.FirstName + " " + u.LastName,
-                        Email = u.Email,
                         Gender = u.Gender,
                         DateOfBirth = u.DateOfBirth,
                         Image = u.ProfileImage ?? "https://picsum.photos/seed/" + u.Id + "/100/100"
@@ -316,15 +315,29 @@ namespace MedLinkPortal.Controllers.Api
                     })
                     .ToListAsync();
 
-                var rng = new Random();
-                var activeChats = patients.Select(patient => new {
-                    Patient = patient,
-                    LastMessage = "I have uploaded my recent test reports.",
-                    LastMessageTime = DateTime.Now.AddHours(-rng.Next(1, 48)),
-                    UnreadCount = rng.Next(0, 3)
+                var today = DateTime.UtcNow.Date;
+                var appointments = await _context.Appointments
+                    .Where(a => a.DoctorId == doctor.Id && a.Status != "Cancelled" && a.Status != "Rejected")
+                    .ToListAsync();
+
+                var activeChats = patients.Select(patient => {
+                    var pAppts = appointments.Where(a => a.UserId == patient.Id).ToList();
+                    var hasToday = pAppts.Any(a => a.AppointmentDate.Date == today);
+                    var nextAppt = pAppts.Where(a => a.AppointmentDate.Date >= today).OrderBy(a => a.AppointmentDate).FirstOrDefault()
+                                   ?? pAppts.OrderByDescending(a => a.AppointmentDate).FirstOrDefault();
+
+                    return new {
+                        Patient = patient,
+                        LastMessage = hasToday ? "Appointment active today." : "Awaiting appointment day.",
+                        LastMessageTime = DateTime.UtcNow,
+                        UnreadCount = 0,
+                        CanChatToday = hasToday,
+                        NextAppointmentDate = nextAppt?.AppointmentDate.ToString("yyyy-MM-dd"),
+                        NextAppointmentTime = nextAppt?.TimeSlot
+                    };
                 }).ToList();
 
-                return Ok(activeChats.OrderByDescending(c => c.LastMessageTime));
+                return Ok(activeChats.OrderByDescending(c => c.CanChatToday).ThenBy(c => c.NextAppointmentDate));
             }
             catch (Exception ex)
             {

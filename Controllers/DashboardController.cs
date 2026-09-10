@@ -439,15 +439,84 @@ namespace MedLinkPortal.Controllers
             var model = await GetBaseModelAsync();
             model.ActiveTab = "messages";
 
-            // If a doctor is selected, fetch conversation
+            var today = DateTime.UtcNow.Date;
+
+            // Fetch patient's active appointments
+            var patientAppointments = await _context.Appointments
+                .Where(a => a.UserId == userId && a.Status != "Cancelled" && a.Status != "Rejected")
+                .ToListAsync();
+
+            var appointedDoctorIds = patientAppointments.Select(a => a.DoctorId).Distinct().ToList();
+
+            // Only show doctors with whom the patient has an appointment
+            model.AvailableDoctors = model.AvailableDoctors
+                .Where(d => appointedDoctorIds.Contains(d.Id))
+                .ToList();
+
+            // Map appointment status for each appointed doctor
+            var docStatusDict = new Dictionary<int, object>();
+            foreach (var doc in model.AvailableDoctors)
+            {
+                var docAppts = patientAppointments.Where(a => a.DoctorId == doc.Id).ToList();
+                var todayAppt = docAppts.FirstOrDefault(a => a.AppointmentDate.Date == today);
+                if (todayAppt != null)
+                {
+                    docStatusDict[doc.Id] = new
+                    {
+                        canChat = true,
+                        status = "active_today",
+                        date = todayAppt.AppointmentDate.ToString("yyyy-MM-dd"),
+                        displayDate = todayAppt.AppointmentDate.ToString("MMM dd, yyyy"),
+                        time = todayAppt.TimeSlot
+                    };
+                }
+                else
+                {
+                    var upcoming = docAppts.Where(a => a.AppointmentDate.Date > today).OrderBy(a => a.AppointmentDate).FirstOrDefault();
+                    if (upcoming != null)
+                    {
+                        docStatusDict[doc.Id] = new
+                        {
+                            canChat = false,
+                            status = "upcoming",
+                            date = upcoming.AppointmentDate.ToString("yyyy-MM-dd"),
+                            displayDate = upcoming.AppointmentDate.ToString("MMM dd, yyyy"),
+                            time = upcoming.TimeSlot
+                        };
+                    }
+                    else
+                    {
+                        var past = docAppts.OrderByDescending(a => a.AppointmentDate).FirstOrDefault();
+                        docStatusDict[doc.Id] = new
+                        {
+                            canChat = false,
+                            status = "past",
+                            date = past?.AppointmentDate.ToString("yyyy-MM-dd"),
+                            displayDate = past?.AppointmentDate.ToString("MMM dd, yyyy"),
+                            time = past?.TimeSlot
+                        };
+                    }
+                }
+            }
+            ViewBag.DoctorAppointmentStatus = docStatusDict;
+
+            // If a doctor is selected, check if valid
             if (doctorId.HasValue)
             {
-                var selectedDoc = _context.Doctors.Find(doctorId.Value);
-                if (selectedDoc != null)
+                if (appointedDoctorIds.Contains(doctorId.Value))
                 {
-                    ViewBag.SelectedDoctorId = doctorId;
-                    ViewBag.SelectedDoctorName = selectedDoc.Name;
-                    ViewBag.SelectedDoctorImage = selectedDoc.Image;
+                    var selectedDoc = model.AvailableDoctors.FirstOrDefault(d => d.Id == doctorId.Value) 
+                                      ?? _context.Doctors.Find(doctorId.Value);
+                    if (selectedDoc != null)
+                    {
+                        ViewBag.SelectedDoctorId = doctorId;
+                        ViewBag.SelectedDoctorName = selectedDoc.Name;
+                        ViewBag.SelectedDoctorImage = selectedDoc.Image;
+                    }
+                }
+                else
+                {
+                    ViewBag.SelectedDoctorId = null;
                 }
             }
 
@@ -552,6 +621,21 @@ namespace MedLinkPortal.Controllers
             {
                 var doctor = await _context.Doctors.FindAsync(doctorId);
                 finalReceiverId = doctor?.UserId ?? "";
+            }
+
+            // APPOINTMENT DAY ACCESS CHECK
+            var today = DateTime.UtcNow.Date;
+            var hasTodayAppointment = await _context.Appointments
+                .AnyAsync(a => a.AppointmentDate.Date == today &&
+                               a.Status != "Cancelled" && a.Status != "Rejected" &&
+                               (
+                                   (a.UserId == userId && (a.DoctorId == finalDoctorId || (_context.Doctors.Any(d => d.Id == a.DoctorId && d.UserId == finalReceiverId)))) ||
+                                   (a.UserId == finalReceiverId && (a.DoctorId == finalDoctorId || (_context.Doctors.Any(d => d.Id == a.DoctorId && d.UserId == userId))))
+                               ));
+
+            if (!hasTodayAppointment)
+            {
+                return Json(new { success = false, message = "Messaging is only allowed on your scheduled appointment day." });
             }
 
             var message = new ChatMessage
@@ -1325,6 +1409,26 @@ namespace MedLinkPortal.Controllers
             var userId = _userManager.GetUserId(User);
             var doctor = await _context.Doctors.FindAsync(doctorId);
             if (doctor == null) return RedirectToAction("Doctors");
+
+            // Validate that the slot is not already booked
+            var cutoff = DateTime.Now.AddMinutes(-30);
+            var normSlot = NormalizeTimeSlot(timeSlot);
+            var existingAppointments = await _context.Appointments
+                .Where(a => a.DoctorId == doctorId &&
+                            a.AppointmentDate.Date == date.Date &&
+                            a.Status != "Cancelled" && a.Status != "Rejected")
+                .ToListAsync();
+
+            var isAlreadyBooked = existingAppointments.Any(a =>
+                (a.Status == "Confirmed" || a.Status == "Scheduled" || a.Status == "Paid" || a.Status == "Completed" ||
+                 ((a.Status == "Pending" || a.Status == "PendingPayment" || a.Status == "Pending Payment") && a.CreatedAt >= cutoff)) &&
+                NormalizeTimeSlot(a.TimeSlot) == normSlot);
+
+            if (isAlreadyBooked)
+            {
+                TempData["ErrorMessage"] = "This time slot is already booked by another patient. Please choose another time slot.";
+                return RedirectToAction("BookAppointment", new { doctorId });
+            }
 
             var appointment = new Appointment
             {
@@ -2126,6 +2230,21 @@ namespace MedLinkPortal.Controllers
                 await _notificationService.MarkAllAsReadAsync(userId);
             }
             return Json(new { success = true });
+        }
+
+        private static string NormalizeTimeSlot(string? slot)
+        {
+            if (string.IsNullOrWhiteSpace(slot)) return string.Empty;
+            var trimmed = slot.Trim();
+            if (DateTime.TryParse(trimmed, out var dt))
+            {
+                return dt.ToString("hh:mm tt");
+            }
+            if (TimeSpan.TryParse(trimmed, out var ts))
+            {
+                return DateTime.Today.Add(ts).ToString("hh:mm tt");
+            }
+            return trimmed.ToUpperInvariant();
         }
     }
 

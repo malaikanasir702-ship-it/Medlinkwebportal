@@ -200,11 +200,32 @@ namespace MedLinkPortal.Controllers
         }
 
         [HttpPost]
-        public IActionResult BookAppointment(BookingModel model)
+        public async Task<IActionResult> BookAppointment(BookingModel model)
         {
             if (!ModelState.IsValid)
             {
                 return Json(new { success = false, message = "Please fill all required fields." });
+            }
+
+            if (model.SelectedDoctor != null && DateTime.TryParse(model.Date, out var apptDate))
+            {
+                var normSlot = NormalizeTimeSlot(model.Time);
+                var cutoff = DateTime.Now.AddMinutes(-30);
+                var existingAppointments = await _context.Appointments
+                    .Where(a => a.DoctorId == model.SelectedDoctor.Id &&
+                                a.AppointmentDate.Date == apptDate.Date &&
+                                a.Status != "Cancelled" && a.Status != "Rejected")
+                    .ToListAsync();
+
+                var isAlreadyBooked = existingAppointments.Any(a =>
+                    (a.Status == "Confirmed" || a.Status == "Scheduled" || a.Status == "Paid" || a.Status == "Completed" ||
+                     ((a.Status == "Pending" || a.Status == "PendingPayment" || a.Status == "Pending Payment") && a.CreatedAt >= cutoff)) &&
+                    NormalizeTimeSlot(a.TimeSlot) == normSlot);
+
+                if (isAlreadyBooked)
+                {
+                    return Json(new { success = false, message = "This time slot is already booked by another patient. Please choose another slot." });
+                }
             }
 
             return Json(new
@@ -236,24 +257,92 @@ namespace MedLinkPortal.Controllers
 
             var dayOfWeek = selectedDate.DayOfWeek.ToString();
             
-            // First, find the doctor to get their UserId (which is the string ID used in AvailabilitySlots)
             var doctorObj = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == doctorId);
             if (doctorObj == null || string.IsNullOrEmpty(doctorObj.UserId))
             {
                 return Json(new { success = true, slots = new List<object>() });
             }
 
-            // Note: In a real system, we would also filter out slots that are already booked for this specific date
-            var slots = await _context.DoctorAvailabilitySlots
+            var availabilitySlots = await _context.DoctorAvailabilitySlots
                 .Where(s => s.DoctorId == doctorObj.UserId && s.DayOfWeek == dayOfWeek && s.IsActive)
                 .OrderBy(s => s.StartTime)
-                .Select(s => new {
-                    id = s.Id,
-                    time = s.StartTime.ToString(@"hh\:mm") + (s.StartTime.Hours >= 12 ? " PM" : " AM")
-                })
                 .ToListAsync();
 
-            return Json(new { success = true, slots });
+            var cutoff = DateTime.Now.AddMinutes(-30);
+            var bookedAppointments = await _context.Appointments
+                .Where(a => a.DoctorId == doctorId &&
+                            a.AppointmentDate.Date == selectedDate.Date &&
+                            a.Status != "Cancelled" && a.Status != "Rejected")
+                .ToListAsync();
+
+            var activeBookings = bookedAppointments.Where(a =>
+                a.Status == "Confirmed" || a.Status == "Scheduled" || a.Status == "Paid" || a.Status == "Completed" ||
+                ((a.Status == "Pending" || a.Status == "PendingPayment" || a.Status == "Pending Payment") && a.CreatedAt >= cutoff)
+            ).ToList();
+
+            var bookedTimeSlots = activeBookings
+                .Select(a => NormalizeTimeSlot(a.TimeSlot))
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var generatedSlots = new List<object>();
+            var seenTimes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var slot in availabilitySlots)
+            {
+                var cur = slot.StartTime;
+                if (cur >= slot.EndTime)
+                {
+                    var timeStr = DateTime.Today.Add(cur).ToString("hh:mm tt");
+                    if (!seenTimes.Contains(timeStr))
+                    {
+                        seenTimes.Add(timeStr);
+                        bool isLocked = bookedTimeSlots.Contains(NormalizeTimeSlot(timeStr));
+                        generatedSlots.Add(new {
+                            id = slot.Id,
+                            time = timeStr,
+                            isLocked = isLocked,
+                            isBooked = isLocked
+                        });
+                    }
+                }
+                else
+                {
+                    while (cur < slot.EndTime)
+                    {
+                        var timeStr = DateTime.Today.Add(cur).ToString("hh:mm tt");
+                        if (!seenTimes.Contains(timeStr))
+                        {
+                            seenTimes.Add(timeStr);
+                            bool isLocked = bookedTimeSlots.Contains(NormalizeTimeSlot(timeStr));
+                            generatedSlots.Add(new {
+                                id = slot.Id,
+                                time = timeStr,
+                                isLocked = isLocked,
+                                isBooked = isLocked
+                            });
+                        }
+                        cur = cur.Add(TimeSpan.FromMinutes(30));
+                    }
+                }
+            }
+
+            return Json(new { success = true, slots = generatedSlots });
+        }
+
+        private static string NormalizeTimeSlot(string? slot)
+        {
+            if (string.IsNullOrWhiteSpace(slot)) return string.Empty;
+            var trimmed = slot.Trim();
+            if (DateTime.TryParse(trimmed, out var dt))
+            {
+                return dt.ToString("hh:mm tt");
+            }
+            if (TimeSpan.TryParse(trimmed, out var ts))
+            {
+                return DateTime.Today.Add(ts).ToString("hh:mm tt");
+            }
+            return trimmed.ToUpperInvariant();
         }
 
         public IActionResult GPNow()

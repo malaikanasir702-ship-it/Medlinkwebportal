@@ -91,8 +91,8 @@ let activeTab = 'received';
 
 async function loadAll() {
     const [recRes, sentRes] = await Promise.all([
-        fetch('/api/doctor/referrals/received', { headers: { 'Authorization': 'Bearer ' + getToken() } }),
-        fetch('/api/doctor/referrals/sent', { headers: { 'Authorization': 'Bearer ' + getToken() } })
+        fetch('/api/doctor/referrals/received', { credentials: 'include', headers: getAuthHeaders() }),
+        fetch('/api/doctor/referrals/sent', { credentials: 'include', headers: getAuthHeaders() })
     ]);
     const received = recRes.ok ? await recRes.json() : [];
     const sent = sentRes.ok ? await sentRes.json() : [];
@@ -159,7 +159,8 @@ function renderSent(items) {
 async function respond(id, status) {
     const res = await fetch('/api/doctor/referrals/respond', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        credentials: 'include',
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ referralId: id, status })
     });
     if (res.ok) { showToast(`Referral ${status.toLowerCase()}`, 'success'); loadAll(); }
@@ -180,7 +181,7 @@ function switchTab(tab) {
 }
 
 async function loadPatients() {
-    const res = await fetch('/api/doctor/patients', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    const res = await fetch('/api/doctor/patients', { credentials: 'include', headers: getAuthHeaders() });
     if (!res.ok) return;
     const data = await res.json();
     const sel = document.getElementById('refPatientId');
@@ -230,7 +231,8 @@ document.getElementById('referralForm').addEventListener('submit', async e => {
     };
     const res = await fetch('/api/doctor/referrals', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        credentials: 'include',
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload)
     });
     btn.textContent = 'Send Referral'; btn.disabled = false;

@@ -438,6 +438,66 @@ namespace MedLinkPortal.Controllers.Api
             }
         }
 
+        [HttpGet("doctors/{id}/booked-slots")]
+        public async Task<IActionResult> GetDoctorBookedSlots(int id, [FromQuery] string date)
+        {
+            try
+            {
+                if (!DateTime.TryParse(date, out var selectedDate))
+                {
+                    return BadRequest(new { success = false, message = "Invalid date format." });
+                }
+
+                var doctor = await _context.Doctors.FindAsync(id);
+                if (doctor == null) return NotFound("Doctor not found");
+
+                var appointments = await _context.Appointments
+                    .Where(a => a.DoctorId == id &&
+                                a.AppointmentDate.Date == selectedDate.Date &&
+                                a.Status != "Cancelled" && a.Status != "Rejected")
+                    .ToListAsync();
+
+                var cutoff = DateTime.Now.AddMinutes(-30);
+                var activeBookings = appointments.Where(a =>
+                    a.Status == "Confirmed" || a.Status == "Scheduled" || a.Status == "Paid" || a.Status == "Completed" ||
+                    ((a.Status == "Pending" || a.Status == "PendingPayment" || a.Status == "Pending Payment") && a.CreatedAt >= cutoff)
+                ).ToList();
+
+                var bookedSlots = activeBookings
+                    .Select(a => NormalizeTimeSlot(a.TimeSlot))
+                    .Where(s => !string.IsNullOrEmpty(s))
+                    .Distinct()
+                    .ToList();
+
+                return Ok(new
+                {
+                    success = true,
+                    doctorId = id,
+                    date = selectedDate.ToString("yyyy-MM-dd"),
+                    bookedSlots = bookedSlots
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Failed to load booked slots: " + ex.Message });
+            }
+        }
+
+        private static string NormalizeTimeSlot(string? slot)
+        {
+            if (string.IsNullOrWhiteSpace(slot)) return string.Empty;
+            var trimmed = slot.Trim();
+            if (DateTime.TryParse(trimmed, out var dt))
+            {
+                return dt.ToString("hh:mm tt");
+            }
+            if (TimeSpan.TryParse(trimmed, out var ts))
+            {
+                return DateTime.Today.Add(ts).ToString("hh:mm tt");
+            }
+            return trimmed.ToUpperInvariant();
+        }
+
         [HttpPost("doctors/{id}/reviews")]
         public async Task<IActionResult> AddDoctorReview(int id, [FromBody] MedLinkPortal.Models.Api.ReviewRequest request)
         {
@@ -492,6 +552,23 @@ namespace MedLinkPortal.Controllers.Api
             var user = await _userManager.FindByIdAsync(userId);
             var doctorUser = await _userManager.FindByIdAsync(doctor.UserId ?? "");
             var fee = (long)((doctorUser?.ConsultationFee ?? 2000) * 100); // Stripe expects cents
+
+            // Validate that the slot is not already booked
+            var normalizedSlotSession = NormalizeTimeSlot(request.TimeSlot);
+            var cutoffSession = DateTime.Now.AddMinutes(-30);
+            var existingSessionBookings = await _context.Appointments
+                .Where(a => a.DoctorId == doctor.Id &&
+                            a.AppointmentDate.Date == request.Date.Date &&
+                            a.Status != "Cancelled" && a.Status != "Rejected")
+                .ToListAsync();
+
+            if (existingSessionBookings.Any(a =>
+                (a.Status == "Confirmed" || a.Status == "Scheduled" || a.Status == "Paid" || a.Status == "Completed" ||
+                 ((a.Status == "Pending" || a.Status == "PendingPayment" || a.Status == "Pending Payment") && a.CreatedAt >= cutoffSession)) &&
+                NormalizeTimeSlot(a.TimeSlot) == normalizedSlotSession))
+            {
+                return BadRequest(new { success = false, message = "This time slot is already booked by another patient. Please select another slot." });
+            }
 
             // Create temporary appointment
             var appointment = new Appointment
@@ -573,6 +650,23 @@ namespace MedLinkPortal.Controllers.Api
             var user = await _userManager.FindByIdAsync(userId);
             var doctorUser = await _userManager.FindByIdAsync(doctor.UserId ?? "");
             var fee = (long)((doctorUser?.ConsultationFee ?? 2000) * 100);
+
+            // Validate that the slot is not already booked
+            var normalizedSlotIntent = NormalizeTimeSlot(request.TimeSlot);
+            var cutoffIntent = DateTime.Now.AddMinutes(-30);
+            var existingIntentBookings = await _context.Appointments
+                .Where(a => a.DoctorId == doctor.Id &&
+                            a.AppointmentDate.Date == request.Date.Date &&
+                            a.Status != "Cancelled" && a.Status != "Rejected")
+                .ToListAsync();
+
+            if (existingIntentBookings.Any(a =>
+                (a.Status == "Confirmed" || a.Status == "Scheduled" || a.Status == "Paid" || a.Status == "Completed" ||
+                 ((a.Status == "Pending" || a.Status == "PendingPayment" || a.Status == "Pending Payment") && a.CreatedAt >= cutoffIntent)) &&
+                NormalizeTimeSlot(a.TimeSlot) == normalizedSlotIntent))
+            {
+                return BadRequest(new { success = false, message = "This time slot is already booked by another patient. Please select another slot." });
+            }
 
             var appointment = new Appointment
             {
@@ -2431,7 +2525,6 @@ namespace MedLinkPortal.Controllers.Api
             {
                 id = memberUser.Id,
                 name = $"{memberUser.FirstName} {memberUser.LastName}".Trim(),
-                email = memberUser.Email,
                 relationship = link.Relationship,
                 status = link.Status,
                 profileImage = memberUser.ProfileImage,
@@ -2604,7 +2697,6 @@ namespace MedLinkPortal.Controllers.Api
                         linkId = link.Id,
                         requesterId = requester.Id,
                         name = $"{requester.FirstName} {requester.LastName}".Trim(),
-                        email = requester.Email,
                         relationship = link.Relationship,
                         profileImage = requester.ProfileImage,
                         invitedAt = link.CreatedAt

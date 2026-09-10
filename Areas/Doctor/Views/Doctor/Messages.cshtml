@@ -29,10 +29,11 @@
             {
                 var patient = item.Patient;
                 var isStarted = item.IsAppointmentStarted;
+                var canChatToday = item.CanChatToday;
                 var disabledClass = "";
-                var statusIcon = isStarted ? "fa-circle-check text-emerald-500" : "fa-circle-nodes text-slate-300";
+                var statusIcon = canChatToday ? "fa-circle-check text-emerald-500" : (isStarted ? "fa-clock text-amber-500" : "fa-lock text-slate-400");
                 
-                <button onclick="loadConversation('@patient.Id', '@(patient.Name ?? patient.UserName ?? "Patient")', @(item.AppointmentId?.ToString() ?? "null"))" 
+                <button onclick="loadConversation('@patient.Id', '@(patient.Name ?? patient.UserName ?? "Patient")', @(item.AppointmentId?.ToString() ?? "null"), @(canChatToday.ToString().ToLower()), '@(item.NextAppointmentTime?.ToString("MMM dd, yyyy") ?? "")')" 
                         class="w-full p-6 flex items-center gap-4 hover:bg-white dark:hover:bg-white/5 transition-all text-left group contact-item @disabledClass" 
                         id="contact-@patient.Id">
                     <div class="relative">
@@ -459,6 +460,10 @@
     // --- Modern Call UI Logic ---
     function startVoiceCall() {
         if (!activeRecipientId) return;
+        if (!activeCanChatToday) {
+            alert('Calling is only permitted on the patient\'s scheduled appointment day.');
+            return;
+        }
         const name = document.getElementById('activeUserName').textContent;
         showCallOverlay(name, 'audio', 'connecting');
         rtc.initiateCall(activeRecipientId, 'audio');
@@ -466,6 +471,10 @@
 
     function startVideoCall() {
         if (!activeRecipientId) return;
+        if (!activeCanChatToday) {
+            alert('Calling is only permitted on the patient\'s scheduled appointment day.');
+            return;
+        }
         const name = document.getElementById('activeUserName').textContent;
         showCallOverlay(name, 'video', 'connecting');
         rtc.initiateCall(activeRecipientId, 'video');
@@ -613,9 +622,11 @@
     }
 
     // --- Chat Logic ---
-    function loadConversation(userId, userName, appointmentId) {
+    let activeCanChatToday = true;
+    function loadConversation(userId, userName, appointmentId, canChatToday = true, apptDate = '') {
         activeRecipientId = userId;
         activeAppointmentId = appointmentId;
+        activeCanChatToday = (canChatToday === true || canChatToday === 'true');
         
         // Mobile Transition: Slide Chat IN
         const hub = document.getElementById('communicationHub');
@@ -630,6 +641,50 @@
         document.getElementById('inputArea').classList.remove('hidden');
         document.getElementById('activeUserName').textContent = userName;
         document.getElementById('activeUserAvatar').textContent = userName.charAt(0).toUpperCase();
+
+        // Lock / Unlock Consultation Controls based on appointment day
+        const msgInput = document.getElementById('messageInput');
+        const submitBtn = document.querySelector('#chatForm button[type="submit"]');
+        const startConsultationBtn = document.getElementById('startConsultation');
+        let lockBanner = document.getElementById('doctorLockBanner');
+
+        if (!activeCanChatToday) {
+            if (!lockBanner) {
+                lockBanner = document.createElement('div');
+                lockBanner.id = 'doctorLockBanner';
+                lockBanner.className = 'p-3 mb-2 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold flex items-center gap-2';
+                document.getElementById('inputArea').insertBefore(lockBanner, document.getElementById('chatForm'));
+            }
+            lockBanner.innerHTML = `<i class="fas fa-lock"></i> Consultation is locked. Scheduled for ${apptDate || 'future date'}. Communication opens on appointment day.`;
+            lockBanner.classList.remove('hidden');
+
+            if (msgInput) {
+                msgInput.disabled = true;
+                msgInput.placeholder = 'Consultation locked until appointment day...';
+            }
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-40', 'cursor-not-allowed');
+            }
+            if (startConsultationBtn) {
+                startConsultationBtn.disabled = true;
+                startConsultationBtn.classList.add('opacity-40', 'cursor-not-allowed');
+            }
+        } else {
+            if (lockBanner) lockBanner.classList.add('hidden');
+            if (msgInput) {
+                msgInput.disabled = false;
+                msgInput.placeholder = 'Enter clinical signal...';
+            }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+            }
+            if (startConsultationBtn) {
+                startConsultationBtn.disabled = false;
+                startConsultationBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+            }
+        }
         
         // Reset unread badge
         const badge = document.getElementById('unread-' + userId);
@@ -795,6 +850,10 @@
     }
 
     async function sendMessage() {
+        if (!activeCanChatToday) {
+            alert('Messaging is only allowed on the patient\'s scheduled appointment day.');
+            return;
+        }
         const input = document.getElementById('messageInput');
         const fileInput = document.getElementById('fileInput');
         const imageInput = document.getElementById('imageInput');

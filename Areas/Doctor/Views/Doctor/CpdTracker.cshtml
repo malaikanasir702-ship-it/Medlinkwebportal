@@ -125,7 +125,7 @@ function initYears() {
 
 async function loadCpd() {
     const year = document.getElementById('yearFilter').value;
-    const res = await fetch(`/api/doctor/cpd?year=${year}`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    const res = await fetch(`/api/doctor/cpd?year=${year}`, { credentials: 'include', headers: getAuthHeaders() });
     if (!res.ok) return;
     const data = await res.json();
 
@@ -198,7 +198,7 @@ function closeCpdModal() {
 }
 
 async function editCpd(id) {
-    const res = await fetch(`/api/doctor/cpd?year=${document.getElementById('yearFilter').value}`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    const res = await fetch(`/api/doctor/cpd?year=${document.getElementById('yearFilter').value}`, { credentials: 'include', headers: getAuthHeaders() });
     if (res.ok) {
         const data = await res.json();
         const a = (data.activities || []).find(x => x.id === id);
@@ -208,7 +208,7 @@ async function editCpd(id) {
 
 async function deleteCpd(id) {
     if (!confirm('Delete this activity?')) return;
-    await fetch(`/api/doctor/cpd/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
+    await fetch(`/api/doctor/cpd/${id}`, { method: 'DELETE', credentials: 'include', headers: getAuthHeaders() });
     loadCpd();
 }
 
@@ -227,7 +227,8 @@ document.getElementById('cpdForm').addEventListener('submit', async e => {
     };
     const res = await fetch('/api/doctor/cpd', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        credentials: 'include',
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload)
     });
     btn.textContent = 'Save Activity'; btn.disabled = false;

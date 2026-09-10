@@ -349,17 +349,12 @@
                         <span class="text-sm font-bold tracking-tight group-[.active]:text-indigo-700 dark:group-[.active]:text-indigo-300">Clinic Staff</span>
                     </a>
 
-                    <a asp-controller="Doctor" asp-action="CpdTracker"
+                    {{-- CPD/CME TRACKER -- hidden until certificate upload is implemented --}}
+                    @* <a asp-controller="Doctor" asp-action="CpdTracker"
                        class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mb-1 text-slate-500 dark:text-slate-400">
                         <i class="fas fa-graduation-cap mr-4 text-slate-400 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors text-base group-[.active]:text-emerald-600 dark:group-[.active]:text-emerald-400"></i>
                         <span class="text-sm font-bold tracking-tight group-[.active]:text-emerald-700 dark:group-[.active]:text-emerald-300">CPD / CME</span>
-                    </a>
-
-                    <a asp-controller="Doctor" asp-action="VoiceNotes"
-                       class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mb-1 text-slate-500 dark:text-slate-400">
-                        <i class="fas fa-microphone-lines mr-4 text-slate-400 group-hover:text-pink-500 dark:group-hover:text-pink-400 transition-colors text-base group-[.active]:text-pink-600 dark:group-[.active]:text-pink-400"></i>
-                        <span class="text-sm font-bold tracking-tight group-[.active]:text-pink-700 dark:group-[.active]:text-pink-300">Voice Notes</span>
-                    </a>
+                    </a> *@
 
                     <a asp-controller="Doctor" asp-action="PeakAnalytics"
                        class="sidebar-link flex items-center px-5 py-3.5 rounded-2xl group mb-1 text-slate-500 dark:text-slate-400">
@@ -699,6 +694,15 @@
         notificationConnection.start().catch(err => console.error("Notification Sync Error:", err));
     </script>
     <script src="~/js/premium-modals.js"></script>
+    <script>
+        // Shared auth helper — works for both cookie (web portal) and JWT (mobile API)
+        function getToken() { return localStorage.getItem('jwt_token') || ''; }
+        function getAuthHeaders(extra) {
+            const token = localStorage.getItem('jwt_token');
+            const base = token ? { 'Authorization': 'Bearer ' + token } : {};
+            return Object.assign(base, extra || {});
+        }
+    </script>
     @if (ViewData["HideGlobalCall"] == null || !(bool)ViewData["HideGlobalCall"])
     {
         @await Html.PartialAsync("_GlobalCallOverlay")

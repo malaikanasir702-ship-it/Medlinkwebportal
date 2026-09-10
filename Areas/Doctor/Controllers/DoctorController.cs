@@ -581,18 +581,23 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
                 .ToListAsync();
 
             var viewModel = new List<PatientRecordListViewModel>();
+            var today = DateTime.Today;
+            var utcToday = DateTime.UtcNow.Date;
             foreach (var patient in patients)
             {
-                var nextAppt = await _context.Appointments
-                    .Where(a => a.UserId == patient.Id && a.DoctorId == coreDocId && a.AppointmentDate >= DateTime.Today.AddDays(-1) && a.Status != "Completed")
-                    .OrderByDescending(a => a.AppointmentDate)
-                    .FirstOrDefaultAsync();
+                var appts = await _context.Appointments
+                    .Where(a => a.UserId == patient.Id && a.DoctorId == coreDocId && a.Status != "Cancelled" && a.Status != "Rejected")
+                    .ToListAsync();
+
+                var activeAppt = appts.FirstOrDefault(a => a.AppointmentDate.Date == today || a.AppointmentDate.Date == utcToday)
+                                ?? appts.Where(a => a.AppointmentDate.Date > today).OrderBy(a => a.AppointmentDate).FirstOrDefault()
+                                ?? appts.OrderByDescending(a => a.AppointmentDate).FirstOrDefault();
 
                 viewModel.Add(new PatientRecordListViewModel
                 {
                     Patient = patient,
-                    NextAppointmentTime = nextAppt?.AppointmentDate,
-                    AppointmentId = nextAppt?.Id
+                    NextAppointmentTime = activeAppt?.AppointmentDate,
+                    AppointmentId = activeAppt?.Id
                 });
             }
 
@@ -1165,7 +1170,6 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
         public IActionResult ClinicStaff() => View();
         public IActionResult Referrals() => View();
         public IActionResult MyReviews() => View();
-        public IActionResult VoiceNotes() => View();
         public IActionResult PeakAnalytics() => View();
 
         // Public profile — no auth required

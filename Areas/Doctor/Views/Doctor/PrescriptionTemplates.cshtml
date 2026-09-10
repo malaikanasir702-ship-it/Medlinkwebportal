@@ -146,7 +146,8 @@ document.getElementById('templateForm').addEventListener('submit', async e => {
     try {
         const res = await fetch('/api/doctor/prescription-templates', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+            credentials: 'include',
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload)
         });
         if (res.ok) { closeTemplateModal(); loadTemplates(); }
@@ -157,14 +158,14 @@ document.getElementById('templateForm').addEventListener('submit', async e => {
 async function deleteTemplate(id) {
     if (!confirm('Delete this template?')) return;
     await fetch(`/api/doctor/prescription-templates/${id}`, {
-        method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() }
+        method: 'DELETE', credentials: 'include', headers: getAuthHeaders()
     });
     loadTemplates();
 }
 
 async function loadTemplates() {
     const res = await fetch('/api/doctor/prescription-templates', {
-        headers: { 'Authorization': 'Bearer ' + getToken() }
+        credentials: 'include', headers: getAuthHeaders()
     });
     templates = res.ok ? await res.json() : [];
     renderTemplates();

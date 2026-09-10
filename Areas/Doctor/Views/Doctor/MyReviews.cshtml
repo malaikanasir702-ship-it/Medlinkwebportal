@@ -67,7 +67,7 @@ const stars = (n) => '★'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n
 const ratingColor = (n) => n >= 4 ? 'text-green-500' : n >= 3 ? 'text-amber-500' : 'text-red-400';
 
 async function loadReviews() {
-    const res = await fetch('/api/doctor/reviews', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    const res = await fetch('/api/doctor/reviews', { credentials: 'include', headers: getAuthHeaders() });
     reviews = res.ok ? await res.json() : [];
     updateStats();
     renderReviews();
@@ -163,7 +163,8 @@ document.getElementById('replyForm').addEventListener('submit', async e => {
     };
     const res = await fetch('/api/doctor/reviews/reply', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        credentials: 'include',
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload)
     });
     btn.textContent = 'Publish Reply'; btn.disabled = false;

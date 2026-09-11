@@ -1,6 +1,7 @@
 using MedLinkPortal.Models;
 using MedLinkPortal.Areas.Identity.Pages.Account;
 using MedLinkPortal.Middleware;
+using MedLinkPortal.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;

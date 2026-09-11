@@ -109,6 +109,9 @@ function renderStaff(staff) {
                 <span class="px-3 py-1 ${roleColors[s.role] || 'bg-slate-50 text-slate-600'} rounded-full text-xs font-bold">${s.role}</span>
                 <span class="text-xs text-slate-400">Added ${s.addedAt ? new Date(s.addedAt).toLocaleDateString() : '—'}</span>
             </div>
+            <button onclick="resendEmail(${s.id})" class="mt-4 w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-envelope"></i> Resend Login Email
+            </button>
         </div>`).join('');
 }
 
@@ -117,6 +120,15 @@ async function removeStaff(id) {
     const res = await fetch(`/api/doctor/staff/${id}`, { method: 'DELETE', credentials: 'include', headers: getAuthHeaders() });
     if (res.ok) { showToast('Staff member removed', 'success'); loadStaff(); }
     else showToast('Failed to remove', 'error');
+}
+
+async function resendEmail(id) {
+    const res = await fetch(`/api/doctor/staff/${id}/resend-email`, {
+        method: 'POST', credentials: 'include', headers: getAuthHeaders()
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) showToast('Login credentials resent to staff email!', 'success');
+    else showToast(data.message || 'Failed to resend email', 'error');
 }
 
 function openStaffModal() {
@@ -147,7 +159,12 @@ document.getElementById('staffForm').addEventListener('submit', async e => {
     btn.textContent = 'Add Staff'; btn.disabled = false;
     if (res.ok) {
         closeStaffModal(); document.getElementById('staffForm').reset();
-        showToast('Staff member added successfully!', 'success');
+        const data = await res.json().catch(() => ({}));
+        if (data.emailSent === false && data.emailError) {
+            showToast(`Staff added but email failed: ${data.emailError}`, 'error');
+        } else {
+            showToast('Staff member added & welcome email sent!', 'success');
+        }
         loadStaff();
     } else {
         const data = await res.json().catch(() => ({}));

@@ -631,9 +631,14 @@ namespace MedLinkPortal.Controllers.Api
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
+            // Get doctor info for the email
+            var doctor = await _db.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
+            var doctorName = doctor?.Name ?? "Your Doctor";
+
             // Check if user already exists, create if not
             var existing = await _userManager.FindByEmailAsync(req.Email);
             string staffUserId;
+            bool isNewUser = false;
 
             if (existing == null)
             {
@@ -641,6 +646,7 @@ namespace MedLinkPortal.Controllers.Api
                 {
                     UserName       = req.Email,
                     Email          = req.Email,
+                    Name           = req.Name,
                     FirstName      = req.Name.Split(' ').First(),
                     LastName       = req.Name.Contains(' ') ? req.Name[(req.Name.IndexOf(' ') + 1)..] : "",
                     PhoneNumber    = req.Phone,
@@ -653,15 +659,7 @@ namespace MedLinkPortal.Controllers.Api
 
                 await _userManager.AddToRoleAsync(newUser, "Patient");
                 staffUserId = newUser.Id;
-
-                // Send welcome email
-                try
-                {
-                    await _emailSender.SendEmailAsync(req.Email,
-                        "Welcome to MedLink — Staff Account",
-                        $"<p>Hello {req.Name},</p><p>Your MedLink staff account has been created. Your temporary password is <b>Staff@12345!</b> Please change it after first login.</p>");
-                }
-                catch { /* non-fatal */ }
+                isNewUser   = true;
             }
             else
             {
@@ -683,7 +681,89 @@ namespace MedLinkPortal.Controllers.Api
             _db.ClinicStaff.Add(member);
             await _db.SaveChangesAsync();
 
-            return Ok(new { success = true, staffId = member.Id, userId = staffUserId });
+            // Send welcome email (only for newly created accounts)
+            string? emailError = null;
+            if (isNewUser)
+            {
+                try
+                {
+                    var portalUrl = "https://medlinkwebportal-production.up.railway.app";
+                    var html = $@"<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <style>
+    body {{ font-family: 'Segoe UI', Arial, sans-serif; background:#f0f5fa; margin:0; padding:0; }}
+    .wrap {{ max-width:580px; margin:40px auto; background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,.08); }}
+    .top  {{ background:#1e293b; padding:36px 40px; text-align:center; }}
+    .top h1 {{ color:#fff; margin:0; font-size:26px; letter-spacing:-0.5px; }}
+    .top p  {{ color:#94a3b8; margin:8px 0 0; font-size:14px; }}
+    .body {{ padding:36px 40px; }}
+    .hi   {{ font-size:20px; font-weight:700; color:#0f172a; margin-bottom:12px; }}
+    p     {{ color:#475569; line-height:1.7; margin:0 0 16px; }}
+    .box  {{ background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:20px 24px; margin:24px 0; }}
+    .box .label {{ font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }}
+    .box .value {{ font-size:15px; font-weight:700; color:#0f172a; }}
+    .btn  {{ display:inline-block; padding:14px 32px; background:#2563eb; color:#fff !important; border-radius:12px; font-weight:700; font-size:14px; text-decoration:none; margin-top:8px; }}
+    .warn {{ font-size:12px; color:#f59e0b; margin-top:16px; }}
+    .foot {{ background:#f8fafc; padding:20px 40px; text-align:center; color:#94a3b8; font-size:12px; border-top:1px solid #e2e8f0; }}
+  </style>
+</head>
+<body>
+<div class='wrap'>
+  <div class='top'>
+    <h1>MedLink Staff Access</h1>
+    <p>You have been added to a clinic team</p>
+  </div>
+  <div class='body'>
+    <div class='hi'>Welcome, {req.Name}! 👋</div>
+    <p>Dr. <strong>{doctorName}</strong> has added you as a <strong>{req.Role}</strong> on MedLink Portal. Your account is ready — here are your login credentials:</p>
+
+    <div class='box'>
+      <div class='label'>Email (Login)</div>
+      <div class='value'>{req.Email}</div>
+    </div>
+    <div class='box'>
+      <div class='label'>Temporary Password</div>
+      <div class='value' style='letter-spacing:2px;'>Staff@12345!</div>
+    </div>
+
+    <p class='warn'>⚠️ Please change your password immediately after your first login.</p>
+
+    <p>As a {req.Role}, you can help manage appointments, the waiting room, and patient scheduling on behalf of Dr. {doctorName}.</p>
+
+    <a href='{portalUrl}' class='btn'>Log In to MedLink Portal →</a>
+
+    <p style='margin-top:24px; font-size:13px; color:#94a3b8;'>If you were not expecting this invitation, please ignore this email.</p>
+  </div>
+  <div class='foot'>
+    MedLink Portal &bull; Integrated Health Systems &bull; {DateTime.UtcNow.Year}<br>
+    <a href='{portalUrl}' style='color:#2563eb;'>{portalUrl}</a>
+  </div>
+</div>
+</body>
+</html>";
+
+                    await _emailSender.SendEmailAsync(
+                        req.Email,
+                        $"Welcome to MedLink — You've been added as {req.Role} by Dr. {doctorName}",
+                        html);
+                }
+                catch (Exception ex)
+                {
+                    // Staff was created successfully; just note email issue
+                    emailError = ex.Message;
+                }
+            }
+
+            return Ok(new
+            {
+                success    = true,
+                staffId    = member.Id,
+                userId     = staffUserId,
+                emailSent  = isNewUser && emailError == null,
+                emailError = emailError
+            });
         }
 
         [HttpDelete("staff/{id}")]
@@ -697,6 +777,78 @@ namespace MedLinkPortal.Controllers.Api
             member.IsActive = false; // Soft delete
             await _db.SaveChangesAsync();
             return Ok(new { success = true });
+        }
+
+        [HttpPost("staff/{id}/resend-email")]
+        public async Task<IActionResult> ResendStaffEmail(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var member = await _db.ClinicStaff
+                .FirstOrDefaultAsync(s => s.Id == id && s.DoctorId == userId && s.IsActive);
+            if (member == null) return NotFound();
+
+            var doctor     = await _db.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
+            var doctorName = doctor?.Name ?? "Your Doctor";
+            var portalUrl  = "https://medlinkwebportal-production.up.railway.app";
+
+            var html = $@"<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <style>
+    body {{ font-family: 'Segoe UI', Arial, sans-serif; background:#f0f5fa; margin:0; padding:0; }}
+    .wrap {{ max-width:580px; margin:40px auto; background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,.08); }}
+    .top  {{ background:#1e293b; padding:36px 40px; text-align:center; }}
+    .top h1 {{ color:#fff; margin:0; font-size:26px; letter-spacing:-0.5px; }}
+    .top p  {{ color:#94a3b8; margin:8px 0 0; font-size:14px; }}
+    .body {{ padding:36px 40px; }}
+    .hi   {{ font-size:20px; font-weight:700; color:#0f172a; margin-bottom:12px; }}
+    p     {{ color:#475569; line-height:1.7; margin:0 0 16px; }}
+    .box  {{ background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:20px 24px; margin:24px 0; }}
+    .box .label {{ font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }}
+    .box .value {{ font-size:15px; font-weight:700; color:#0f172a; }}
+    .btn  {{ display:inline-block; padding:14px 32px; background:#2563eb; color:#fff !important; border-radius:12px; font-weight:700; font-size:14px; text-decoration:none; margin-top:8px; }}
+    .warn {{ font-size:12px; color:#f59e0b; margin-top:16px; }}
+    .foot {{ background:#f8fafc; padding:20px 40px; text-align:center; color:#94a3b8; font-size:12px; border-top:1px solid #e2e8f0; }}
+  </style>
+</head>
+<body>
+<div class='wrap'>
+  <div class='top'>
+    <h1>MedLink Staff Access</h1>
+    <p>Your login credentials — resent by Dr. {doctorName}</p>
+  </div>
+  <div class='body'>
+    <div class='hi'>Hello, {member.Name}! 👋</div>
+    <p>Here are your MedLink Portal login credentials for Dr. <strong>{doctorName}</strong>'s clinic:</p>
+    <div class='box'>
+      <div class='label'>Email (Login)</div>
+      <div class='value'>{member.Email}</div>
+    </div>
+    <div class='box'>
+      <div class='label'>Temporary Password</div>
+      <div class='value' style='letter-spacing:2px;'>Staff@12345!</div>
+    </div>
+    <p class='warn'>⚠️ Please change your password after logging in.</p>
+    <a href='{portalUrl}' class='btn'>Log In to MedLink Portal →</a>
+  </div>
+  <div class='foot'>MedLink Portal &bull; Integrated Health Systems</div>
+</div>
+</body>
+</html>";
+
+            try
+            {
+                await _emailSender.SendEmailAsync(
+                    member.Email,
+                    $"Your MedLink Staff Login — Dr. {doctorName}",
+                    html);
+                return Ok(new { success = true, message = "Credentials email resent." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = $"Email failed: {ex.Message}" });
+            }
         }
 
         // ══════════════════════════════════════════════════════════════════════

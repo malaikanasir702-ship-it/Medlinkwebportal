@@ -601,6 +601,38 @@ namespace MedLinkPortal.Controllers.Api
         // 6. CLINIC STAFF MANAGEMENT
         // ══════════════════════════════════════════════════════════════════════
 
+        // Quick email test — call GET /api/doctor/test-email?to=someone@gmail.com
+        [HttpGet("test-email")]
+        public async Task<IActionResult> TestEmail([FromQuery] string? to)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var recipient = to ?? (await _userManager.FindByIdAsync(userId))?.Email;
+            if (string.IsNullOrEmpty(recipient))
+                return BadRequest(new { message = "Provide ?to=email@example.com" });
+
+            try
+            {
+                await _emailSender.SendEmailAsync(
+                    recipient,
+                    "MedLink — Email Test ✅",
+                    $"<h2>Email is working!</h2><p>Sent at {DateTime.UtcNow:u} UTC</p><p>If you see this, SMTP is configured correctly.</p>");
+
+                return Ok(new { success = true, sentTo = recipient, message = "Test email sent! Check inbox." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    sentTo  = recipient,
+                    error   = ex.Message,
+                    detail  = ex.InnerException?.Message
+                });
+            }
+        }
+
         [HttpGet("staff")]
         public async Task<IActionResult> GetStaff()
         {

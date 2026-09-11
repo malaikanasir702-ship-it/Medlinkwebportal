@@ -1,7 +1,8 @@
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
-using System.Net;
-using System.Net.Mail;
+using MimeKit;
 
 namespace MedLinkPortal.Services
 {
@@ -26,35 +27,44 @@ namespace MedLinkPortal.Services
             _logger   = logger;
         }
 
-        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+        public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
+            // Build the MIME message
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_settings.SenderName, _settings.SenderEmail));
+            message.To.Add(MailboxAddress.Parse(toEmail));
+            message.Subject = subject;
+
+            var builder = new BodyBuilder { HtmlBody = htmlBody };
+            message.Body = builder.ToMessageBody();
+
+            using var smtp = new SmtpClient();
+
             try
             {
-                using var client = new SmtpClient(_settings.Host, _settings.Port)
-                {
-                    Credentials    = new NetworkCredential(_settings.Username, _settings.Password),
-                    EnableSsl      = true,
-                    DeliveryMethod = SmtpDeliveryMethod.Network
-                };
+                // Connect with STARTTLS on port 587
+                await smtp.ConnectAsync(_settings.Host, _settings.Port, SecureSocketOptions.StartTls);
 
-                var mail = new MailMessage
-                {
-                    From       = new MailAddress(_settings.SenderEmail, _settings.SenderName),
-                    Subject    = subject,
-                    Body       = htmlMessage,
-                    IsBodyHtml = true
-                };
+                // Gmail App Password — strip spaces if present
+                var password = _settings.Password?.Replace(" ", "") ?? "";
+                await smtp.AuthenticateAsync(_settings.Username, password);
 
-                mail.To.Add(email);
+                await smtp.SendAsync(message);
+                await smtp.DisconnectAsync(quit: true);
 
-                await client.SendMailAsync(mail);
-
-                _logger.LogInformation("Email sent to {Email} — Subject: {Subject}", email, subject);
+                _logger.LogInformation("✅ Email sent to {Email} | Subject: {Subject}", toEmail, subject);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send email to {Email} — Subject: {Subject}", email, subject);
-                throw; // re-throw so caller can handle / surface the error
+                _logger.LogError(ex,
+                    "❌ Email FAILED to {Email} | Subject: {Subject} | Host: {Host}:{Port} | User: {User}",
+                    toEmail, subject, _settings.Host, _settings.Port, _settings.Username);
+
+                // Disconnect cleanly even on error
+                if (smtp.IsConnected)
+                    await smtp.DisconnectAsync(quit: false);
+
+                throw; // Re-throw so caller sees the real error message
             }
         }
     }

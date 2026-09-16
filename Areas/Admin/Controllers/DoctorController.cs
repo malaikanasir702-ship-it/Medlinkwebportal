@@ -299,6 +299,7 @@ namespace MedLinkPortal.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Approve(string userId)
         {
             if (string.IsNullOrEmpty(userId)) return BadRequest(new { message = "User ID is required" });
@@ -365,6 +366,7 @@ namespace MedLinkPortal.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Reject(string userId)
         {
             if (string.IsNullOrEmpty(userId)) return BadRequest(new { message = "User ID is required" });
@@ -380,6 +382,7 @@ namespace MedLinkPortal.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> BulkApprove([FromBody] List<string> userIds)
         {
             if (userIds == null || !userIds.Any()) return BadRequest(new { message = "No doctors selected." });
@@ -427,6 +430,7 @@ namespace MedLinkPortal.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> BulkReject([FromBody] List<string> userIds)
         {
             if (userIds == null || !userIds.Any()) return BadRequest(new { message = "No doctors selected." });

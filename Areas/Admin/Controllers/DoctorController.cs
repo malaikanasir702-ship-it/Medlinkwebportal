@@ -378,5 +378,71 @@ namespace MedLinkPortal.Areas.Admin.Controllers
             if (result.Succeeded) return Ok();
             return BadRequest(new { message = "Failed to reject doctor", errors = result.Errors.Select(e => e.Description) });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> BulkApprove([FromBody] List<string> userIds)
+        {
+            if (userIds == null || !userIds.Any()) return BadRequest(new { message = "No doctors selected." });
+
+            int successCount = 0;
+            var failedList = new List<string>();
+
+            foreach (var userId in userIds)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) continue;
+
+                user.ApprovalStatus = "Approved";
+                user.ApprovalDate = DateTime.Now;
+                var result = await _userManager.UpdateAsync(user);
+
+                if (result.Succeeded)
+                {
+                    var doctor = _context.Doctors.FirstOrDefault(d => d.UserId == userId);
+                    if (doctor == null)
+                    {
+                        doctor = new MedLinkPortal.Models.Doctor
+                        {
+                            UserId = userId,
+                            Name = user.Name ?? $"{user.FirstName} {user.LastName}",
+                            Specialty = user.Specialist ?? "General Practice",
+                            ClinicAddress = user.Workplace ?? "Main Hospital",
+                            Experience = user.Experience ?? "1",
+                            Rating = 5.0,
+                            Online = true,
+                            Availability = "Available Today"
+                        };
+                        _context.Doctors.Add(doctor);
+                    }
+                    successCount++;
+                }
+                else
+                {
+                    failedList.Add(user.Email ?? userId);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, approvedCount = successCount, failed = failedList });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BulkReject([FromBody] List<string> userIds)
+        {
+            if (userIds == null || !userIds.Any()) return BadRequest(new { message = "No doctors selected." });
+
+            int successCount = 0;
+            foreach (var userId in userIds)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) continue;
+
+                user.ApprovalStatus = "Rejected";
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded) successCount++;
+            }
+
+            return Ok(new { success = true, rejectedCount = successCount });
+        }
     }
 }

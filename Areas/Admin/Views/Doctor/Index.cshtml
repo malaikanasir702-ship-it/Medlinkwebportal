@@ -67,10 +67,41 @@
                 </div>
             </div>
         </div>
+
+        <!-- Bulk Action Bar -->
+        <div id="bulkActionBar" class="hidden mb-8 p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-[24px] shadow-2xl border border-slate-700/50 flex flex-col md:flex-row items-center justify-between gap-5 transition-all duration-300 animate-in fade-in slide-in-from-top-4">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-base border border-blue-400/30 shadow-inner" id="selectedBadge">0</div>
+                <div>
+                    <h4 class="font-bold text-sm text-white flex items-center gap-2">
+                        <span class="bulk-count">0</span> Doctors Selected
+                    </h4>
+                    <p class="text-xs text-slate-400 font-medium">Perform quick batch operations on selected records</p>
+                </div>
+            </div>
+            <div class="flex items-center flex-wrap gap-3">
+                <button type="button" id="btnSelectAllPending" class="px-5 py-3 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-[16px] border border-slate-600/50 transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                    <i class="fas fa-clock text-amber-400"></i> Select All Pending
+                </button>
+                <button type="button" id="btnBulkApprove" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-bold rounded-[16px] transition-all flex items-center gap-2 shadow-lg shadow-emerald-950/40">
+                    <i class="fas fa-check-circle text-sm"></i> Approve Selected (<span class="bulk-count">0</span>)
+                </button>
+                <button type="button" id="btnBulkReject" class="px-6 py-3 bg-rose-600 hover:bg-rose-500 active:scale-95 text-white text-xs font-bold rounded-[16px] transition-all flex items-center gap-2 shadow-lg shadow-rose-950/40">
+                    <i class="fas fa-times-circle text-sm"></i> Reject Selected (<span class="bulk-count">0</span>)
+                </button>
+                <button type="button" id="btnClearSelection" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all ml-1" title="Deselect All">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
         <div class="overflow-x-auto">
             <table class="w-full border-collapse">
                 <thead>
                     <tr class="text-slate-400 text-[10px] font-semibold uppercase tracking-[0.3em]">
+                        <th class="px-4 py-8 border-b border-slate-50 text-center w-14">
+                            <input type="checkbox" id="selectAllDocs" class="w-5 h-5 rounded-md border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer transition-all" title="Select / Deselect All Visible" />
+                        </th>
                         <th class="px-6 py-8 border-b border-slate-50 text-left">Physician Identity</th>
                         <th class="px-6 py-8 border-b border-slate-50 text-left">Core Specialty</th>
                         <th class="px-6 py-8 border-b border-slate-50 text-left">Professional Standing</th>
@@ -82,6 +113,9 @@
                 <tbody class="divide-y divide-slate-50">
                     @foreach (var doc in Model) {
                         <tr class="group hover:bg-slate-50/80 transition-all duration-500 physician-row" data-id="@doc.Id">
+                            <td class="px-4 py-10 text-center">
+                                <input type="checkbox" class="doc-checkbox w-5 h-5 rounded-md border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer transition-all" data-userid="@doc.UserId" data-status="@doc.ApprovalStatus" />
+                            </td>
                             <td class="px-6 py-10">
                                 <div class="flex items-center gap-6">
                                     <div class="relative">
@@ -434,6 +468,9 @@
                         $row.addClass('hidden');
                     }
                 });
+                if (typeof updateBulkBar === 'function') {
+                    updateBulkBar();
+                }
             }
             $('#physicianSearch').on('input', filterTable);
             $('#physicianFilter').on('change', filterTable);
@@ -642,6 +679,132 @@
                     },
                     error: function(xhr) {
                         alert(xhr.responseJSON?.message || 'Failed to reject doctor');
+                    }
+                });
+            });
+
+            // ── Bulk Selection & Action Handlers ───────────────────
+            function updateBulkBar() {
+                const $visibleBoxes = $('.physician-row:not(.hidden) .doc-checkbox');
+                const $checkedBoxes = $('.physician-row:not(.hidden) .doc-checkbox:checked');
+                const count = $checkedBoxes.length;
+
+                $('.bulk-count').text(count);
+                $('#selectedBadge').text(count);
+
+                if (count > 0) {
+                    $('#bulkActionBar').removeClass('hidden').addClass('flex');
+                } else {
+                    $('#bulkActionBar').addClass('hidden').removeClass('flex');
+                }
+
+                // Update Select All checkbox state
+                if ($visibleBoxes.length > 0 && count === $visibleBoxes.length) {
+                    $('#selectAllDocs').prop('checked', true).prop('indeterminate', false);
+                } else if (count > 0 && count < $visibleBoxes.length) {
+                    $('#selectAllDocs').prop('checked', false).prop('indeterminate', true);
+                } else {
+                    $('#selectAllDocs').prop('checked', false).prop('indeterminate', false);
+                }
+            }
+
+            // Header Select All Checkbox
+            $('#selectAllDocs').on('change', function() {
+                const isChecked = $(this).is(':checked');
+                $('.physician-row:not(.hidden) .doc-checkbox').prop('checked', isChecked);
+                updateBulkBar();
+            });
+
+            // Individual Checkbox Change
+            $(document).on('change', '.doc-checkbox', function() {
+                updateBulkBar();
+            });
+
+            // Select All Pending Button
+            $('#btnSelectAllPending').on('click', function() {
+                $('.physician-row .doc-checkbox').prop('checked', false);
+                $('.physician-row:not(.hidden) .doc-checkbox').each(function() {
+                    const status = ($(this).data('status') || '').toString().toLowerCase();
+                    if (status === 'pending') {
+                        $(this).prop('checked', true);
+                    }
+                });
+                updateBulkBar();
+            });
+
+            // Clear Selection
+            $('#btnClearSelection').on('click', function() {
+                $('.doc-checkbox').prop('checked', false);
+                $('#selectAllDocs').prop('checked', false).prop('indeterminate', false);
+                updateBulkBar();
+            });
+
+            // Bulk Approve Action
+            $('#btnBulkApprove').on('click', function() {
+                const userIds = $('.physician-row:not(.hidden) .doc-checkbox:checked').map(function() {
+                    return $(this).data('userid');
+                }).get();
+
+                if (!userIds || userIds.length === 0) {
+                    alert('Please select at least one doctor to approve.');
+                    return;
+                }
+
+                if (!confirm(`Are you sure you want to approve ${userIds.length} selected doctor(s)?`)) {
+                    return;
+                }
+
+                const $btn = $(this);
+                const originalHtml = $btn.html();
+                $btn.html('<i class="fas fa-spinner fa-spin text-sm"></i> Approving...').prop('disabled', true);
+
+                $.ajax({
+                    url: '/Admin/Doctor/BulkApprove',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(userIds),
+                    success: function(res) {
+                        alert(`Success! ${res.approvedCount} doctor(s) approved successfully.`);
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseJSON?.message || 'Failed to perform bulk approval.');
+                        $btn.html(originalHtml).prop('disabled', false);
+                    }
+                });
+            });
+
+            // Bulk Reject Action
+            $('#btnBulkReject').on('click', function() {
+                const userIds = $('.physician-row:not(.hidden) .doc-checkbox:checked').map(function() {
+                    return $(this).data('userid');
+                }).get();
+
+                if (!userIds || userIds.length === 0) {
+                    alert('Please select at least one doctor to reject.');
+                    return;
+                }
+
+                if (!confirm(`Are you sure you want to reject ${userIds.length} selected doctor(s)?`)) {
+                    return;
+                }
+
+                const $btn = $(this);
+                const originalHtml = $btn.html();
+                $btn.html('<i class="fas fa-spinner fa-spin text-sm"></i> Rejecting...').prop('disabled', true);
+
+                $.ajax({
+                    url: '/Admin/Doctor/BulkReject',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(userIds),
+                    success: function(res) {
+                        alert(`Success! ${res.rejectedCount} doctor(s) marked as rejected.`);
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseJSON?.message || 'Failed to perform bulk rejection.');
+                        $btn.html(originalHtml).prop('disabled', false);
                     }
                 });
             });

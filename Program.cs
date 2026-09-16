@@ -389,6 +389,19 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.MapGet("/api/dev/seed-all", async (IServiceProvider sp) =>
+{
+    await MedLinkPortal.Services.DatabaseSeederService.SeedAllAsync(sp);
+    return Results.Ok(new { message = "Comprehensive seeding completed successfully!" });
+});
+
+if (args.Contains("--seed"))
+{
+    await MedLinkPortal.Services.DatabaseSeederService.SeedAllAsync(app.Services);
+    Console.WriteLine("SEEDING_COMPLETED_SUCCESSFULLY");
+    return;
+}
+
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 // Always bind to 0.0.0.0:PORT — required for Railway container networking.
 // Clear any previously set URLs to avoid conflict with ASPNETCORE_URLS env var.

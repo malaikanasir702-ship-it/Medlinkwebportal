@@ -202,41 +202,12 @@
 
     window._rxFile = null;
 
-    // Single DOMContentLoaded — bind everything once after page load
+    // File input change listener — single bind on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function() {
-        const rxDropzone = document.getElementById('rxDropzone');
-        const rxFileInput = document.getElementById('rxFileInput');
-
-        if (rxDropzone) {
-            rxDropzone.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                rxFileInput.click();
-            });
-            rxDropzone.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                rxDropzone.style.borderColor = '#60a5fa';
-                rxDropzone.style.background = 'rgba(219,234,254,0.3)';
-            });
-            rxDropzone.addEventListener('dragleave', function() {
-                rxDropzone.style.borderColor = '';
-                rxDropzone.style.background = '';
-            });
-            rxDropzone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                rxDropzone.style.borderColor = '';
-                rxDropzone.style.background = '';
-                var file = e.dataTransfer.files[0];
-                if (file) handleRxFile(file);
-            });
-        }
-
-        if (rxFileInput) {
-            rxFileInput.addEventListener('change', function(e) {
-                var file = e.target.files[0];
-                if (file) handleRxFile(file);
-            });
-        }
+        document.getElementById('rxFileInput').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (file) handleRxFile(file);
+        });
     });
 
     function handleRxFile(file) {
@@ -356,6 +327,9 @@
     }
 </script>
 
+<!-- HIDDEN FILE INPUT — outside modal to avoid event bubbling issues -->
+<input type="file" id="rxFileInput" accept="image/*" class="hidden" style="position:absolute;left:-9999px;top:-9999px;">
+
 <!-- Prescription Upload Modal -->
 <div id="prescriptionModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
     <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg mx-auto overflow-hidden flex flex-col max-h-[90vh]">
@@ -376,23 +350,26 @@
         </div>
 
         <div class="px-8 pb-8 overflow-y-auto flex-1 space-y-5">
-            <!-- Dropzone -->
-            <div id="rxDropzone" class="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all group">
-                <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-100 transition-all">
+            <!-- Dropzone — using <label for="rxFileInput"> which is guaranteed to open file picker -->
+            <label for="rxFileInput" id="rxDropzone"
+                   class="block border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all group"
+                   ondragover="event.preventDefault();this.style.borderColor='#60a5fa';"
+                   ondragleave="this.style.borderColor='';"
+                   ondrop="event.preventDefault();this.style.borderColor='';handleRxFile(event.dataTransfer.files[0]);">
+                <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-100 transition-all pointer-events-none">
                     <i data-lucide="upload-cloud" class="w-7 h-7 text-blue-500"></i>
                 </div>
-                <p class="font-bold text-slate-700 mb-1">Drop prescription here or click to upload</p>
-                <p class="text-xs text-slate-400">JPG, PNG, WEBP up to 20MB</p>
-                <input type="file" id="rxFileInput" accept="image/*" class="hidden">
-            </div>
+                <p class="font-bold text-slate-700 mb-1 pointer-events-none">Drop prescription here or click to upload</p>
+                <p class="text-xs text-slate-400 pointer-events-none">JPG, PNG, WEBP up to 20MB</p>
+            </label>
 
             <!-- Preview -->
             <div id="rxPreview" class="hidden">
                 <div class="relative rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
                     <img id="rxPreviewImg" src="" alt="Prescription" class="w-full max-h-48 object-contain bg-slate-50">
-                    <button onclick="document.getElementById('rxFileInput').click()" class="absolute top-3 right-3 px-3 py-1.5 bg-white/90 backdrop-blur-sm text-slate-700 text-xs font-bold rounded-xl border border-slate-200 hover:bg-white transition-all shadow-sm">
+                    <label for="rxFileInput" class="absolute top-3 right-3 px-3 py-1.5 bg-white/90 backdrop-blur-sm text-slate-700 text-xs font-bold rounded-xl border border-slate-200 hover:bg-white transition-all shadow-sm cursor-pointer">
                         Change
-                    </button>
+                    </label>
                 </div>
             </div>
 

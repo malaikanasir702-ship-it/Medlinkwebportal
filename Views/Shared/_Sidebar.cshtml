@@ -1,0 +1,55 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+
+<div class="p-6 flex-1 flex flex-col h-full">
+    <!-- Brand -->
+    <div class="flex items-center gap-3 mb-10 group cursor-pointer px-2">
+        <div class="rounded-2xl overflow-hidden shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300 w-11 h-11 flex-shrink-0">
+            <img src="/images/medlink-logo.png" alt="MedLink Logo" class="w-10 h-10 rounded-2xl object-cover shadow-lg">
+        </div>
+        <div>
+            <span class="text-xl font-black text-gray-900 tracking-tight block leading-none">MedLink</span>
+            <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1 block">Patient Portal</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="space-y-1.5 flex-1">
+        @foreach (var item in Model.NavItems)
+        {
+            var isActive = Model.ActiveTab == item.Id;
+            var actionUrl = item.Id switch {
+                "overview" => Url.Action("Index", "Dashboard"),
+                "appointments" => Url.Action("Appointments", "Dashboard"),
+                "records" => Url.Action("HealthRecords", "Dashboard"),
+                "messages" => Url.Action("Messages", "Dashboard"),
+                "ai-lab" => Url.Action("AIDiagnosticLab", "Dashboard"),
+                "doctors" => Url.Action("Doctors", "Dashboard"),
+                "medical-tourism" => Url.Action("Index", "MedicalTourism"),
+                "lab-diagnostics" => Url.Action("Index", "LabDiagnostics"),
+                "transcription-history" => Url.Action("TranscriptionHistory", "Dashboard"),
+                "store" => Url.Action("Store", "Pharmacy"),
+                "orders" => Url.Action("MyOrders", "Pharmacy"),
+                "settings" => Url.Action("Settings", "Dashboard"),
+                "wishlist" => Url.Action("Wishlist", "Dashboard"),
+                _ => Url.Action("Index", "Dashboard")
+            };
+
+            <a href="@actionUrl" 
+               class="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[13px] font-bold transition-all duration-200 group @(isActive ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900")">
+                <i data-lucide="@item.Icon" class="w-5 h-5 @(isActive ? "text-white" : "group-hover:text-blue-600")"></i>
+                @item.Label
+            </a>
+        }
+    </nav>
+
+    <div class="pt-6 border-t border-gray-100">
+        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm">
+            <button type="submit" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[13px] font-bold text-rose-500 hover:bg-rose-50 transition-all duration-200 group">
+                <i data-lucide="log-out" class="w-5 h-5 group-hover:rotate-12 transition-transform"></i>
+                Sign Out
+            </button>
+        </form>
+    </div>
+</div>
+
+

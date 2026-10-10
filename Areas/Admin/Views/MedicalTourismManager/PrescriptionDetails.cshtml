@@ -1,0 +1,219 @@
+@model MedLinkPortal.Models.Prescription
+@{
+    ViewData["Title"] = "Prescription Details";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var patientName = ViewBag.PatientName;
+}
+
+<div id="prescriptionContent" class="p-8 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <!-- Breadcrumbs / Back -->
+    <div class="mb-8 back-nav">
+        <a href="@Url.Action("ClinicalHistory", new { userId = Model.PatientId })" class="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-colors font-bold text-xs uppercase tracking-widest group">
+            <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
+            Back to Clinical History
+        </a>
+    </div>
+
+    <!-- Main Card -->
+    <div class="bg-white rounded-[40px] shadow-[0_30px_60px_rgba(0,0,0,0.06)] border border-slate-100 overflow-hidden relative">
+        <!-- Accents -->
+        <div class="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none">
+            <i data-lucide="pill" class="w-64 h-64 text-slate-900"></i>
+        </div>
+
+        <!-- Header Section -->
+        <div class="p-10 md:p-14 border-b border-slate-50 relative z-10">
+            <div class="flex items-center gap-4 mb-6">
+                <span class="px-4 py-1.5 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-semibold uppercase tracking-[0.2em] shadow-sm">Verified Prescription</span>
+                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-widest">ID: #@Model.Id</span>
+            </div>
+            
+            <h1 class="text-4xl md:text-5xl font-semibold text-slate-900 tracking-tight mb-4 capitalize">@Model.Diagnosis</h1>
+            
+            <div class="flex flex-wrap items-center gap-6 text-slate-500 font-bold">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-[9px] uppercase tracking-widest text-slate-400 leading-none mb-1">Patient</p>
+                        <p class="text-slate-900">@patientName</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-blue-500/80">
+                        <i data-lucide="stethoscope" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-[9px] uppercase tracking-widest text-slate-400 leading-none mb-1">Prescribing Doctor</p>
+                        <p class="text-slate-900">Dr. @(Model.Appointment?.Doctor?.Name ?? "General Practitioner")</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
+                        <i data-lucide="calendar" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-[9px] uppercase tracking-widest text-slate-400 leading-none mb-1">Issued Date</p>
+                        <p class="text-slate-900">@Model.CreatedAt.ToString("MMM dd, yyyy")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Body -->
+        <div class="p-10 md:p-14 space-y-12">
+            <!-- Medications Section -->
+            <div>
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-[12px] uppercase tracking-[0.3em] font-semibold text-slate-400 flex items-center gap-3">
+                        <span class="w-6 h-px bg-slate-200"></span>
+                        Prescribed Medications
+                    </h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @if (Model.PrescriptionMedicines != null && Model.PrescriptionMedicines.Any())
+                    {
+                        foreach (var pm in Model.PrescriptionMedicines)
+                        {
+                            <div class="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all flex items-center justify-between group shadow-sm">
+                                <div>
+                                    <p class="font-semibold text-slate-900 text-base mb-1">@(pm.Medicine?.Name ?? "Prescribed Medicine")</p>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                        @pm.Frequency
+                                    </p>
+                                </div>
+                                <div class="px-4 py-2 bg-white rounded-xl border border-slate-100 text-xs font-semibold text-blue-600 shadow-sm group-hover:scale-105 transition-transform">
+                                    @pm.Dosage
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        try {
+                            if (!string.IsNullOrEmpty(Model.MedicationsJson) && Model.MedicationsJson.StartsWith("[")) {
+                                var medsList = System.Text.Json.JsonSerializer.Deserialize<List<dynamic>>(Model.MedicationsJson);
+                                if (medsList != null) {
+                                    foreach (var med in medsList) {
+                                        var m = (System.Text.Json.JsonElement)med;
+                                        <div class="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all flex items-center justify-between group shadow-sm">
+                                            <div>
+                                                <p class="font-semibold text-slate-900 text-base mb-1">@(m.TryGetProperty("name", out var nm) ? nm.GetString() : "Medicine")</p>
+                                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                    @(m.TryGetProperty("frequency", out var freq) ? freq.GetString() : "As directed")
+                                                </p>
+                                            </div>
+                                            <div class="px-4 py-2 bg-white rounded-xl border border-slate-100 text-xs font-semibold text-blue-600 shadow-sm group-hover:scale-105 transition-transform">
+                                                @(m.TryGetProperty("dosage", out var dos) ? dos.GetString() : "1 unit")
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            } else {
+                                <div class="col-span-2 p-8 rounded-3xl bg-amber-50/50 border border-amber-100 border-dashed text-center">
+                                    <p class="text-sm font-bold text-amber-700 italic">@(string.IsNullOrEmpty(Model.MedicationsJson) || Model.MedicationsJson == "Structured" ? "Relational database record only" : Model.MedicationsJson)</p>
+                                </div>
+                            }
+                        } catch (Exception) {
+                             <div class="col-span-2 p-8 rounded-3xl bg-slate-100 text-center">
+                                <p class="text-sm text-slate-500 italic">@Model.MedicationsJson</p>
+                             </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Clinical Notes Section -->
+            <div class="relative">
+                <div class="absolute -left-14 top-0 bottom-0 w-1 bg-slate-900/5 rounded-full hidden md:block"></div>
+                <h3 class="text-[12px] uppercase tracking-[0.3em] font-semibold text-slate-400 mb-6 flex items-center gap-3">
+                    <span class="w-6 h-px bg-slate-200"></span>
+                    Physician's Notes
+                </h3>
+                <div class="p-8 md:p-10 rounded-[2.5rem] bg-slate-900 text-white shadow-2xl shadow-slate-900/10 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                        <i data-lucide="quote" class="w-16 h-16"></i>
+                    </div>
+                    <p class="text-lg font-medium leading-[1.8] text-white/90 italic relative z-10">
+                        @(string.IsNullOrEmpty(Model.Notes) ? "No additional clinical notes were recorded for this entry." : Model.Notes)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="p-10 md:p-14 bg-slate-50 border-t border-slate-100 flex flex-col md:flex-row gap-4 footer-actions">
+            <button onclick="downloadPDF()" class="flex-1 py-5 bg-white text-slate-900 font-semibold text-[11px] rounded-2xl border border-slate-200 hover:bg-slate-100 transition-all uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-sm active:scale-95">
+                <i data-lucide="printer" class="w-4 h-4 text-slate-400"></i> Generate Clinical PDF
+            </button>
+            <button onclick="secureShare()" class="flex-1 py-5 bg-blue-600 text-white font-semibold text-[11px] rounded-2xl shadow-xl shadow-blue-500/20 hover:bg-blue-700 hover:shadow-blue-500/30 transition-all uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-95">
+                <i data-lucide="share-2" class="w-4 h-4"></i> Secure Share Port
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    lucide.createIcons();
+
+    function downloadPDF() {
+        const element = document.getElementById('prescriptionContent');
+        const opt = {
+            margin:       [10, 10],
+            filename:     'Prescription_Detailed_Record_@(Model.Id).pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Add a temporary class to hide non-pdf elements during capture
+        const buttons = document.querySelector('.footer-actions');
+        const backLink = document.querySelector('.back-nav');
+        buttons.style.display = 'none';
+        backLink.style.display = 'none';
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            buttons.style.display = 'flex';
+            backLink.style.display = 'block';
+        });
+    }
+
+    function secureShare() {
+        const title = "Clinical Prescription Detail";
+        const text = "Prescription for @patientName\nDiagnosis: @Model.Diagnosis\nPrescribed by: Dr. @(Model.Appointment?.Doctor?.Name ?? "General Practitioner")\n\nView full secure record in MedLink Portal.";
+        const url = window.location.href;
+
+        if (navigator.share) {
+            navigator.share({
+                title: title,
+                text: text,
+                url: url
+            }).catch(err => console.error("Share failed:", err));
+        } else {
+            // Fallback for desktop: Show a simple menu or default to WhatsApp
+            const encodedText = encodeURIComponent(text + " " + url);
+            const whatsappUrl = `https://wa.me/?text=${encodedText}`;
+            window.open(whatsappUrl, '_blank');
+        }
+    }
+</script>
+
+<style>
+    @@media print {
+        body * { visibility: hidden; }
+        .bg-white { border: none !important; shadow: none !important; }
+        .shadow-[0_30px_60px_rgba(0,0,0,0.06)] { box-shadow: none !important; }
+        .rounded-[40px] { border-radius: 0 !important; }
+        .max-w-4xl { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+        .p-8, .p-10, .p-14 { padding: 20px !important; }
+        .bg-slate-900 { background-color: #f8fafc !important; color: #0f172a !important; border: 1px solid #e2e8f0 !important; }
+        .text-white\/90 { color: #334155 !important; }
+        [onclick="window.print()"], .mb-8, .border-t, [data-lucide="arrow-left"], .shadow-xl { display: none !important; }
+        .animate-in { animation: none !important; }
+        * { visibility: visible; }
+    }
+</style>

@@ -1,0 +1,153 @@
+@model IEnumerable<MedLinkPortal.Areas.Admin.Models.MedicalRecord>
+<div class="space-y-12 pb-20">
+    <div class="flex flex-col flex-md-row md:items-center justify-between gap-10 py-6">
+        <div class="animate-in fade-in slide-in-from-left-8 duration-1000">
+            <h1 class="text-6xl md:text-7xl font-semibold text-slate-900 tracking-tighter mb-4">
+                Clinical <span class="text-blue-600">Repository</span>
+            </h1>
+            <p class="text-slate-500 text-xl font-medium leading-relaxed max-w-2xl">
+                Unified vault for prescriptions, lab results, and diagnostic imaging.
+            </p>
+        </div>
+        <button id="btnOpenRecordModal" class="flex items-center gap-3 px-10 py-5 bg-[#0F172A] text-white rounded-[24px] text-sm font-semibold hover:bg-black transition-all shadow-xl active:scale-95 group">
+            <i class="fas fa-plus group-hover:rotate-90 transition-transform"></i> Archive New Record
+        </button>
+    </div>
+    <div class="bento-card p-5 md:p-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            @foreach (var record in Model) {
+                <div class="bg-white border border-slate-100 rounded-[32px] p-8 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:bg-blue-50 transition-colors duration-500"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-6">
+                            <span class="px-4 py-1.5 bg-slate-100 text-slate-600 rounded-full text-[9px] font-semibold uppercase tracking-widest border border-slate-200">
+                                @record.RecordType
+                            </span>
+                            <div class="flex gap-2">
+                                <button class="btn-edit-record text-slate-400 hover:text-blue-600 transition-colors" 
+                                        data-id="@record.Id" data-title="@record.Title" data-content="@record.Content" 
+                                        data-type="@record.RecordType" data-patient="@record.PatientId" data-physician="@record.PhysicianId">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <span class="approval-badge @(record.IsApproved ? "text-emerald-500" : "text-amber-500")">
+                                    <i class="fas @(record.IsApproved ? "fa-check-circle" : "fa-clock") text-lg"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <h4 class="text-xl font-semibold text-slate-900 mb-2 truncate">@record.Title</h4>
+                        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-6">Patient: @record.Patient?.Name • @record.DateCreated.ToString("MMM dd, yyyy")</p>
+                        <div class="bg-slate-50 rounded-2xl p-4 mb-6 min-h-[80px]">
+                            <p class="text-xs font-medium text-slate-600 leading-relaxed italic line-clamp-3">"@record.Content"</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-6 border-t border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-[10px] font-semibold">
+                                    @record.Physician?.Name.Substring(0, 1)
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-500">Dr. @record.Physician?.Name</span>
+                            </div>
+                            <button class="btn-toggle-approval px-6 py-2.5 @(record.IsApproved ? "bg-slate-900 text-white" : "bg-blue-600 text-white") rounded-xl text-[9px] font-semibold uppercase tracking-widest hover:scale-105 transition-all shadow-md active:scale-95" data-id="@record.Id">
+                                @(record.IsApproved ? "Revoke" : "Approve")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div id="recordModal" class="fixed inset-0 hidden items-center justify-center modal-overlay transition-opacity duration-300 p-4 z-[100]">
+    <div class="modal-content w-full max-w-sm overflow-hidden relative">
+        <div class="p-6 pb-0 flex justify-between items-start">
+            <div>
+                <h3 class="text-xl font-semibold text-slate-900 tracking-tight">Archive <span class="text-blue-600">Entry</span></h3>
+                <p class="text-slate-500 text-[10px] font-medium mt-1">Upload prescriptions or lab results.</p>
+            </div>
+            <button id="btnCloseModal" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:text-slate-900 transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="recordForm" class="p-6 space-y-4">
+            <div class="space-y-1.5">
+                <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Record Type</label>
+                <select name="RecordType" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-slate-900 transition-all text-xs">
+                    <option value="Prescription">Prescription</option>
+                    <option value="LabResult">Lab Result</option>
+                    <option value="Imaging">Imaging Report</option>
+                </select>
+            </div>
+            <div class="space-y-1.5">
+                <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Entry Title</label>
+                <input type="text" name="Title" required placeholder="e.g. Chest X-Ray Results" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-slate-900 transition-all text-xs" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Patient</label>
+                    <select name="PatientId" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-slate-900 transition-all text-xs">
+                        @foreach(var p in ViewBag.Patients) {
+                            <option value="@p.Id">@p.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Physician</label>
+                    <select name="PhysicianId" required class="w-full px-4 py-1 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500/10 font-bold text-slate-900 transition-all text-xs">
+                        @foreach(var d in ViewBag.Physicians) {
+                            <option value="@d.Id">@d.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="space-y-1.5">
+                <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-2">Findings/Notes</label>
+                <textarea name="Content" placeholder="Enter clinical notes here..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500/10 font-medium text-slate-900 placeholder:text-slate-300 transition-all text-xs resize-none h-24"></textarea>
+            </div>
+            <button type="submit" class="w-full py-4 bg-emerald-600 text-white rounded-[24px] text-[10px] font-semibold uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg active:scale-95">Archive Record</button>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            const $modal = $('#recordModal');
+            $('#btnOpenRecordModal').on('click', () => {
+                $modal.removeClass('hidden').addClass('flex');
+                setTimeout(() => $modal.addClass('modal-open'), 10);
+            });
+            $('#btnCloseModal').on('click', () => {
+                $modal.removeClass('modal-open');
+                setTimeout(() => $modal.removeClass('flex').addClass('hidden'), 400);
+            });
+            $('#recordForm').on('submit', function(e) {
+                e.preventDefault();
+                const id = $('#recordModal').data('edit-id');
+                const url = id ? '/Prescription/Edit' : '/Prescription/Create';
+                const data = $(this).serialize() + (id ? '&Id=' + id : '');
+                $.post(url, data, function(res) {
+                    if (res.success) location.reload();
+                });
+            });
+            $('.btn-edit-record').on('click', function() {
+                const d = $(this).data();
+                $modal.data('edit-id', d.id);
+                $modal.find('select[name="RecordType"]').val(d.type);
+                $modal.find('input[name="Title"]').val(d.title);
+                $modal.find('select[name="PatientId"]').val(d.patient);
+                $modal.find('select[name="PhysicianId"]').val(d.physician);
+                $modal.find('textarea[name="Content"]').val(d.content);
+                $modal.find('h3').html('Edit <span class="text-blue-600">Entry</span>');
+                $modal.removeClass('hidden').addClass('flex');
+                setTimeout(() => $modal.addClass('modal-open'), 10);
+            });
+            $('.btn-toggle-approval').on('click', function() {
+                const id = $(this).data('id');
+                const $btn = $(this);
+                $.post('/Prescription/ToggleApproval/' + id, function(res) {
+                    if (res.success) {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+}

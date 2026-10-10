@@ -1,0 +1,146 @@
+@model IEnumerable<MedLinkPortal.Models.SubscriptionPlan>
+@{
+    ViewData["Title"] = "Ascend to MedLink PRO";
+    Layout = "~/Areas/Doctor/Views/Shared/_DocDash.cshtml";
+    int currentPlanId = ViewBag.CurrentPlanId ?? 1;
+}
+
+@if (TempData["WarningMessage"] != null)
+{
+    <div class="bg-amber-500/10 border border-amber-500/50 p-6 rounded-3xl animate-bounce">
+        <div class="flex items-center gap-4 text-amber-400">
+            <i class="fas fa-exclamation-triangle text-2xl"></i>
+            <p class="font-bold">@TempData["WarningMessage"]</p>
+        </div>
+    </div>
+}
+
+<div class="space-y-12 lg:space-y-20 mb-20 reveal bg-slate-950 p-6 lg:p-12 rounded-[50px]">
+    <!-- Hero Section -->
+    <div class="relative rounded-[40px] overflow-hidden bg-[#020617] p-8 lg:p-20 text-center border border-white/10 shadow-2xl shadow-blue-900/20 group">
+        <!-- Animated Background Mesh -->
+        <div class="absolute inset-0 opacity-30">
+             <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/30 rounded-full blur-[120px] mix-blend-screen animate-pulse"></div>
+             <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" style="animation-delay: 2s"></div>
+        </div>
+
+        <div class="relative z-10 max-w-4xl mx-auto space-y-6 lg:space-y-8">
+            <span class="inline-block px-4 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-[10px] font-semibold uppercase tracking-[0.3em] backdrop-blur-md">
+                Clinical Singularity
+            </span>
+            <h1 class="text-4xl lg:text-7xl font-semibold text-white tracking-tighter leading-[0.9]">
+                Unlock the <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Divine Layer</span> of Medical Intelligence.
+            </h1>
+            <p class="text-lg text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
+                Seamlessly integrate AI diagnostics, infinite patient retention, and predictive analytics. 
+                Move beyond care—achieve foresight.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                @if (currentPlanId == 1) {
+                    <form asp-action="UpgradeToPro" asp-controller="Doctor" method="post" class="w-full sm:w-auto">
+                        <input type="hidden" name="planId" value="2" />
+                        <button type="submit" class="w-full px-10 py-5 bg-white text-slate-900 rounded-3xl font-semibold text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-2xl shadow-white/10">
+                            Initialize PRO Upgrade
+                        </button>
+                    </form>
+                }
+                <button class="w-full sm:w-auto px-10 py-5 bg-white/5 border border-white/10 text-white rounded-3xl font-semibold text-sm uppercase tracking-widest hover:bg-white/10 transition-colors backdrop-blur-md">
+                    Support / Help
+                </button>
+            </div>
+            
+            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-6">Used by 4,000+ Elite Clinicians Worldwide</p>
+        </div>
+    </div>
+
+    <!-- Feature Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        <!-- Feature 1 -->
+        <div class="group p-8 lg:p-10 rounded-[40px] bg-white/5 border border-white/10 hover:border-blue-500/50 hover:bg-blue-900/10 transition-all duration-500 cursor-default">
+            <div class="w-16 h-16 bg-blue-600/20 rounded-3xl flex items-center justify-center mb-6 text-blue-400 group-hover:scale-110 transition-transform duration-500">
+                <i class="fas fa-brain text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-semibold text-white mb-3">AI Diagnostics</h3>
+            <p class="text-slate-300 font-medium leading-relaxed">
+                Our neural engine analyzes patient vitals against 50M+ data points to suggest differential diagnoses with 99.4% accuracy.
+            </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="group p-8 lg:p-10 rounded-[40px] bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:bg-emerald-900/10 transition-all duration-500 cursor-default">
+            <div class="w-16 h-16 bg-emerald-600/20 rounded-3xl flex items-center justify-center mb-6 text-emerald-400 group-hover:scale-110 transition-transform duration-500">
+                <i class="fas fa-infinity text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-semibold text-white mb-3">Infinite Vault</h3>
+            <p class="text-slate-300 font-medium leading-relaxed">
+                Zero storage limits. Upload high-res MRI scans, genetic sequences, and 4K surgical logs. Encrypted with military-grade 256-bit keys.
+            </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="group p-8 lg:p-10 rounded-[40px] bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-purple-900/10 transition-all duration-500 cursor-default">
+            <div class="w-16 h-16 bg-purple-600/20 rounded-3xl flex items-center justify-center mb-6 text-purple-400 group-hover:scale-110 transition-transform duration-500">
+                <i class="fas fa-crown text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-semibold text-white mb-3">Priority Neural Link</h3>
+            <p class="text-slate-300 font-medium leading-relaxed">
+                Connect directly with our senior medical officers for platform support. <span class="text-white">Response time: < 2 minutes.</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Pricing Interface -->
+    <div class="text-center space-y-12">
+        <div class="space-y-4">
+            <h2 class="text-3xl lg:text-5xl font-semibold text-white tracking-tighter">Choose Your Vector</h2>
+            <p class="text-slate-400 font-medium">Pricing managed by registry administrators. Synchronized in real-time.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            @foreach (var plan in Model)
+            {
+                var isCurrent = plan.Id == currentPlanId;
+                <div class="p-8 lg:p-12 rounded-[40px] @(plan.Price > 0 ? "bg-gradient-to-b from-blue-900 to-indigo-900 border-blue-500/30" : "bg-[#0f172a] border-white/10") border text-left relative overflow-hidden group hover:scale-[1.02] transition-all duration-500 shadow-2xl @(plan.Price > 0 ? "shadow-blue-900/50" : "")">
+                    @if (plan.Price > 0) {
+                        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+                        <div class="absolute top-0 right-0 px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-[10px] font-semibold uppercase tracking-widest rounded-bl-3xl">Premium</div>
+                    }
+
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold @(plan.Price > 0 ? "text-blue-300" : "text-slate-400") uppercase tracking-widest mb-2">@plan.Name</h3>
+                        <div class="flex items-baseline mb-6">
+                            <span class="text-5xl font-semibold text-white tracking-tighter">$@plan.Price</span>
+                            <span class="@(plan.Price > 0 ? "text-blue-200" : "text-slate-500") ml-2 font-bold">/ month</span>
+                        </div>
+                        <ul class="space-y-4 mb-8 @(plan.Price > 0 ? "text-white" : "text-slate-300") font-medium">
+                            <li class="flex items-center">
+                                <i class="fas @(plan.Price > 0 ? "fa-check-circle text-blue-400" : "fa-check text-emerald-500") mr-3"></i> 
+                                @(plan.PatientLimit == -1 ? "Unlimited" : plan.PatientLimit.ToString()) Patient Records
+                            </li>
+                            @if (!string.IsNullOrEmpty(plan.Features)) {
+                                @foreach (var feature in plan.Features.Split('|')) {
+                                    <li class="flex items-center">
+                                        <i class="fas @(plan.Price > 0 ? "fa-check-circle text-blue-400" : "fa-check text-emerald-500") mr-3"></i> 
+                                        @feature
+                                    </li>
+                                }
+                            }
+                        </ul>
+
+                        @if (isCurrent) {
+                            <button disabled class="w-full py-5 bg-white/10 border border-white/20 text-white/50 rounded-2xl font-semibold uppercase tracking-widest cursor-default">Active Plan</button>
+                        } else if (plan.Price > 0) {
+                            <form asp-action="UpgradeToPro" asp-controller="Doctor" method="post">
+                                <input type="hidden" name="planId" value="@plan.Id" />
+                                <button type="submit" class="w-full py-5 bg-white text-blue-900 rounded-2xl font-semibold uppercase tracking-widest hover:shadow-lg hover:shadow-white/20 transition-all">Upgrade Now</button>
+                            </form>
+                        } else {
+                            <button disabled class="w-full py-5 bg-white/5 border border-white/10 text-white/30 rounded-2xl font-semibold uppercase tracking-widest cursor-default">Downgrade Restricted</button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

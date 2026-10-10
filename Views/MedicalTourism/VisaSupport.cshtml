@@ -1,0 +1,100 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+
+@{
+    ViewData["Title"] = "Medical Visa Support";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="relative min-h-[calc(100vh-100px)] -mt-6 -mx-8 px-8 py-10 overflow-hidden">
+    <!-- Cinematic Background Layer -->
+    <div class="absolute inset-0 pointer-events-none select-none overflow-hidden">
+        <div class="absolute top-[10%] right-[5%] w-[600px] h-[600px] bg-indigo-100/30 rounded-full blur-[120px] animate-pulse"></div>
+        <div class="absolute bottom-[10%] left-[5%] w-[500px] h-[500px] bg-blue-100/20 rounded-full blur-[100px] animate-pulse delay-1000"></div>
+    </div>
+
+    <div class="relative z-10 max-w-6xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="text-center space-y-4">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-[0.3em]">
+                <i data-lucide="file-text" class="w-3 h-3"></i>
+                Visa Concierge
+            </div>
+            <h1 class="text-5xl font-black text-slate-900 tracking-tighter">Medical <span class="text-indigo-600">Visa Support</span></h1>
+            <p class="text-slate-500 font-medium max-w-2xl mx-auto">Skip the bureaucracy. We handle your medical visa invitation and documentation for a seamless cross-border experience.</p>
+        </div>
+
+        <!-- Visa Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Step 1: Document Prep -->
+            <div class="bg-white rounded-[32px] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 space-y-6 group hover:-translate-y-2 transition-all">
+                <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all">
+                    <i data-lucide="files" class="w-7 h-7"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Document Prep</h3>
+                <p class="text-slate-500 text-sm font-medium leading-relaxed">We assist in gathering essential medical reports, bank statements, and passport proofs required for the application.</p>
+            </div>
+
+            <!-- Step 2: Hospital Invitation -->
+            <div class="bg-white rounded-[32px] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 space-y-6 group hover:-translate-y-2 transition-all">
+                <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                    <i data-lucide="building-2" class="w-7 h-7"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Official Invitation</h3>
+                <p class="text-slate-500 text-sm font-medium leading-relaxed">Receive a formal invitation letter from our partner ISO-accredited hospitals to fast-track your visa process.</p>
+            </div>
+
+            <!-- Step 3: Embassy Guidance -->
+            <div class="bg-white rounded-[32px] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 space-y-6 group hover:-translate-y-2 transition-all">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                    <i data-lucide="landmark" class="w-7 h-7"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Embassy Liaison</h3>
+                <p class="text-slate-500 text-sm font-medium leading-relaxed">Our concierge team provides mock interview prep and embassy appointment booking assistance globally.</p>
+            </div>
+        </div>
+
+        <!-- Visa Tracker Simulation -->
+        <div class="bg-slate-900 rounded-[40px] p-8 md:p-12 text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px] -mr-48 -mt-48"></div>
+            
+            <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
+                <div class="max-w-md space-y-6">
+                    <h2 class="text-3xl font-black tracking-tight">Track Your Visa Status</h2>
+                    <p class="text-slate-400 font-medium">Already applied? Monitor the real-time progress of your medical visa invitation and embassy status.</p>
+                    <div class="relative">
+                        <input type="text" placeholder="Application Reference ID" class="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-white/30 font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        <button class="absolute right-3 top-3 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-500 transition-all">Track</button>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-[500px] h-[300px] bg-white/5 rounded-[32px] p-8 border border-white/10 backdrop-blur-sm relative flex flex-col justify-center gap-8">
+                    <div class="flex items-center gap-6">
+                        <div class="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)] animate-pulse"></div>
+                        <div class="space-y-1">
+                            <p class="text-sm font-black uppercase tracking-widest text-emerald-500">Document Review Complete</p>
+                            <p class="text-xs font-medium text-slate-500">Your documents were verified by Dr. Sarah Khan</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-6 opacity-30">
+                        <div class="w-4 h-4 rounded-full bg-slate-500"></div>
+                        <div class="space-y-1">
+                            <p class="text-sm font-black uppercase tracking-widest">Invitation Dispatched</p>
+                            <p class="text-xs font-medium">Awaiting courier tracking number</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-6 opacity-30">
+                        <div class="w-4 h-4 rounded-full bg-slate-500"></div>
+                        <div class="space-y-1">
+                            <p class="text-sm font-black uppercase tracking-widest">Visa Stamped</p>
+                            <p class="text-xs font-medium">Final approval from destination embassy</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>

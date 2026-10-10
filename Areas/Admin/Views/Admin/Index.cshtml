@@ -1,0 +1,516 @@
+@{}
+<div class="skeleton-container space-y-12 pb-20">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-10 py-6">
+        <div class="w-full max-w-xl">
+            <div class="skeleton skeleton-text w-32 mb-4"></div>
+            <div class="skeleton skeleton-title w-full h-16 md:h-24"></div>
+            <div class="skeleton skeleton-text w-3/4 h-6"></div>
+        </div>
+        <div class="flex gap-4 w-full lg:w-auto">
+            <div class="skeleton w-32 h-14 rounded-2xl"></div>
+            <div class="skeleton w-32 h-14 rounded-2xl"></div>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-10">
+        @for(int i=0; i<4; i++) {
+            <div class="skeleton-card space-y-6">
+                <div class="flex justify-between">
+                    <div class="skeleton w-14 h-14 rounded-2xl"></div>
+                    <div class="skeleton w-20 h-6 rounded-full"></div>
+                </div>
+                <div class="space-y-3">
+                    <div class="skeleton skeleton-text w-24"></div>
+                    <div class="skeleton w-32 h-10 rounded-xl"></div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-10 items-start">
+        <div class="xl:col-span-8 skeleton-card h-[500px]">
+            <div class="flex justify-between mb-12">
+                <div class="space-y-2">
+                    <div class="skeleton skeleton-text w-48 h-8"></div>
+                    <div class="skeleton skeleton-text w-32"></div>
+                </div>
+                <div class="flex gap-3">
+                    <div class="skeleton w-20 h-10 rounded-xl"></div>
+                    <div class="skeleton w-20 h-10 rounded-xl"></div>
+                </div>
+            </div>
+            <div class="skeleton w-full h-64 rounded-3xl mt-8"></div>
+        </div>
+        <div class="xl:col-span-4 space-y-8">
+            <div class="skeleton-card h-[400px]">
+                <div class="skeleton skeleton-text w-32 h-8 mb-8"></div>
+                <div class="space-y-6">
+                    @for(int i=0; i<4; i++) {
+                        <div class="flex items-center gap-4">
+                            <div class="skeleton skeleton-avatar"></div>
+                            <div class="flex-1 space-y-2">
+                                <div class="skeleton skeleton-text w-24"></div>
+                                <div class="skeleton skeleton-text w-16 h-2"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="skeleton w-full h-48 rounded-[40px]"></div>
+        </div>
+    </div>
+</div>
+<div class="main-content-actual content-hidden space-y-12 pb-20">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-10 py-6">
+        <div class="animate-in fade-in slide-in-from-left-8 duration-1000">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                </span>
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.4em]">Operational Metrics: Verified</span>
+            </div>
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-semibold text-slate-900 tracking-tighter mb-4">
+                MedLink <span class="text-blue-600">Intelligence</span>
+            </h1>
+            <p class="text-slate-500 text-lg md:text-xl max-w-2xl leading-relaxed font-medium">
+                Aggregated diagnostics and resource allocation across your primary medical network.
+            </p>
+        </div>
+        <div class="flex flex-row flex-wrap items-center gap-4 animate-in fade-in slide-in-from-right-8 duration-1000">
+        </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-10">
+        <div class="bento-card p-6 sm:p-10 group animate-in fade-in slide-in-from-bottom-8 duration-1000 stagger-1">
+            <div class="absolute top-0 right-0 w-32 h-32 -mr-12 -mt-12 rounded-full opacity-0 group-hover:opacity-10 blur-3xl transition-all duration-1000 bg-blue-500"></div>
+            <div class="flex flex-col h-full justify-between gap-10">
+                <div class="flex justify-between items-start">
+                    <div class="p-5 rounded-[22px] bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:shadow-2xl transition-all duration-700">
+                        <i class="fas fa-users text-2xl text-slate-900 group-hover:text-blue-600 transition-colors"></i>
+                    </div>
+                    <div class="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500/10 text-emerald-600 rounded-full text-[10px] font-semibold uppercase tracking-widest border border-emerald-500/20">
+                        <i class="fas fa-bolt text-[10px]"></i> +8.4%
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.3em] mb-3">Active Patients</p>
+                    <h3 class="text-3xl sm:text-4xl md:text-5xl font-semibold text-slate-900 tracking-tighter tabular-nums counter" data-target="@ViewBag.PatientCount">@ViewBag.PatientCount.ToString("N0")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="bento-card p-6 sm:p-10 group animate-in fade-in slide-in-from-bottom-8 duration-1000 stagger-2">
+            <div class="absolute top-0 right-0 w-32 h-32 -mr-12 -mt-12 rounded-full opacity-0 group-hover:opacity-10 blur-3xl transition-all duration-1000 bg-indigo-500"></div>
+            <div class="flex flex-col h-full justify-between gap-10">
+                <div class="flex justify-between items-start">
+                    <div class="p-5 rounded-[22px] bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:shadow-2xl transition-all duration-700">
+                        <i class="fas fa-stethoscope text-2xl text-slate-900 group-hover:text-blue-600 transition-colors"></i>
+                    </div>
+                    <div class="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500/10 text-emerald-600 rounded-full text-[10px] font-semibold uppercase tracking-widest border border-emerald-500/20">
+                        <i class="fas fa-bolt text-[10px]"></i> +12.0%
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.3em] mb-3">On-Call Staff</p>
+                    <h3 class="text-3xl sm:text-4xl md:text-5xl font-semibold text-slate-900 tracking-tighter tabular-nums counter" data-target="@ViewBag.PhysicianCount">@ViewBag.PhysicianCount.ToString("N0")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="bento-card p-6 sm:p-10 group animate-in fade-in slide-in-from-bottom-8 duration-1000 stagger-3">
+            <div class="absolute top-0 right-0 w-32 h-32 -mr-12 -mt-12 rounded-full opacity-0 group-hover:opacity-10 blur-3xl transition-all duration-1000 bg-purple-500"></div>
+            <div class="flex flex-col h-full justify-between gap-10">
+                <div class="flex justify-between items-start">
+                    <div class="p-5 rounded-[22px] bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:shadow-2xl transition-all duration-700">
+                        <i class="fas fa-hospital text-2xl text-slate-900 group-hover:text-blue-600 transition-colors"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.3em] mb-3">Medical Units</p>
+                    <h3 class="text-3xl sm:text-4xl md:text-5xl font-semibold text-slate-900 tracking-tighter tabular-nums counter" data-target="@ViewBag.UnitCount">@ViewBag.UnitCount.ToString("N0")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="bento-card p-6 sm:p-10 group animate-in fade-in slide-in-from-bottom-8 duration-1000 stagger-4">
+            <div class="absolute top-0 right-0 w-32 h-32 -mr-12 -mt-12 rounded-full opacity-0 group-hover:opacity-10 blur-3xl transition-all duration-1000 bg-emerald-500"></div>
+            <div class="flex flex-col h-full justify-between gap-10">
+                <div class="flex justify-between items-start">
+                    <div class="p-5 rounded-[22px] bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:shadow-2xl transition-all duration-700">
+                        <i class="fas fa-heartbeat text-2xl text-slate-900 group-hover:text-red-500 transition-colors"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.3em] mb-3">Critical Alerts</p>
+                    <h3 class="text-3xl sm:text-4xl md:text-5xl font-semibold text-slate-900 tracking-tighter tabular-nums counter" data-target="@ViewBag.CriticalCount">@ViewBag.CriticalCount.ToString("N0")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-10 items-start">
+        <div class="xl:col-span-8 bento-card p-6 md:p-12 relative overflow-visible">
+            <div class="absolute top-0 right-0 p-6 md:p-12 opacity-[0.05] pointer-events-none overflow-hidden">
+                <i class="fas fa-microscope text-[100px] md:text-[180px]"></i>
+            </div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12 lg:mb-16 relative z-10">
+                <div>
+                    <h3 class="text-2xl lg:text-3xl font-semibold text-slate-900 tracking-tight">System Performance</h3>
+                    <p class="text-slate-500 text-sm lg:text-base font-bold mt-1">Real-time throughput analysis</p>
+                </div>
+                <div class="flex gap-2 lg:gap-3 bg-slate-50 p-1.5 lg:p-2 rounded-[16px] lg:rounded-[20px] border border-slate-100 self-start sm:self-auto">
+                    <button id="btnChart7D" class="chart-filter-btn px-4 lg:px-6 py-2 lg:py-2.5 bg-white shadow-lg shadow-slate-200 rounded-xl lg:rounded-2xl text-[9px] lg:text-[10px] font-semibold uppercase tracking-widest text-slate-900 transition-all">7 Days</button>
+                    <button id="btnChart30D" class="chart-filter-btn px-4 lg:px-6 py-2 lg:py-2.5 text-slate-400 hover:text-slate-600 rounded-xl lg:rounded-2xl text-[9px] lg:text-[10px] font-semibold uppercase tracking-widest transition-all">30 Days</button>
+                </div>
+            </div>
+            <div class="h-[250px] sm:h-[350px] md:h-[450px] relative z-10 w-full overflow-hidden">
+                <div id="performanceChart" class="w-full h-full"></div>
+            </div>
+        </div>
+        <div class="xl:col-span-4 space-y-8 md:space-y-10">
+            <div class="bento-card p-6 sm:p-8 md:p-12">
+                <div class="flex items-center justify-between mb-8 md:mb-10">
+                    <h3 class="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight">Triage Queue</h3>
+                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-[16px] md:rounded-[20px] bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm border border-blue-100">
+                        <i class="fas fa-external-link-alt text-base md:text-lg"></i>
+                    </div>
+                </div>
+                <div class="space-y-6 md:space-y-8">
+                    @if (ViewBag.TriageQueue != null && ((System.Collections.IEnumerable)ViewBag.TriageQueue).Cast<dynamic>().Any())
+                    {
+                        @foreach (var alert in ViewBag.TriageQueue)
+                        {
+                            <div class="flex items-center gap-4 p-4 rounded-3xl hover:bg-slate-50 transition-all group cursor-pointer border border-transparent hover:border-slate-100">
+                                <div class="relative">
+                                    <div class="w-12 h-12 rounded-[18px] bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:shadow-lg transition-all">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-@alert.color-500 border-2 border-white"></div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-sm font-semibold text-slate-900 leading-none mb-1 truncate">@alert.name</h4>
+                                    <p class="text-[9px] font-semibold text-blue-500 uppercase tracking-widest truncate">@alert.unit</p>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <p class="text-[10px] font-bold text-slate-400">@alert.time</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="flex flex-col items-center justify-center py-10 opacity-50">
+                            <i class="fas fa-clipboard-list text-3xl text-slate-300 mb-4"></i>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Queue is clear</p>
+                        </div>
+                    }
+                </div>
+                <a href="@Url.Action("Index", "Appointment", new { area = "Admin" })" 
+                   class="w-full flex items-center justify-center mt-10 md:mt-12 py-4 md:py-5 bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-900 text-[9px] md:text-[10px] font-semibold rounded-[20px] md:rounded-[24px] transition-all uppercase tracking-[0.2em] md:tracking-[0.25em]">
+                    Manage Global Queue
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="skeleton-container mt-16">
+        <div class="skeleton-card p-8 md:p-12">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="skeleton w-10 h-10 rounded-xl"></div>
+                <div class="skeleton skeleton-text w-48 h-8"></div>
+            </div>
+            <div class="flex gap-6 overflow-hidden">
+                @for(int i=0; i<5; i++) {
+                    <div class="flex-shrink-0 w-80 p-6 rounded-2xl border border-slate-100 space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="skeleton w-14 h-14 rounded-2xl"></div>
+                            <div class="flex-1 space-y-2">
+                                <div class="skeleton skeleton-text w-32 h-5"></div>
+                                <div class="skeleton skeleton-text w-24 h-4"></div>
+                                <div class="skeleton skeleton-text w-40 h-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content-actual content-hidden mt-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div class="bento-card p-8 md:p-12">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                        <i class="fas fa-user-md text-blue-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-slate-900 tracking-tight">Recently Added Doctors</h3>
+                </div>
+                <a href="/Doctor" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+                    <i class="fas fa-arrow-right"></i>
+                    View All
+                </a>
+            </div>
+            
+            <div class="relative group">
+                <div id="doctorsCarousel" class="flex gap-6 overflow-x-auto scroll-smooth pb-4 scrollbar-hide snap-x snap-mandatory">
+                    @foreach(var doctor in ViewBag.RecentDoctors)
+                    {
+                        <div class="flex-shrink-0 w-80 snap-start">
+                            <div class="p-6 rounded-2xl bg-gradient-to-br from-slate-50 to-white hover:from-white hover:to-slate-50 transition-all duration-300 group/card border border-slate-100 hover:border-blue-200 hover:shadow-xl h-full">
+                                <div class="flex items-start gap-4">
+                                    <div class="relative flex-shrink-0">
+                                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white overflow-hidden group-hover/card:scale-110 group-hover/card:rotate-3 transition-all duration-300 shadow-lg">
+                                            @if (!string.IsNullOrEmpty(doctor.ProfileImage))
+                                            {
+                                                <img src="@doctor.ProfileImage" class="w-full h-full object-cover" />
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-user-md text-2xl"></i>
+                                            }
+                                        </div>
+                                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full animate-pulse"></div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-lg font-semibold text-slate-900 group-hover/card:text-blue-600 transition-colors truncate">@doctor.Name</h4>
+                                        <p class="text-sm text-blue-600 font-bold mb-2">@doctor.Specialty</p>
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center gap-2 text-xs text-slate-500">
+                                                <i class="fas fa-envelope text-slate-400"></i>
+                                                <span class="truncate">@doctor.Email</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-xs text-slate-500">
+                                                <i class="fas fa-map-marker-alt text-slate-400"></i>
+                                                <span class="truncate">@doctor.Office</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                <button id="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 bg-white rounded-full shadow-xl border border-slate-200 flex items-center justify-center text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all opacity-0 group-hover:opacity-100 hover:scale-110 active:scale-95">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button id="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 bg-white rounded-full shadow-xl border border-slate-200 flex items-center justify-center text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all opacity-0 group-hover:opacity-100 hover:scale-110 active:scale-95">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        $(document).ready(function() {
+            // Count animation
+            $('.counter').each(function() {
+                var $this = $(this);
+                var target = parseInt($this.data('target'));
+                var current = 0;
+                var duration = 1500;
+                var increment = target / (duration / 16);
+                var timer = setInterval(function() {
+                    current += increment;
+                    if (current >= target) {
+                        $this.text(target.toLocaleString());
+                        clearInterval(timer);
+                    } else {
+                        $this.text(Math.floor(current).toLocaleString());
+                    }
+                }, 16);
+            });
+            // ApexCharts Optimization
+            var options = {
+                series: [{
+                    name: 'Appointments',
+                    data: @Html.Raw(Json.Serialize(ViewBag.ChartAppointments))
+                }, {
+                    name: 'Billing Invoices',
+                    data: @Html.Raw(Json.Serialize(ViewBag.ChartBillings))
+                }, {
+                    name: 'New Admissions',
+                    data: @Html.Raw(Json.Serialize(ViewBag.ChartPatients))
+                }, {
+                    name: 'Clinical Activity',
+                    data: @Html.Raw(Json.Serialize(ViewBag.ChartRecords))
+                }],
+                chart: {
+                    height: '100%',
+                    width: '100%',
+                    type: 'area',
+                    toolbar: { show: false },
+                    sparkline: { enabled: false },
+                    zoom: { enabled: false },
+                    animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 800,
+                        animateOnRender: true
+                    },
+                    fontFamily: 'Outfit, sans-serif'
+                },
+                dataLabels: { enabled: false },
+                stroke: {
+                    curve: 'smooth',
+                    width: 3,
+                    colors: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b']
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.45,
+                        opacityTo: 0.05,
+                        stops: [20, 100, 100, 100]
+                    }
+                },
+                grid: {
+                    borderColor: '#f1f5f9',
+                    strokeDashArray: 4,
+                    yaxis: { lines: { show: true } },
+                    padding: { top: 0, right: 10, bottom: 0, left: 10 }
+                },
+                xaxis: {
+                    categories: @Html.Raw(Json.Serialize(ViewBag.ChartLabels)),
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                    tooltip: { enabled: false },
+                    labels: {
+                        rotate: -45,
+                        rotateAlways: false,
+                        hideOverlappingLabels: true,
+                        style: {
+                            colors: '#94a3b8',
+                            fontSize: '10px',
+                            fontWeight: 600
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: '#94a3b8',
+                            fontSize: '11px',
+                            fontWeight: 800
+                        }
+                    }
+                },
+                tooltip: {
+                    theme: 'dark',
+                    x: { show: true },
+                    style: { fontSize: '12px' },
+                    marker: { show: false }
+                },
+                colors: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'],
+                legend: { 
+                    show: true,
+                    position: 'top',
+                    horizontalAlign: 'right',
+                    offsetY: -20,
+                    itemMargin: { horizontal: 10, vertical: 0 }
+                },
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: { height: 250 },
+                        xaxis: {
+                            labels: {
+                                style: { fontSize: '8px' }
+                            }
+                        },
+                        yaxis: {
+                            labels: {
+                                style: { fontSize: '8px' }
+                            }
+                        }
+                    }
+                }]
+            };
+            var chart = new ApexCharts(document.querySelector("#performanceChart"), options);
+            chart.render();
+            // Chart Switching Logic
+            $('.chart-filter-btn').on('click', function() {
+                $('.chart-filter-btn').removeClass('bg-white shadow-lg text-slate-900').addClass('text-slate-400');
+                $(this).addClass('bg-white shadow-lg text-slate-900').removeClass('text-slate-400');
+                if (this.id === 'btnChart30D') {
+                    // Dynamic 30 days data
+                    chart.updateSeries([{
+                        name: 'Appointments',
+                        data: @Html.Raw(Json.Serialize(ViewBag.ChartAppointments30))
+                    }, {
+                        name: 'Billing Invoices',
+                        data: @Html.Raw(Json.Serialize(ViewBag.ChartBillings30))
+                    }, {
+                        name: 'New Admissions',
+                        data: @Html.Raw(Json.Serialize(ViewBag.ChartPatients30))
+                    }, {
+                        name: 'Clinical Activity',
+                        data: @Html.Raw(Json.Serialize(ViewBag.ChartRecords30))
+                    }]);
+                    chart.updateOptions({
+                        xaxis: {
+                            categories: @Html.Raw(Json.Serialize(ViewBag.ChartLabels30))
+                        }
+                    });
+                } else {
+                    // Restore 7 days data
+                    chart.updateSeries([{
+                        name: 'Appointments',
+                        data: @Html.Raw(Json.Serialize(ViewBag.ChartAppointments))
+                    }, {
+                        name: 'Billing Invoices',
+                        data: @Html.Raw(Json.Serialize(ViewBag.ChartBillings))
+                    }, {
+                        name: 'New Admissions',
+                        data: @Html.Raw(Json.Serialize(ViewBag.ChartPatients))
+                    }, {
+                        name: 'Clinical Activity',
+                        data: @Html.Raw(Json.Serialize(ViewBag.ChartRecords))
+                    }]);
+                    chart.updateOptions({
+                        xaxis: {
+                            categories: @Html.Raw(Json.Serialize(ViewBag.ChartLabels))
+                        }
+                    });
+                }
+            });
+            // Button Event Listeners
+            
+            $('#scrollLeft').on('click', function() {
+                const carousel = document.getElementById('doctorsCarousel');
+                const scrollAmount = 350;
+                const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+                
+                if (carousel.scrollLeft <= 0) {
+                    carousel.scrollTo({ left: maxScroll, behavior: 'smooth' });
+                } else {
+                    carousel.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                }
+            });
+            
+            $('#scrollRight').on('click', function() {
+                const carousel = document.getElementById('doctorsCarousel');
+                const scrollAmount = 350;
+                const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+                
+                if (carousel.scrollLeft >= maxScroll - 10) {
+                    carousel.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                }
+            });
+            
+            $('#btnManageQueue').on('click', function() {
+                alert('Triage Management Console active. Updating global priority list.');
+            });
+        });
+    </script>
+}

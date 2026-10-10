@@ -1,0 +1,281 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Book Appointment";
+    ViewData["HeaderTitle"] = "Book Appointment";
+    var doctor = Model.SelectedDoctor;
+}
+
+<div class="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500">
+    <!-- Breadcrumb/Back -->
+    <a href="@Url.Action("Doctors", "Dashboard")" class="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 font-bold text-sm transition-colors">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Doctors
+    </a>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Form Column -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                    <i data-lucide="calendar-plus" class="w-6 h-6 text-blue-500"></i>
+                    Appointment Details
+                </h3>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="p-4 mb-6 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-3 text-rose-700 text-sm font-bold animate-in fade-in">
+                        <i data-lucide="alert-circle" class="w-5 h-5 text-rose-500 shrink-0"></i>
+                        <span>@TempData["ErrorMessage"]</span>
+                    </div>
+                }
+
+                <form action="@Url.Action("BookAppointment", "Dashboard")" method="POST" class="space-y-6" onsubmit="if(!document.getElementById('timeSlotInput').value){ document.getElementById('slotSelectionError').classList.remove('hidden'); return false; }">
+                    <input type="hidden" name="doctorId" value="@doctor.Id" />
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Patient Name -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-gray-700">Patient Full Name</label>
+                            <div class="relative">
+                                <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                                <input type="text" name="patientName" value="@ViewBag.UserName" placeholder="e.g. Alex Johnson" 
+                                       class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium" required>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-gray-700">Email Address</label>
+                            <div class="relative">
+                                <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                                <input type="email" name="email" value="@ViewBag.UserEmail" placeholder="alex@example.com" 
+                                       class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-gray-700">Preferred Date</label>
+                            <input type="date" id="appointmentDate" name="date" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold" required min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                        </div>
+
+                        <!-- Time Slot Grid -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm font-bold text-gray-700">Select Time Slot</label>
+                                <div class="flex items-center gap-3 text-[11px] font-semibold">
+                                    <span class="flex items-center gap-1.5 text-emerald-600 font-bold"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Available</span>
+                                    <span class="flex items-center gap-1.5 text-rose-500 font-bold"><i data-lucide="lock" class="w-3 h-3"></i> Locked</span>
+                                </div>
+                            </div>
+
+                            <div id="slotsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
+                                <div class="col-span-full py-6 text-center text-xs text-gray-400 font-medium bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-center gap-2">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+                                    Please select a date above to load doctor's available slots
+                                </div>
+                            </div>
+
+                            <input type="hidden" id="timeSlotInput" name="timeSlot" required />
+                            <p id="slotSelectionError" class="text-xs text-rose-500 font-bold hidden">Please pick an available time slot before proceeding.</p>
+                        </div>
+                    </div>
+
+                    <script>
+                        let selectedSlot = null;
+
+                        function selectTimeSlot(btn, time) {
+                            selectedSlot = time;
+                            document.getElementById('timeSlotInput').value = time;
+                            document.getElementById('slotSelectionError')?.classList.add('hidden');
+
+                            document.querySelectorAll('.time-slot-card').forEach(card => {
+                                card.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md', 'shadow-blue-500/20');
+                                card.classList.add('bg-white', 'text-gray-700', 'border-gray-200');
+                            });
+
+                            btn.classList.remove('bg-white', 'text-gray-700', 'border-gray-200');
+                            btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md', 'shadow-blue-500/20');
+                        }
+
+                        document.getElementById('appointmentDate').addEventListener('change', function() {
+                            var date = this.value;
+                            var doctorId = @doctor.Id;
+                            var slotsGrid = document.getElementById('slotsGrid');
+                            var timeSlotInput = document.getElementById('timeSlotInput');
+                            timeSlotInput.value = '';
+                            selectedSlot = null;
+                            
+                            if (!date) return;
+
+                            slotsGrid.innerHTML = `
+                                <div class="col-span-full py-6 flex justify-center items-center gap-2 text-xs text-blue-600 font-semibold bg-blue-50/50 rounded-xl">
+                                    <div class="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
+                                    Loading slots for selected date...
+                                </div>`;
+
+                            fetch(`/Home/GetAvailableSlotsForDoctor?doctorId=${doctorId}&date=${date}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success && data.slots.length > 0) {
+                                        slotsGrid.innerHTML = data.slots.map(slot => {
+                                            if (slot.isLocked) {
+                                                return `
+                                                    <div class="p-3 rounded-xl border border-gray-200 bg-gray-100/90 text-gray-400 cursor-not-allowed flex items-center justify-between select-none opacity-75" title="This slot is already booked by another patient">
+                                                        <span class="text-xs font-bold font-mono">${slot.time}</span>
+                                                        <span class="flex items-center gap-1 text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200/60">
+                                                            <i data-lucide="lock" class="w-3 h-3"></i> Locked
+                                                        </span>
+                                                    </div>
+                                                `;
+                                            }
+                                            return `
+                                                <button type="button" onclick="selectTimeSlot(this, '${slot.time}')" 
+                                                        class="time-slot-card p-3 rounded-xl border border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50/40 text-gray-700 font-bold transition-all flex items-center justify-between group">
+                                                    <span class="text-xs font-bold font-mono">${slot.time}</span>
+                                                    <i data-lucide="clock" class="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500 transition-colors"></i>
+                                                </button>
+                                            `;
+                                        }).join('');
+                                        lucide.createIcons();
+                                    } else {
+                                        slotsGrid.innerHTML = `
+                                            <div class="col-span-full py-6 text-center text-xs text-rose-500 font-bold bg-rose-50/50 border border-rose-100 rounded-xl">
+                                                No availability slots found for this day. Please select another date.
+                                            </div>`;
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching slots:', error);
+                                    slotsGrid.innerHTML = `
+                                        <div class="col-span-full py-6 text-center text-xs text-rose-500 font-bold bg-rose-50 border border-rose-100 rounded-xl">
+                                            Error loading slots. Please try again.
+                                        </div>`;
+                                });
+                        });
+                    </script>
+
+                    <!-- Consultation Type -->
+                    <div class="space-y-4" x-data="{ consultType: 'Video Call' }">
+                        <label class="text-sm font-bold text-gray-700">Consultation Type</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <label class="relative flex items-center justify-center cursor-pointer group">
+                                <input type="radio" name="consultType" value="Video Call" class="peer sr-only" x-model="consultType">
+                                <div class="w-full text-center p-3 rounded-xl border border-gray-100 bg-gray-50 peer-checked:bg-blue-600 peer-checked:text-white transition-all shadow-sm">
+                                    <i data-lucide="video" class="w-5 h-5 mx-auto mb-1"></i>
+                                    <span class="text-[10px] font-semibold uppercase">Video</span>
+                                </div>
+                            </label>
+                            <label class="relative flex items-center justify-center cursor-pointer group">
+                                <input type="radio" name="consultType" value="Voice Call" class="peer sr-only" x-model="consultType">
+                                <div class="w-full text-center p-3 rounded-xl border border-gray-100 bg-gray-50 peer-checked:bg-blue-600 peer-checked:text-white transition-all shadow-sm">
+                                    <i data-lucide="phone" class="w-5 h-5 mx-auto mb-1"></i>
+                                    <span class="text-[10px] font-semibold uppercase">Voice</span>
+                                </div>
+                            </label>
+                            <label class="relative flex items-center justify-center cursor-pointer group">
+                                <input type="radio" name="consultType" value="Chat" class="peer sr-only" x-model="consultType">
+                                <div class="w-full text-center p-3 rounded-xl border border-gray-100 bg-gray-50 peer-checked:bg-blue-600 peer-checked:text-white transition-all shadow-sm">
+                                    <i data-lucide="message-square" class="w-5 h-5 mx-auto mb-1"></i>
+                                    <span class="text-[10px] font-semibold uppercase">Chat</span>
+                                </div>
+                            </label>
+                            <label class="relative flex items-center justify-center cursor-pointer group">
+                                <input type="radio" name="consultType" value="Physical" class="peer sr-only" x-model="consultType">
+                                <div class="w-full text-center p-3 rounded-xl border border-gray-100 bg-gray-50 peer-checked:bg-blue-600 peer-checked:text-white transition-all shadow-sm">
+                                    <i data-lucide="map-pin" class="w-5 h-5 mx-auto mb-1"></i>
+                                    <span class="text-[10px] font-semibold uppercase">Physical</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Clinic Address Info Box -->
+                        <div x-show="consultType === 'Physical'" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform -translate-y-2"
+                             x-transition:enter-end="opacity-100 transform translate-y-0"
+                             class="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl space-y-3">
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 shadow-sm">
+                                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-[10px] font-semibold text-emerald-800 uppercase tracking-widest mb-1">Clinic Visit Detail</p>
+                                    <h4 class="text-sm font-semibold text-gray-900">@(doctor.ClinicName ?? "Private Clinic")</h4>
+                                    <p class="text-xs text-emerald-700 font-medium leading-relaxed mt-1">
+                                        @(doctor.ClinicAddress ?? "Address not specified. Please contact doctor after booking.")
+                                    </p>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(doctor.ClinicMapUrl))
+                            {
+                                <a href="@doctor.ClinicMapUrl" target="_blank" class="flex items-center gap-2 text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 transition-colors bg-white/50 px-4 py-2 rounded-xl border border-emerald-100/50 inline-flex">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                                    Open in Google Maps
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Additional Notes -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-gray-700">Symptoms or Notes (Optional)</label>
+                        <textarea name="notes" rows="4" placeholder="Briefly describe your symptoms or reason for visit..." 
+                                  class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 bg-gray-900 text-white font-semibold text-lg rounded-2xl shadow-xl shadow-gray-900/10 hover:bg-blue-600 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
+                        <i data-lucide="credit-card" class="w-6 h-6"></i>
+                        Proceed to Payment
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Doctor Summary Column -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm sticky top-24">
+                <h3 class="text-lg font-bold text-gray-900 mb-6">Booking With</h3>
+                
+                <div class="flex items-center gap-4 mb-6">
+                    @{
+                        var imageUrl = !string.IsNullOrEmpty(doctor.Image) 
+                            ? doctor.Image 
+                            : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(doctor.Name)}&size=200&background=random&color=fff&bold=true";
+                    }
+                    <img src="@imageUrl" class="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md">
+                    <div>
+                        <h4 class="font-semibold text-gray-900">@doctor.Name</h4>
+                        <p class="text-xs font-bold text-blue-600">@doctor.Specialty</p>
+                        <div class="flex items-center gap-1 mt-1">
+                             <i data-lucide="star" class="w-3 h-3 text-amber-500 fill-current"></i>
+                             <span class="text-xs font-semibold text-gray-900">@doctor.Rating</span>
+                             <span class="text-[10px] font-bold text-gray-400">(@doctor.Reviews Reviews)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 pt-6 border-t border-gray-50">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="font-bold text-gray-400 uppercase text-[10px]">Consultation Fee</span>
+                        <span class="font-semibold text-emerald-600">PKR @ViewBag.ConsultationFee.ToString("N2")</span>
+                    </div>
+                     <div class="pt-4 border-t border-dashed border-gray-200 flex justify-between items-center">
+                        <span class="font-semibold text-gray-900">Total</span>
+                        <span class="font-semibold text-2xl text-blue-600">PKR @ViewBag.ConsultationFee.ToString("N2")</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                    <p class="text-[10px] font-semibold text-blue-800 uppercase mb-2 flex items-center gap-1">
+                        <i data-lucide="info" class="w-3 h-3"></i> Note
+                    </p>
+                    <p class="text-xs text-blue-700 font-medium leading-relaxed">
+                        Secure payments powered by Stripe. Your appointment will be confirmed immediately after successful payment.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,66 @@
+@model MedLinkPortal.Areas.Doctor.Models.Appointment
+@{
+    Layout = "~/Areas/Doctor/Views/Shared/_DocDash.cshtml";
+    ViewData["Title"] = "Reschedule Event";
+}
+
+<div class="max-w-2xl mx-auto">
+    <div class="premium-card overflow-hidden reveal transition-all duration-500 bg-white dark:bg-slate-900/50">
+        <div class="p-6 md:p-10 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/2">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">Temporal Correction</h2>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-2 flex items-center">
+                        <i class="fas fa-clock-rotate-left mr-3 text-blue-500"></i>
+                         Node: @(Model.Patient?.Name ?? Model.Patient?.UserName ?? "Patient")
+                    </p>
+                </div>
+                <a asp-action="Schedule" class="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-2xl transition-all">
+                    <i class="fas fa-arrow-left text-xs"></i>
+                </a>
+            </div>
+        </div>
+
+        <form asp-action="Reschedule" method="post" class="p-6 md:p-10 space-y-8">
+            <input type="hidden" name="id" value="@Model.Id" />
+            
+            <div class="grid grid-cols-1 gap-8">
+                <div class="space-y-4">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Current Parameters</label>
+                    <div class="p-6 bg-slate-50 dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/5 flex items-center gap-6">
+                        <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-500/20">
+                            <i class="fas fa-user-clock text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-semibold text-blue-500 uppercase tracking-widest">Active Link</p>
+                            <h4 class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight mt-1">@Model.ScheduledTime.ToString("MMMM dd, yyyy @ hh:mm tt")</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <label for="scheduledTime" class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">New Temporal Vector</label>
+                    <div class="relative group">
+                        <input type="datetime-local" 
+                               class="premium-input w-full pl-12" 
+                               id="scheduledTime" 
+                               name="scheduledTime" 
+                               value="@Model.ScheduledTime.ToString("yyyy-MM-ddTHH:mm")" 
+                               required>
+                        <i class="fas fa-calendar-plus absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors"></i>
+                    </div>
+                    <p class="text-[9px] font-bold text-slate-400 italic px-1">Ensure the new slot does not conflict with existing clinical operations.</p>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-slate-100 dark:border-white/5 flex flex-col sm:flex-row gap-4">
+                <button type="submit" class="flex-[2] py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[24px] text-xs font-semibold uppercase tracking-widest shadow-2xl hover:opacity-90 active:scale-95 transition-all">
+                    Apply Temporal Shift
+                </button>
+                <a asp-action="Schedule" class="flex-1 py-5 bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-[24px] text-xs font-semibold uppercase tracking-widest text-center transition-all">
+                    Abort
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

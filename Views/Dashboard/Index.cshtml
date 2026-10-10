@@ -1,0 +1,645 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Overview";
+}
+
+<!-- Dashboard Grid - Compact -->
+<div class="grid grid-cols-12 gap-4 lg:gap-5">
+    <!-- Vitals Overview -->
+    <div class="col-span-12 lg:col-span-8 space-y-4 lg:space-y-5">
+        <div class="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
+                @for (int i = 0; i < 4; i++)
+                {
+                    <div class="skeleton-loader bg-white p-3 md:p-4 rounded-2xl md:rounded-3xl border border-gray-50 shadow-sm">
+                        <div class="animate-pulse bg-gray-200/60 rounded-lg md:rounded-xl w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4"></div>
+                        <div class="flex justify-between items-end mb-1">
+                            <div class="animate-pulse bg-gray-200/60 rounded-lg h-6 md:h-7 w-10 md:w-14"></div>
+                            <div class="animate-pulse bg-gray-200/60 rounded-full h-3 md:h-3.5 w-6 md:w-8"></div>
+                        </div>
+                        <div class="animate-pulse bg-gray-200/60 rounded-lg h-2.5 md:h-3 w-12 md:w-16"></div>
+                    </div>
+                }
+            
+                @foreach (var vital in Model.HealthVitals)
+                {
+                    <div class="page-content hidden bg-white p-3 md:p-4 rounded-2xl md:rounded-3xl border border-gray-50 shadow-sm shadow-gray-200/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl @GetVitalBgColor(vital.Color) flex items-center justify-center mb-3 md:mb-4">
+                            <i data-lucide="@vital.Icon" class="@GetVitalTextColor(vital.Color) w-4 h-4 md:w-5 md:h-5"></i>
+                        </div>
+                        <div class="flex items-end justify-between mb-0.5 md:mb-1">
+                            <div class="text-lg md:text-2xl font-semibold text-gray-900">@vital.Value</div>
+                            <div class="text-[9px] md:text-xs font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">@vital.Trend</div>
+                        </div>
+                        <div class="text-[9px] md:text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">@vital.Label</div>
+                        <div class="text-[7px] md:text-[9px] font-medium text-gray-400 uppercase mt-0.5">@vital.Unit</div>
+                    </div>
+                }
+        </div>
+
+        <!-- Upcoming Consultations -->
+        <div class="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 border border-gray-50 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-6 gap-3">
+                <h3 class="text-base md:text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="video" class="text-blue-600 w-4 h-4"></i>
+                    Consultations
+                </h3>
+                <a href="@Url.Action("Consultations", "Dashboard")" class="text-xs md:text-sm font-bold text-blue-600 hover:underline text-left">View All</a>
+            </div>
+            <div class="space-y-3">
+                @for (int i = 0; i < 2; i++)
+                {
+                    <div class="skeleton-loader p-3 md:p-4 rounded-xl md:rounded-2xl border border-gray-50 bg-gray-50/50 flex items-center justify-between">
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <div class="animate-pulse bg-gray-200/60 rounded-lg md:rounded-xl w-10 h-10 md:w-12 md:h-12"></div>
+                            <div class="space-y-1.5">
+                                <div class="animate-pulse bg-gray-200/60 rounded-lg h-3.5 md:h-4 w-20 md:w-28"></div>
+                                <div class="animate-pulse bg-gray-200/60 rounded-lg h-2.5 md:h-3 w-28 md:w-40"></div>
+                            </div>
+                        </div>
+                        <div class="animate-pulse bg-gray-200/60 rounded-lg w-14 md:w-16 h-7 md:h-8"></div>
+                    </div>
+                }
+                
+                @{
+                    var today = DateTime.Today;
+                }
+                @foreach (var consult in Model.UpcomingConsultations.Take(4))
+                {
+                    bool isToday = consult.RawDate.HasValue && consult.RawDate.Value.Date == today;
+                    bool isPast = consult.RawDate.HasValue && consult.RawDate.Value.Date < today;
+                    bool isFuture = consult.RawDate.HasValue && consult.RawDate.Value.Date > today;
+                    bool isFinished = consult.Status == "Completed" || consult.Status == "Cancelled";
+                    bool canJoin = isToday && !isFinished && consult.Type != "Physical";
+
+                    string clickHandler = "";
+                    if (isFinished || isPast) clickHandler = $"showRestrictedModal('completed', '{consult.Doctor}')";
+                    else if (isFuture) clickHandler = $"showRestrictedModal('upcoming', '{consult.Doctor}', '{consult.RawDate?.ToString("MMM dd")}')";
+                    else if (consult.Type == "Physical") clickHandler = $"showRestrictedModal('physical', '{consult.Doctor}')";
+                    else clickHandler = $"window.location.href='{Url.Action("ConsultationRoom", "Dashboard", new { id = consult.Id })}'";
+
+                    <div onclick="@clickHandler" class="page-content hidden cursor-pointer group p-3 md:p-4 rounded-xl md:rounded-2xl border border-gray-50 bg-gray-50/50 hover:bg-white hover:border-blue-100 hover:shadow-xl hover:shadow-blue-900/5 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <img src="@consult.Image" class="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl object-cover shadow-sm" alt="@consult.Doctor">
+                            <div>
+                                <h4 class="font-bold text-gray-900 text-sm md:text-base">@consult.Doctor</h4>
+                                <div class="flex flex-wrap items-center gap-1.5 md:gap-2 text-xs md:text-sm text-gray-500 font-medium mt-0.5">
+                                    <span class="text-blue-600">@consult.Specialty</span>
+                                    <span class="hidden xs:block w-1 h-1 rounded-full bg-gray-300"></span>
+                                    <span class="flex items-center gap-0.5"><i data-lucide="clock" class="w-3 h-3"></i> @consult.Time</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between w-full sm:w-auto gap-2">
+                            <div class="px-2.5 md:px-3 py-1 md:py-1.5 bg-white border border-gray-100 rounded-lg text-[9px] md:text-xs font-bold text-gray-600">
+                                @consult.Type
+                            </div>
+                            @if (canJoin)
+                            {
+                                <div class="p-2 md:p-2.5 bg-blue-600 text-white rounded-lg shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all group-hover:scale-105">
+                                    <i data-lucide="video" class="w-3 h-3"></i>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="p-2 md:p-2.5 bg-gray-200 text-gray-400 rounded-lg transition-all">
+                                    <i data-lucide="lock" class="w-3 h-3"></i>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Health Records Table -->
+        <div class="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 border border-gray-50 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-6 gap-3">
+                <h3 class="text-base md:text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="database" class="text-blue-600 w-4 h-4"></i>
+                    Health Records
+                </h3>
+                <div class="flex items-center gap-2">
+                    <a href="@Url.Action("HealthRecords", "Dashboard")" class="p-1.5 bg-gray-50 text-gray-500 rounded-lg hover:bg-gray-100 transition-colors">
+                        <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                    </a>
+                    <a href="@Url.Action("HealthRecords", "Dashboard")" class="bg-blue-600 text-white px-2.5 md:px-3 py-1.5 rounded-lg text-[9px] md:text-xs font-bold shadow-md shadow-blue-500/10 flex items-center gap-1.5">
+                        <i data-lucide="plus" class="w-3 h-3"></i> Upload
+                    </a>
+                </div>
+            </div>
+            <!-- Desktop Table View -->
+            <div class="hidden sm:block overflow-x-auto -mx-4 px-4 scrollbar-hide">
+                <table class="w-full text-left min-w-[600px]">
+                    <thead>
+                        <tr class="border-b border-gray-50">
+                            <th class="pb-3 text-[9px] font-semibold text-gray-400 uppercase tracking-widest px-3">Document</th>
+                            <th class="pb-3 text-[9px] font-semibold text-gray-400 uppercase tracking-widest px-3">Type</th>
+                            <th class="pb-3 text-[9px] font-semibold text-gray-400 uppercase tracking-widest px-3">Date</th>
+                            <th class="pb-3 text-[9px] font-semibold text-gray-400 uppercase tracking-widest px-3 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @for (int i = 0; i < 3; i++)
+                        {
+                            <tr class="skeleton-loader">
+                                <td class="py-4 px-3"><div class="animate-pulse bg-gray-200/60 rounded-lg h-4 w-32"></div></td>
+                                <td class="py-4 px-3"><div class="animate-pulse bg-gray-200/60 rounded-lg h-3.5 w-16"></div></td>
+                                <td class="py-4 px-3"><div class="animate-pulse bg-gray-200/60 rounded-lg h-3.5 w-20"></div></td>
+                                <td class="py-4 px-3 text-right"><div class="animate-pulse bg-gray-200/60 rounded-lg h-6 w-6 ml-auto"></div></td>
+                            </tr>
+                        }
+                    
+                        @foreach (var row in Model.HealthRecords.Take(4))
+                        {
+                            <tr class="page-content hidden group hover:bg-gray-50/50 transition-colors">
+                                <td class="py-4 px-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                                            <i data-lucide="database" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                        <span class="font-bold text-gray-900 text-xs text-nowrap truncate max-w-[150px]">@row.Name</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-3"><span class="text-xs font-bold text-gray-500">@row.Type</span></td>
+                                <td class="py-4 px-3"><span class="text-xs font-medium text-gray-400">@row.Date.ToString("MMM dd, yyyy")</span></td>
+                                <td class="py-4 px-3 text-right">
+                                    <div class="relative inline-block text-left" x-data="{ open: false }" @@click.away="open = false">
+                                        <button @@click="open = !open" class="p-1.5 text-gray-400 hover:text-blue-600 transition-colors">
+                                            <i data-lucide="more-vertical" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                        
+                                        <!-- Dropdown Menu -->
+                                        <div x-show="open" 
+                                             x-transition:enter="transition ease-out duration-100"
+                                             class="absolute right-0 top-full mt-1 w-40 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden py-1 origin-top-right">
+                                            <a href="@Url.Action("DownloadHealthRecord", "Dashboard", new { id = row.Id })" class="flex items-center gap-2 px-4 py-2 text-[10px] font-bold text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-all">
+                                                <i data-lucide="download" class="w-3.5 h-3.5"></i> Download
+                                            </a>
+                                            <a href="@Url.Action("HealthRecords", "Dashboard")" class="flex items-center gap-2 px-4 py-2 text-[10px] font-bold text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-all">
+                                                <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Share
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="sm:hidden space-y-3">
+                @foreach (var row in Model.HealthRecords.Take(3))
+                {
+                    <div class="p-4 rounded-2xl bg-gray-50/50 border border-gray-100 flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-100/50 text-blue-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="file-text" class="w-5 h-5"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <h4 class="text-xs font-semibold text-gray-900 truncate">@row.Name</h4>
+                                <p class="text-[10px] font-bold text-gray-400 mt-0.5">@row.Type • @row.Date.ToString("MMM dd")</p>
+                            </div>
+                        </div>
+                        <a href="@Url.Action("DownloadHealthRecord", "Dashboard", new { id = row.Id })" class="p-2 bg-white rounded-lg text-blue-600 border border-gray-100 shadow-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                }
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-50 text-center">
+                <a href="@Url.Action("HealthRecords", "Dashboard")" class="text-xs font-bold text-blue-600 hover:underline">View All Medical Records</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Widgets - Compact -->
+    <div class="col-span-12 lg:col-span-4 space-y-4 lg:space-y-5">
+        <!-- AI Health Assistant Insight -->
+        <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl md:rounded-3xl p-4 md:p-6 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-3 md:p-6 opacity-20">
+                <i data-lucide="brain" class="w-6 h-6"></i>
+            </div>
+            <div class="relative z-10">
+                <div class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest mb-3 md:mb-4 border border-white/20">
+                    <i data-lucide="zap" fill="currentColor" class="w-2.5 h-2.5"></i>
+                    AI Insight
+                </div>
+                <div class="skeleton-loader space-y-3">
+                    <div class="animate-pulse bg-white/20 rounded-lg h-7 md:h-8 w-full"></div>
+                    <div class="animate-pulse bg-white/10 rounded-lg h-10 md:h-12 w-full"></div>
+                    <div class="animate-pulse bg-white/30 rounded-xl h-10 md:h-12 w-full"></div>
+                </div>
+                
+                <div class="page-content hidden">
+                    <h4 class="text-lg md:text-xl font-semibold mb-2 md:mb-3 tracking-tight leading-tight">Health score trending up.</h4>
+                    <p class="text-blue-100/80 text-xs md:text-sm mb-4 md:mb-6 leading-relaxed">
+                        Resilience score improved by 8% this week.
+                    </p>
+                    <div class="h-1.5 w-full bg-white/10 rounded-full mb-4 md:mb-6 overflow-hidden">
+                        <div class="h-full bg-white w-4/5 shadow-[0_0_10px_rgba(255,255,255,0.4)]"></div>
+                    </div>
+                    <a href="@Url.Action("HealthAnalysisInput", "Dashboard")" class="w-full py-2.5 md:py-3 bg-white text-blue-600 rounded-lg md:rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-blue-50 transition-all shadow-lg">
+                        Full Analysis <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Lab Tests Widget -->
+        <div class="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 border border-gray-50 shadow-sm">
+            <h3 class="text-base md:text-lg font-bold text-gray-900 flex items-center gap-2 mb-4 md:mb-6">
+                <i data-lucide="test-tube" class="text-blue-600 w-4 h-4"></i>
+                My Lab Tests
+            </h3>
+            <div class="space-y-3">
+                @if (Model.LabBookings == null || !Model.LabBookings.Any())
+                {
+                    <div class="text-center py-6 text-gray-400 text-xs">
+                        <i data-lucide="flask-conical" class="w-8 h-8 mx-auto mb-2 opacity-20"></i>
+                        <p>No active lab tests.</p>
+                        <a href="@Url.Action("Index", "LabDiagnostics")" class="text-blue-600 hover:underline mt-2 inline-block font-bold">Book a Test</a>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var booking in Model.LabBookings.Take(3))
+                    {
+                        <a href="@Url.Action("Tracking", "LabDiagnostics", new { bookingId = booking.Id })" class="block group">
+                            <div class="p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">#@booking.Id.ToString("D6")</span>
+                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[8px] font-semibold uppercase rounded-full">@booking.Status</span>
+                                </div>
+                                <h5 class="text-xs font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">@booking.Laboratory.Name</h5>
+                                <p class="text-[10px] font-bold text-gray-400 mt-1">@booking.BookingDate.ToString("MMM dd, yyyy")</p>
+                            </div>
+                        </a>
+                    }
+                    <a href="@Url.Action("Index", "LabDiagnostics")" class="w-full mt-2 py-2.5 border border-dashed border-gray-200 rounded-xl text-[10px] font-semibold text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest">
+                        <i data-lucide="plus" class="w-3 h-3"></i> Book New Test
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Medication Tracker -->
+        <div class="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 border border-gray-50 shadow-sm">
+            <h3 class="text-base md:text-lg font-bold text-gray-900 flex items-center gap-2 mb-4 md:mb-6">
+                <i data-lucide="activity" class="text-blue-600 w-4 h-4"></i>
+                Medications
+            </h3>
+            <div id="medication-list" class="space-y-2 md:space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                @if (!Model.Medications.Any())
+                {
+                    <div class="text-center py-6 text-gray-400 text-xs">
+                        <i data-lucide="pill" class="w-8 h-8 mx-auto mb-2 opacity-20"></i>
+                        <p>No medications added yet.</p>
+                    </div>
+                }
+                @foreach (var med in Model.Medications)
+                {
+                    <div id="med-@med.Id" class="p-3 rounded-lg md:rounded-xl border transition-all flex items-center justify-between @(med.Taken ? "bg-gray-50/50 border-gray-100 opacity-60" : "bg-white border-blue-100")">
+                        <div class="flex items-center gap-2.5 md:gap-3">
+                            <div class="w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center @(med.Taken ? "bg-emerald-100 text-emerald-600" : "bg-blue-100 text-blue-600")">
+                                <i data-lucide="@(med.Taken ? "check-circle-2" : "clock")" class="w-3.5 h-3.5"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-gray-900 text-xs">@med.Name</h5>
+                                <p class="text-[7px] md:text-[9px] font-bold text-gray-400 uppercase tracking-tight">@med.Dosage • @med.Schedule</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleMedication(@med.Id)" class="text-[7px] md:text-[9px] font-semibold uppercase tracking-widest hover:underline @(med.Taken ? "text-emerald-600" : "text-blue-600")">
+                            @(med.Taken ? "UNMARK" : "MARK")
+                        </button>
+                    </div>
+                }
+            </div>
+            <button onclick="document.getElementById('addMedicationModal').classList.remove('hidden')" class="w-full mt-3 md:mt-4 py-2.5 md:py-3 border border-dashed border-gray-200 rounded-lg md:rounded-xl text-[9px] md:text-xs font-bold text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-all flex items-center justify-center gap-1.5">
+                <i data-lucide="plus" class="w-3 h-3"></i> Add New
+            </button>
+        </div>
+
+        <!-- Quick Consultation Portal (Enhanced) -->
+        <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border border-rose-100 shadow-xl shadow-rose-500/10 group">
+            <!-- Background Gradient -->
+            <div class="absolute inset-0 bg-gradient-to-br from-white via-rose-50/50 to-white opacity-100 transition-opacity duration-300"></div>
+            
+             <!-- Decorative Elements -->
+            <div class="absolute -right-6 -top-6 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/10 transition-all"></div>
+            
+            <div class="relative p-4 md:p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                         <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-rose-50 border border-rose-100 text-[9px] font-semibold uppercase tracking-widest text-rose-600 mb-2">
+                             <span class="relative flex h-1.5 w-1.5">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
+                            </span>
+                            Live Triage
+                        </div>
+                        <h4 class="font-semibold text-gray-900 text-base md:text-lg tracking-tight">Emergency Care</h4>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-white border border-rose-50 shadow-sm flex items-center justify-center text-rose-500">
+                        <i data-lucide="activity" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                
+                <p class="text-xs text-gray-500 mb-5 leading-relaxed font-medium">
+                    Connect with a GP for urgent triage assessment in under 60 seconds.
+                </p>
+
+                <a href="@Url.Action("LiveTriage", "Dashboard")" class="w-full relative group/btn overflow-hidden bg-gray-900 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-rose-600 transition-all shadow-lg hover:shadow-rose-500/25 transform active:scale-[0.98]">
+                    <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover/btn:animate-shimmer"></div>
+                    <span class="relative">Start Triage Now</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5 relative transition-transform group-hover/btn:translate-x-0.5"></i>
+                </a>
+            </div>
+
+            <div class="bg-rose-50/50 border-t border-rose-100 p-2 text-center backdrop-blur-sm">
+                 <p class="text-[9px] font-bold text-rose-700 uppercase tracking-widest flex items-center justify-center gap-1.5">
+                     <i data-lucide="users" class="w-3 h-3"></i>
+                     Queue: <span class="text-gray-900">~1 min wait</span>
+                 </p>
+            </div>
+        </div>
+    </div>
+
+<!-- Add Medication Modal -->
+<div id="addMedicationModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-[2rem] p-6 lg:p-8 max-w-sm w-full shadow-2xl relative animate-in fade-in zoom-in duration-300">
+        <button onclick="document.getElementById('addMedicationModal').classList.add('hidden')" class="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-50 rounded-full transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                <i data-lucide="pill" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold text-gray-900">Add Medication</h3>
+                <p class="text-xs text-gray-500 font-medium">Track your daily intake</p>
+            </div>
+        </div>
+
+        <form id="addMedicationForm" onsubmit="handleAddMedication(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Medication Name</label>
+                <div class="relative">
+                    <input type="text" name="name" required class="w-full pl-10 pr-4 py-3 bg-gray-50 border-transparent focus:bg-white focus:border-blue-500 rounded-xl text-sm font-bold transition-all outline-none" placeholder="e.g. Metformin">
+                    <i data-lucide="type" class="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5"></i>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Dosage</label>
+                    <div class="relative">
+                        <input type="text" name="dosage" required class="w-full pl-10 pr-4 py-3 bg-gray-50 border-transparent focus:bg-white focus:border-blue-500 rounded-xl text-sm font-bold transition-all outline-none" placeholder="500mg">
+                        <i data-lucide="activity" class="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5"></i>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Schedule</label>
+                    <div class="relative">
+                        <select name="schedule" class="w-full pl-10 pr-4 py-3 bg-gray-50 border-transparent focus:bg-white focus:border-blue-500 rounded-xl text-sm font-bold transition-all outline-none appearance-none">
+                            <option>Breakfast</option>
+                            <option>Lunch</option>
+                            <option>Dinner</option>
+                            <option>Bedtime</option>
+                            <option>As needed</option>
+                        </select>
+                        <i data-lucide="clock" class="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i> Add to Schedule
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Restricted Access Modal -->
+<div id="restrictedModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md animate-in fade-in duration-300">
+    <div class="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl relative animate-in zoom-in slide-in-from-bottom-4 duration-500">
+        <!-- Header Pattern -->
+        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-blue-600 to-indigo-700 opacity-5"></div>
+        <div class="absolute top-0 right-0 p-8 opacity-[0.03]">
+            <i data-lucide="shield-alert" class="w-32 h-32 text-blue-600"></i>
+        </div>
+
+        <div class="relative p-10 text-center">
+            <!-- Icon Stage -->
+            <div id="restrictedIconContainer" class="w-24 h-24 mx-auto mb-8 rounded-[2rem] bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner relative group">
+                <div class="absolute inset-0 bg-blue-400 rounded-[2rem] animate-ping opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                <i id="restrictedIcon" data-lucide="lock" class="w-10 h-10 relative z-10 transition-transform group-hover:scale-110"></i>
+            </div>
+
+            <!-- Content -->
+            <h3 id="restrictedTitle" class="text-2xl font-semibold text-gray-900 tracking-tight mb-3">Room Access Locked</h3>
+            <p id="restrictedMessage" class="text-sm text-gray-500 font-medium leading-relaxed mb-10 px-4">
+                This consultation session is currently unavailable for digital entry based on clinical status.
+            </p>
+
+            <!-- Buttons -->
+            <div class="space-y-3">
+                <button onclick="closeRestrictedModal()" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-semibold text-[11px] uppercase tracking-widest shadow-xl shadow-gray-900/20 hover:bg-gray-800 transition-all active:scale-95">
+                    Acknowledge Protocol
+                </button>
+                <div id="physicalVisitAction" class="hidden">
+                    <a href="@Url.Action("Consultations", "Dashboard")" class="w-full py-4 bg-blue-50 text-blue-600 rounded-2xl font-semibold text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-100 transition-all">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> View Clinic Details
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="bg-gray-50/80 border-t border-gray-100 p-4 text-center">
+            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+                <i data-lucide="shield-check" class="w-3 h-3"></i>
+                Security Architecture Verified
+            </p>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetVitalBgColor(string color)
+    {
+        return color switch
+        {
+            "rose" => "bg-rose-50",
+            "amber" => "bg-amber-50",
+            "emerald" => "bg-emerald-50",
+            "blue" => "bg-blue-50",
+            _ => "bg-gray-50"
+        };
+    }
+
+    public string GetVitalTextColor(string color)
+    {
+        return color switch
+        {
+            "rose" => "text-rose-500",
+            "amber" => "text-amber-500",
+            "emerald" => "text-emerald-500",
+            "blue" => "text-blue-500",
+            _ => "text-gray-500"
+        };
+    }
+}
+
+
+<script>
+    async function handleAddMedication(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        try {
+            const response = await fetch('@Url.Action("AddMedication", "Dashboard")', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                const med = result.medication;
+                const container = document.getElementById('medication-list');
+                
+                // Remove empty state if present
+                if (container.querySelector('.text-center')) {
+                    container.innerHTML = '';
+                }
+
+                const html = `
+                    <div id="med-${med.id}" class="page-content hidden p-3 rounded-lg md:rounded-xl border transition-all flex items-center justify-between bg-white border-blue-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div class="flex items-center gap-2.5 md:gap-3">
+                            <div class="w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center bg-blue-100 text-blue-600">
+                                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-gray-900 text-xs">${med.name}</h5>
+                                <p class="text-[7px] md:text-[9px] font-bold text-gray-400 uppercase tracking-tight">${med.dosage} • ${med.schedule}</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleMedication(${med.id})" class="text-[7px] md:text-[9px] font-semibold uppercase tracking-widest hover:underline text-blue-600">
+                            MARK
+                        </button>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', html);
+                lucide.createIcons();
+                
+                // Reset and close modal
+                form.reset();
+                document.getElementById('addMedicationModal').classList.add('hidden');
+                
+                // Show newly added item
+                setTimeout(() => {
+                    const newItem = document.getElementById(`med-${med.id}`);
+                    newItem.classList.remove('hidden');
+                }, 50);
+            }
+        } catch (err) {
+            console.error('Error adding medication:', err);
+        }
+    }
+
+    async function toggleMedication(id) {
+        try {
+            const response = await fetch(`@Url.Action("ToggleMedication", "Dashboard")?id=${id}`, {
+                method: 'POST'
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                const el = document.getElementById(`med-${id}`);
+                const iconContainer = el.querySelector('div.w-7');
+                const icon = iconContainer.querySelector('i');
+                const btn = el.querySelector('button');
+                
+                if (result.taken) {
+                    // Mark as Taken
+                    el.classList.remove('bg-white', 'border-blue-100');
+                    el.classList.add('bg-gray-50/50', 'border-gray-100', 'opacity-60');
+                    
+                    iconContainer.classList.remove('bg-blue-100', 'text-blue-600');
+                    iconContainer.classList.add('bg-emerald-100', 'text-emerald-600');
+                    
+                    icon.setAttribute('data-lucide', 'check-circle-2');
+                    
+                    btn.innerText = 'UNMARK';
+                    btn.classList.remove('text-blue-600');
+                    btn.classList.add('text-emerald-600');
+                } else {
+                    // Mark as Not Taken
+                    el.classList.add('bg-white', 'border-blue-100');
+                    el.classList.remove('bg-gray-50/50', 'border-gray-100', 'opacity-60');
+                    
+                    iconContainer.classList.add('bg-blue-100', 'text-blue-600');
+                    iconContainer.classList.remove('bg-emerald-100', 'text-emerald-600');
+                    
+                    icon.setAttribute('data-lucide', 'clock');
+                    
+                    btn.innerText = 'MARK';
+                    btn.classList.add('text-blue-600');
+                    btn.classList.remove('text-emerald-600');
+                }
+                
+                lucide.createIcons();
+            }
+        } catch (err) {
+            console.error('Error toggling medication:', err);
+        }
+    }
+
+    function showRestrictedModal(type, doctor, date = '') {
+        const modal = document.getElementById('restrictedModal');
+        const icon = document.getElementById('restrictedIcon');
+        const container = document.getElementById('restrictedIconContainer');
+        const title = document.getElementById('restrictedTitle');
+        const message = document.getElementById('restrictedMessage');
+        const physicalAction = document.getElementById('physicalVisitAction');
+
+        // Reset
+        physicalAction.classList.add('hidden');
+        container.className = 'w-24 h-24 mx-auto mb-8 rounded-[2rem] flex items-center justify-center shadow-inner relative group';
+
+        if (type === 'completed') {
+            title.innerText = 'Session Completed';
+            message.innerText = `The clinical consultation with Dr. ${doctor} has already been concluded and archived in your history.`;
+            icon.setAttribute('data-lucide', 'check-circle-2');
+            container.classList.add('bg-emerald-50', 'text-emerald-600');
+        } else if (type === 'upcoming') {
+            title.innerText = 'Upcoming Protocol';
+            message.innerText = `Your session with Dr. ${doctor} is scheduled for ${date}. Communication channels will initialize strictly on the appointment date.`;
+            icon.setAttribute('data-lucide', 'clock');
+            container.classList.add('bg-amber-50', 'text-amber-600');
+        } else if (type === 'physical') {
+            title.innerText = 'Physical Visit Required';
+            message.innerText = `This is a physical in-person consultation at Dr. ${doctor}'s clinic. No digital room is required for this protocol.`;
+            icon.setAttribute('data-lucide', 'building-2');
+            container.classList.add('bg-blue-50', 'text-blue-600');
+            physicalAction.classList.remove('hidden');
+        }
+
+        modal.classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function closeRestrictedModal() {
+        const modal = document.getElementById('restrictedModal');
+        modal.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-300');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('opacity-0', 'scale-95');
+        }, 300);
+    }
+</script>

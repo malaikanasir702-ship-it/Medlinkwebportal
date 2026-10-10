@@ -1,0 +1,392 @@
+@using MedLinkPortal.Areas.Doctor.Models
+@{
+    ViewData["Title"] = "Patient Inventory";
+    Layout = "~/Areas/Doctor/Views/Shared/_DocDash.cshtml";
+
+    var onlinePatients = ViewBag.OnlinePatients as IEnumerable<PatientRecordListViewModel> ?? Enumerable.Empty<PatientRecordListViewModel>();
+    var walkIns        = ViewBag.WalkInPatients as IEnumerable<WalkInPatient>              ?? Enumerable.Empty<WalkInPatient>();
+    int totalOnline    = ViewBag.TotalOnline ?? 0;
+    int totalWalkIn    = ViewBag.TotalWalkIn ?? 0;
+}
+@functions {
+    static string GetPatientName(MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser p) {
+        if (!string.IsNullOrWhiteSpace(p.Name)) return p.Name;
+        var full = $"{p.FirstName} {p.LastName}".Trim();
+        if (!string.IsNullOrWhiteSpace(full)) return full;
+        return p.UserName?.Split('@')[0] ?? "Patient";
+    }
+}
+
+<div class="space-y-8 reveal">
+
+    @* ── Header ── *@
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+            <h1 class="text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">Patient Inventory</h1>
+            <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-2">All patients — online appointments &amp; walk-ins</p>
+        </div>
+        @* Add Walk-in button *@
+        <button onclick="document.getElementById('walkInModal').classList.remove('hidden')"
+                class="flex items-center gap-3 px-6 py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[11px] font-semibold uppercase tracking-widest hover:opacity-90 transition-all shadow-xl">
+            <i class="fas fa-user-plus text-xs"></i> Add Walk-in Patient
+        </button>
+    </div>
+
+    @* ── Flash messages ── *@
+    @if (TempData["Success"] != null)
+    {
+        <div class="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-3">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-xs font-semibold flex items-center gap-3">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        </div>
+    }
+
+    @* ── Stats row ── *@
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="premium-card p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600">
+                <i class="fas fa-users text-sm"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-semibold text-slate-900 dark:text-white">@(totalOnline + totalWalkIn)</div>
+                <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Total Patients</div>
+            </div>
+        </div>
+        <div class="premium-card p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                <i class="fas fa-mobile-alt text-sm"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-semibold text-slate-900 dark:text-white">@totalOnline</div>
+                <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Online / App</div>
+            </div>
+        </div>
+        <div class="premium-card p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600">
+                <i class="fas fa-walking text-sm"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-semibold text-slate-900 dark:text-white">@totalWalkIn</div>
+                <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Walk-in</div>
+            </div>
+        </div>
+        <div class="premium-card p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-600">
+                <i class="fas fa-file-medical text-sm"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-semibold text-slate-900 dark:text-white">@walkIns.Count(w => w.HasRecord)</div>
+                <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Records Filed</div>
+            </div>
+        </div>
+    </div>
+
+    @* ── Tab switcher ── *@
+    <div class="flex items-center bg-slate-100 dark:bg-white/5 p-1.5 rounded-2xl w-full md:w-auto md:inline-flex gap-1" id="tabBar">
+        <button onclick="switchTab('online')" id="tab-online"
+                class="tab-btn flex-1 md:flex-none px-6 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest transition-all bg-white dark:bg-white/10 text-blue-600 shadow-sm">
+            <i class="fas fa-wifi mr-2 text-[10px]"></i> Online Patients
+            <span class="ml-2 bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full">@totalOnline</span>
+        </button>
+        <button onclick="switchTab('walkin')" id="tab-walkin"
+                class="tab-btn flex-1 md:flex-none px-6 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest transition-all text-slate-500 dark:text-slate-400">
+            <i class="fas fa-person-walking mr-2 text-[10px]"></i> Walk-in Patients
+            <span class="ml-2 bg-amber-500 text-white text-[9px] px-2 py-0.5 rounded-full">@totalWalkIn</span>
+        </button>
+    </div>
+
+    @* ════════════════════════════════════════
+         TAB 1 — ONLINE PATIENTS
+    ════════════════════════════════════════ *@
+    <div id="panel-online" class="tab-panel">
+        <div class="premium-card overflow-hidden">
+            @if (!onlinePatients.Any())
+            {
+                <div class="py-20 text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-slate-50 dark:bg-white/5 rounded-full mb-4">
+                        <i class="fas fa-user-slash text-slate-300 text-2xl"></i>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">No online appointments yet</p>
+                </div>
+            }
+            else
+            {
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/50 dark:bg-white/2 border-b border-slate-100 dark:border-white/5">
+                            <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Patient</th>
+                            <th class="px-6 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest hidden md:table-cell">Channel</th>
+                            <th class="px-6 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest hidden md:table-cell">Next Appointment</th>
+                            <th class="px-6 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest hidden md:table-cell">Status</th>
+                            <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-white/5">
+                        @foreach (var item in onlinePatients)
+                        {
+                            var patient = item.Patient;
+                            var name    = GetPatientName(patient);
+                            <tr class="group hover:bg-slate-50/30 dark:hover:bg-white/2 transition-all">
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-blue-600 font-semibold text-base shadow-inner">
+                                            @name.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">@name</div>
+                                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">ID: @patient.Id.Substring(0, 8)</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-6 hidden md:table-cell">
+                                    <span class="inline-flex items-center gap-2 text-[10px] font-semibold text-emerald-600 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 uppercase tracking-widest">
+                                        <i class="fas fa-mobile-alt text-[9px]"></i> App / Online
+                                    </span>
+                                </td>
+                                <td class="px-6 py-6 hidden md:table-cell">
+                                    <div class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                        @(item.NextAppointmentTime.HasValue ? item.NextAppointmentTime.Value.ToString("dd MMM yyyy") : "—")
+                                    </div>
+                                </td>
+                                <td class="px-6 py-6 hidden md:table-cell">
+                                    @if (item.IsAppointmentStarted)
+                                    {
+                                        <span class="flex items-center gap-2 text-[10px] font-semibold text-emerald-500 uppercase tracking-widest">
+                                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Live
+                                        </span>
+                                    }
+                                    else if (item.NextAppointmentTime.HasValue)
+                                    {
+                                        <span class="flex items-center gap-2 text-[10px] font-semibold text-blue-500 uppercase tracking-widest">
+                                            <span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Scheduled
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="flex items-center gap-2 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+                                            <span class="w-1.5 h-1.5 bg-slate-300 rounded-full"></span> Standby
+                                        </span>
+                                    }
+                                </td>
+                                <td class="px-8 py-6 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a asp-action="ViewHistory" asp-route-patientId="@patient.Id"
+                                           class="h-9 px-4 flex items-center gap-2 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 transition-all">
+                                            <i class="fas fa-history text-[9px]"></i> History
+                                        </a>
+                                        <a asp-action="CreateRecord" asp-route-patientId="@patient.Id"
+                                           class="h-9 px-4 flex items-center gap-2 bg-blue-600 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20">
+                                            <i class="fas fa-plus text-[9px]"></i> Record
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    @* ════════════════════════════════════════
+         TAB 2 — WALK-IN PATIENTS
+    ════════════════════════════════════════ *@
+    <div id="panel-walkin" class="tab-panel hidden">
+        <div class="premium-card overflow-hidden">
+            @if (!walkIns.Any())
+            {
+                <div class="py-20 text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-slate-50 dark:bg-white/5 rounded-full mb-4">
+                        <i class="fas fa-user-plus text-slate-300 text-2xl"></i>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">No walk-in patients yet</p>
+                    <button onclick="document.getElementById('walkInModal').classList.remove('hidden')"
+                            class="px-6 py-3 bg-amber-500 text-white rounded-2xl text-[11px] font-semibold uppercase tracking-widest hover:bg-amber-600 transition-all">
+                        <i class="fas fa-user-plus mr-2"></i> Add First Walk-in
+                    </button>
+                </div>
+            }
+            else
+            {
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/50 dark:bg-white/2 border-b border-slate-100 dark:border-white/5">
+                            <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Patient</th>
+                            <th class="px-6 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest hidden md:table-cell">Channel</th>
+                            <th class="px-6 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest hidden md:table-cell">Visit</th>
+                            <th class="px-6 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest hidden md:table-cell">Visit Reason</th>
+                            <th class="px-6 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest hidden md:table-cell">Record</th>
+                            <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-white/5">
+                        @foreach (var w in walkIns)
+                        {
+                            <tr class="group hover:bg-slate-50/30 dark:hover:bg-white/2 transition-all">
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-100 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-amber-600 font-semibold text-base shadow-inner">
+                                            @w.FullName.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">@w.FullName</div>
+                                            <div class="text-[10px] text-slate-400 mt-0.5">
+                                                @(w.AgeYears.HasValue ? $"{w.AgeYears}y" : "")
+                                                @(w.Gender != null ? $" · {w.Gender}" : "")
+                                                @(w.Phone != null ? $" · {w.Phone}" : "")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-6 hidden md:table-cell">
+                                    <span class="inline-flex items-center gap-2 text-[10px] font-semibold text-amber-600 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20 uppercase tracking-widest">
+                                        <i class="fas fa-walking text-[9px]"></i> Walk-in
+                                    </span>
+                                </td>
+                                <td class="px-6 py-6 hidden md:table-cell">
+                                    <div class="text-sm font-semibold text-slate-700 dark:text-slate-300">@w.VisitDate.ToLocalTime().ToString("dd MMM yyyy")</div>
+                                    <div class="text-[10px] text-slate-400">@w.VisitDate.ToLocalTime().ToString("hh:mm tt")</div>
+                                </td>
+                                <td class="px-6 py-6 hidden md:table-cell">
+                                    <div class="text-xs text-slate-600 dark:text-slate-400 max-w-[180px] truncate">
+                                        @(w.VisitReason ?? "—")
+                                    </div>
+                                </td>
+                                <td class="px-6 py-6 hidden md:table-cell">
+                                    @if (w.HasRecord)
+                                    {
+                                        <span class="flex items-center gap-2 text-[10px] font-semibold text-emerald-500 uppercase tracking-widest">
+                                            <i class="fas fa-check-circle text-xs"></i> Filed
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="flex items-center gap-2 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+                                            <i class="fas fa-clock text-xs"></i> Pending
+                                        </span>
+                                    }
+                                </td>
+                                <td class="px-8 py-6 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a asp-action="WalkInRecord" asp-route-id="@w.Id"
+                                           class="h-9 px-4 flex items-center gap-2 bg-blue-600 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20">
+                                            <i class="fas fa-file-medical text-[9px]"></i> @(w.HasRecord ? "Edit Record" : "Add Record")
+                                        </a>
+                                        <form asp-action="DeleteWalkIn" method="post" class="inline"
+                                              onsubmit="return confirm('Remove this patient?')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@w.Id" />
+                                            <button type="submit"
+                                                    class="h-9 w-9 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 rounded-xl hover:bg-red-100 transition-all">
+                                                <i class="fas fa-trash-alt text-[10px]"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+</div>
+
+@* ════ ADD WALK-IN MODAL ════ *@
+<div id="walkInModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+    <div class="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl p-8 space-y-6 relative">
+        <button onclick="document.getElementById('walkInModal').classList.add('hidden')"
+                class="absolute top-6 right-6 w-9 h-9 flex items-center justify-center bg-slate-100 dark:bg-white/5 rounded-xl text-slate-500 hover:bg-slate-200 transition-all">
+            <i class="fas fa-times text-xs"></i>
+        </button>
+
+        <div>
+            <h2 class="text-xl font-semibold text-slate-900 dark:text-white tracking-tight">Add Walk-in Patient</h2>
+            <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Offline / clinic visit</p>
+        </div>
+
+        <form asp-action="AddWalkIn" method="post" class="space-y-4">
+            @Html.AntiForgeryToken()
+
+            @* Full Name *@
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                    Patient Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="fullName" required placeholder="e.g. Ahmad Raza"
+                       class="w-full px-5 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                @* Age *@
+                <div>
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Age (Years)</label>
+                    <input type="number" name="ageYears" min="0" max="150" placeholder="e.g. 35"
+                           class="w-full px-5 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" />
+                </div>
+                @* Gender *@
+                <div>
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Gender</label>
+                    <select name="gender"
+                            class="w-full px-5 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+                        <option value="">— Select —</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            @* Phone *@
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Phone</label>
+                <input type="tel" name="phone" placeholder="e.g. 0300-1234567"
+                       class="w-full px-5 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" />
+            </div>
+
+            @* Visit Reason *@
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Visit / Chief Complaint</label>
+                <textarea name="visitReason" rows="2" placeholder="e.g. Fever, headache since 3 days..."
+                          class="w-full px-5 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none"></textarea>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('walkInModal').classList.add('hidden')"
+                        class="flex-1 h-12 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 rounded-2xl text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-200 transition-all">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="flex-1 h-12 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[11px] font-semibold uppercase tracking-widest hover:opacity-90 transition-all shadow-xl">
+                    <i class="fas fa-user-plus mr-2 text-xs"></i> Add Patient
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function switchTab(tab) {
+    // Hide all panels
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+    // Reset all buttons
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('bg-white', 'dark:bg-white/10', 'text-blue-600', 'shadow-sm');
+        b.classList.add('text-slate-500', 'dark:text-slate-400');
+    });
+    // Show selected panel
+    document.getElementById('panel-' + tab).classList.remove('hidden');
+    // Activate button
+    const btn = document.getElementById('tab-' + tab);
+    btn.classList.add('bg-white', 'dark:bg-white/10', 'text-blue-600', 'shadow-sm');
+    btn.classList.remove('text-slate-500', 'dark:text-slate-400');
+}
+</script>
+}

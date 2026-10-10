@@ -1,0 +1,38 @@
+@using MedLinkPortal.Areas.Identity.Pages.Account
+@model ApplicationUser
+
+<div class="relative group" id="profileToggle">
+    <button class="flex items-center gap-3 pl-2 pr-5 py-2 bg-white rounded-[24px] shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all border border-slate-100">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-400 p-[2px]">
+            <img src="@(Model?.ProfileImage ?? "https://ui-avatars.com/api/?name=" + (Model?.FirstName ?? "Admin") + "&background=random")" 
+                 alt="Profile" 
+                 class="w-full h-full rounded-[14px] object-cover border-2 border-white">
+        </div>
+        <div class="hidden md:block text-left">
+            <p class="text-sm font-semibold text-slate-900 leading-tight">@(Model?.FirstName ?? "Admin") @(Model?.LastName ?? "")</p>
+            <p class="text-[9px] font-semibold text-blue-600 uppercase tracking-widest mt-0.5">Admin</p>
+        </div>
+    </button>
+
+    <!-- Dropdown -->
+    <div id="profileDropdown" class="hidden absolute right-0 mt-6 w-[320px] bg-white rounded-[32px] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.15)] border border-slate-100 p-3 transform origin-top-right transition-all z-[100] animate-in slide-in-from-top-4 duration-500">
+        <div class="p-6 bg-slate-50/50 rounded-[24px] mb-3 border border-slate-100/50">
+            <p class="text-[10px] font-semibold text-slate-300 uppercase tracking-[0.2em] mb-2">System User</p>
+            <p class="text-sm font-semibold text-slate-800 break-all mb-4">@Model?.Email</p>
+            
+            <a href="/Admin/Admin/Profile" class="flex items-center gap-3 text-slate-500 hover:text-blue-600 transition-all group">
+                <i class="fas fa-user-circle text-lg"></i>
+                <span class="text-xs font-semibold uppercase tracking-widest">Profile</span>
+            </a>
+        </div>
+
+        <div class="px-2 pb-2">
+            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                <button type="submit" class="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 rounded-[20px] transition-all group">
+                    <i class="fas fa-power-off text-sm group-hover:rotate-12 transition-transform"></i>
+                    <span class="text-xs font-semibold uppercase tracking-widest">Sign Out</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

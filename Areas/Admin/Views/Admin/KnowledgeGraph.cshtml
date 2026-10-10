@@ -1,0 +1,267 @@
+@model MedLinkPortal.Services.GraphVisualizationData
+@{
+    ViewData["Title"] = "Knowledge Graph";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var insights = ViewBag.Insights as List<string> ?? new();
+}
+
+<div class="space-y-8 pb-20 animate-in fade-in duration-500">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4 border-b border-slate-200">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fas fa-atom text-purple-600"></i> Phase 6 Medical Knowledge Repository
+                </span>
+                <span class="text-xs text-slate-400 font-mono">Semantic Entity-Relationship Graph</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+                Knowledge <span class="text-purple-600">Graph</span>
+            </h1>
+            <p class="text-slate-500 text-base font-medium mt-1">
+                Visualizing clinical relationships between conditions, symptoms, treatments, medications, and outcomes.
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="px-4 py-2 bg-purple-50 text-purple-700 rounded-2xl text-xs font-bold font-mono">
+                @ViewBag.NodeCount Concepts · @ViewBag.LinkCount Relations
+            </span>
+        </div>
+    </div>
+
+    <!-- Graph Stats & Insights -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-xl relative overflow-hidden text-white flex flex-col justify-between" style="min-height: 520px;">
+            <!-- Top Controls -->
+            <div class="flex items-center justify-between z-10 bg-slate-900/80 backdrop-blur p-2 rounded-2xl border border-white/10">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-red-400 inline-block"></span>
+                    <span class="text-xs font-bold text-slate-300 mr-2">Condition</span>
+                    <span class="w-3 h-3 rounded-full bg-blue-400 inline-block"></span>
+                    <span class="text-xs font-bold text-slate-300 mr-2">Treatment</span>
+                    <span class="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span>
+                    <span class="text-xs font-bold text-slate-300 mr-2">Medication</span>
+                    <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+                    <span class="text-xs font-bold text-slate-300">Symptom</span>
+                </div>
+                <button id="resetGraphBtn" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition-all">
+                    Reset View
+                </button>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="relative w-full flex-1 my-3 overflow-hidden flex items-center justify-center">
+                <canvas id="knowledgeGraphCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+                <div id="graphTooltip" class="absolute hidden bg-slate-800/95 border border-purple-500/30 text-white p-3 rounded-2xl text-xs shadow-2xl backdrop-blur pointer-events-none max-w-xs z-20">
+                    <div id="tooltipTitle" class="font-bold text-purple-300"></div>
+                    <div id="tooltipType" class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5"></div>
+                    <div id="tooltipCode" class="text-[10px] font-mono text-emerald-400 mt-1"></div>
+                </div>
+            </div>
+
+            <!-- Canvas Footer -->
+            <div class="flex items-center justify-between text-xs text-slate-400 z-10 pt-2 border-t border-white/10">
+                <span><i class="fas fa-mouse-pointer mr-1"></i> Click any node to inspect semantic relationships</span>
+                <span class="font-mono text-purple-400">Interactive Canvas Engine</span>
+            </div>
+        </div>
+
+        <!-- Sidebar: Node Inspector & Insights -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm" id="nodeInspectorCard">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-sm shadow-sm">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900" id="selectedNodeName">Select a Medical Entity</h4>
+                        <p class="text-xs text-slate-400" id="selectedNodeType">Click any node on the graph</p>
+                    </div>
+                </div>
+                <div class="space-y-3 text-xs text-slate-600" id="selectedNodeDetails">
+                    <p class="text-slate-400">The knowledge graph maps clinical correlations extracted from verified medical records and ICD-10 registries.</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-lightbulb text-amber-500"></i>
+                    <h4 class="text-sm font-bold text-slate-900">Synthesized Clinical Insights</h4>
+                </div>
+                <div class="space-y-2.5">
+                    @if (insights.Any())
+                    {
+                        @foreach (var ins in insights)
+                        {
+                            <div class="p-3 bg-purple-50/60 border border-purple-100 rounded-2xl text-xs text-slate-700 leading-relaxed flex items-start gap-2">
+                                <i class="fas fa-sparkles text-purple-500 mt-0.5"></i>
+                                <span>@ins</span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="p-3 bg-slate-50 rounded-2xl text-xs text-slate-500">
+                            Knowledge repository active. Processing clinical case correlations.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const canvas = document.getElementById("knowledgeGraphCanvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+
+        // Resize Canvas to container
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight || 450;
+        }
+        resize();
+        window.addEventListener("resize", resize);
+
+        const graphData = @Html.Raw(ViewBag.GraphJson ?? "{nodes:[], links:[]}");
+        const nodes = graphData.nodes || graphData.Nodes || [];
+        const links = graphData.links || graphData.Links || [];
+
+        if (nodes.length === 0) {
+            // Fallback sample medical concepts if empty
+            nodes.push(
+                { id: 1, name: "Type 2 Diabetes", type: "Condition", code: "E11.9" },
+                { id: 2, name: "Metformin", type: "Medication", code: "RxNorm-6809" },
+                { id: 3, name: "Hypertension", type: "Condition", code: "I10" },
+                { id: 4, name: "Amlodipine", type: "Medication", code: "RxNorm-17767" },
+                { id: 5, name: "HbA1c Blood Test", type: "Treatment", code: "CPT-83036" },
+                { id: 6, name: "Polyuria & Fatigue", type: "Symptom", code: "R35.0" },
+                { id: 7, name: "Acute Myocardial Infarction", type: "Condition", code: "I21.0" },
+                { id: 8, name: "Coronary Angioplasty", type: "Treatment", code: "CPT-92928" }
+            );
+            links.push(
+                { source: 1, target: 2, type: "TreatedBy", weight: 1 },
+                { source: 1, target: 5, type: "DiagnosedBy", weight: 1 },
+                { source: 1, target: 6, type: "PresentsWith", weight: 1 },
+                { source: 1, target: 3, type: "Comorbidity", weight: 1 },
+                { source: 3, target: 4, type: "TreatedBy", weight: 1 },
+                { source: 3, target: 7, type: "RiskFactorFor", weight: 1 },
+                { source: 7, target: 8, type: "TreatedBy", weight: 1 }
+            );
+        }
+
+        // Initialize positions
+        const width = canvas.width;
+        const height = canvas.height;
+        nodes.forEach((n, i) => {
+            const angle = (i / nodes.length) * Math.PI * 2;
+            const radius = Math.min(width, height) * 0.35;
+            n.x = width / 2 + Math.cos(angle) * radius + (Math.random() - 0.5) * 40;
+            n.y = height / 2 + Math.sin(angle) * radius + (Math.random() - 0.5) * 40;
+            n.vx = 0;
+            n.vy = 0;
+        });
+
+        const colorMap = {
+            "Condition": "#f87171",
+            "Disease": "#f87171",
+            "Treatment": "#60a5fa",
+            "Procedure": "#60a5fa",
+            "Medication": "#34d399",
+            "Drug": "#34d399",
+            "Symptom": "#fbbf24"
+        };
+
+        let selectedNode = null;
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Links
+            ctx.lineWidth = 1.5;
+            links.forEach(link => {
+                const s = nodes.find(n => (n.id || n.Id) === (link.source || link.Source));
+                const t = nodes.find(n => (n.id || n.Id) === (link.target || link.Target));
+                if (s && t) {
+                    ctx.strokeStyle = "rgba(148, 163, 184, 0.25)";
+                    ctx.beginPath();
+                    ctx.moveTo(s.x, s.y);
+                    ctx.lineTo(t.x, t.y);
+                    ctx.stroke();
+                }
+            });
+
+            // Draw Nodes
+            nodes.forEach(n => {
+                const type = n.type || n.Type || "Condition";
+                const color = colorMap[type] || "#a78bfa";
+                const isSelected = selectedNode && (selectedNode.id || selectedNode.Id) === (n.id || n.Id);
+
+                // Node circle
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, isSelected ? 16 : 11, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = isSelected ? 18 : 8;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Border
+                ctx.strokeStyle = isSelected ? "#ffffff" : "rgba(255,255,255,0.6)";
+                ctx.lineWidth = isSelected ? 3 : 1.5;
+                ctx.stroke();
+
+                // Label
+                ctx.fillStyle = "#e2e8f0";
+                ctx.font = isSelected ? "bold 11px Inter, sans-serif" : "10px Inter, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(n.name || n.Name || "", n.x, n.y + (isSelected ? 26 : 22));
+            });
+        }
+
+        draw();
+
+        // Node Click Interaction
+        canvas.addEventListener("click", function (e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            let clicked = null;
+            nodes.forEach(n => {
+                const dist = Math.hypot(n.x - mouseX, n.y - mouseY);
+                if (dist <= 18) clicked = n;
+            });
+
+            selectedNode = clicked;
+            draw();
+
+            if (clicked) {
+                const name = clicked.name || clicked.Name;
+                const type = clicked.type || clicked.Type;
+                const code = clicked.code || clicked.Code || "ICD/RxNorm";
+
+                document.getElementById("selectedNodeName").innerText = name;
+                document.getElementById("selectedNodeType").innerText = type + " Entity";
+                document.getElementById("selectedNodeDetails").innerHTML = `
+                    <div class="p-3 bg-purple-50 rounded-xl border border-purple-100">
+                        <div class="text-[10px] font-bold text-purple-600 uppercase tracking-widest">Medical Code</div>
+                        <div class="font-mono font-bold text-slate-900 mt-0.5">${code}</div>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl">
+                        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Connected Relations</div>
+                        <div class="text-xs text-slate-700 mt-1">Directly correlated with clinical cases across the MedLink repository.</div>
+                    </div>
+                `;
+            }
+        });
+
+        document.getElementById("resetGraphBtn")?.addEventListener("click", () => {
+            selectedNode = null;
+            resize();
+            draw();
+        });
+    });
+</script>

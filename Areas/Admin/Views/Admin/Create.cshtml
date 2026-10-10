@@ -1,0 +1,68 @@
+@model MedLinkPortal.Areas.Admin.Models.AdminProfile
+@{
+    ViewData["Title"] = "Add New Administrator";
+}
+<div class="max-w-2xl mx-auto pb-20">
+    <div class="mb-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <h1 class="text-4xl font-semibold text-slate-900 tracking-tighter mb-4">
+            New <span class="text-blue-600">Administrator</span>
+        </h1>
+        <p class="text-slate-500 font-medium">Grant system access to a new medical director or staff member.</p>
+    </div>
+    <div class="bento-card p-10 bg-white border border-slate-100 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 relative overflow-hidden group">
+        <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors duration-1000"></div>
+        <form asp-action="Create" class="space-y-8 relative z-10">
+            <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm font-bold"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                    <label asp-for="Name" class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest pl-1">Full Name</label>
+                    <input asp-for="Name" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-300" placeholder="e.g. Dr. Jane Doe" />
+                    <span asp-validation-for="Name" class="text-red-500 text-xs font-bold"></span>
+                </div>
+                <div class="space-y-2">
+                    <label asp-for="Specialty" class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest pl-1">Role / Specialty</label>
+                    <input asp-for="Specialty" class="w-full px-5 py-4 bg-slate-100 border border-slate-100 rounded-2xl text-sm font-bold text-slate-500 focus:outline-none cursor-not-allowed" value="Admin" readonly />
+                    <span asp-validation-for="Specialty" class="text-red-500 text-xs font-bold"></span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                    <label asp-for="Email" class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest pl-1">Email Address</label>
+                    <input asp-for="Email" type="email" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-300" placeholder="doctor@medical.io" />
+                    <span asp-validation-for="Email" class="text-red-500 text-xs font-bold"></span>
+                </div>
+                <div class="space-y-2">
+                    <label asp-for="Phone" class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest pl-1">Contact Phone</label>
+                    <input asp-for="Phone" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-300" placeholder="+1 (555) 000-0000" />
+                    <span asp-validation-for="Phone" class="text-red-500 text-xs font-bold"></span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                    <label asp-for="Office" class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest pl-1">Office Location</label>
+                    <input asp-for="Office" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-300" placeholder="e.g. Building A, Room 302" />
+                    <span asp-validation-for="Office" class="text-red-500 text-xs font-bold"></span>
+                </div>
+                <div class="space-y-2">
+                    <label asp-for="Password" class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest pl-1">Initial Password</label>
+                    <input asp-for="Password" type="password" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-300" placeholder="••••••••" />
+                    <span asp-validation-for="Password" class="text-red-500 text-xs font-bold"></span>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label asp-for="Bio" class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest pl-1">Professional Bio</label>
+                <textarea asp-for="Bio" rows="3" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-300 resize-none" placeholder="Brief description of role and authorized clearance level..."></textarea>
+                <span asp-validation-for="Bio" class="text-red-500 text-xs font-bold"></span>
+            </div>
+            <div class="pt-6 flex items-center gap-4">
+                <a asp-action="Index" class="px-8 py-4 rounded-2xl text-slate-400 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-colors">Cancel</a>
+                <button type="submit" class="flex-1 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-semibold text-xs uppercase tracking-widest shadow-xl shadow-blue-500/30 transition-all active:scale-95">
+                    Create Administrator Account
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

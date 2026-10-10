@@ -1,0 +1,187 @@
+@{
+    ViewData["Title"] = "Instant GP Consultation | MedLink";
+}
+
+<div class="min-h-screen bg-[#FBFCFE] font-inter overflow-hidden">
+    <!-- Sophisticated Background -->
+    <div class="fixed inset-0 -z-10">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-50/50 rounded-full blur-[120px] animate-pulse-slow"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-50/50 rounded-full blur-[150px] animate-pulse-slow-delayed"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/30 backdrop-blur-2xl border-b border-gray-100/50 py-4">
+        <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2 group">
+                <div class="bg-blue-600 p-1.5 rounded-lg text-white group-hover:scale-110 transition-transform shadow-lg shadow-blue-200">
+                    <i data-lucide="heart" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xl font-black tracking-tight text-gray-900">MedLink</span>
+            </a>
+            
+            <div class="flex items-center gap-6">
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-full">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-[10px] font-black text-emerald-700 uppercase tracking-widest">GPs Active Online</span>
+                </div>
+                <a href="/" class="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Exit</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-32 pb-20 px-6 max-w-5xl mx-auto">
+        <!-- Hero Section: Apple/Framer Style -->
+        <div class="text-center mb-20 animate-fade-in-up">
+            <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-full px-4 py-1.5 mb-8">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-blue-600 fill-blue-600"></i>
+                <span class="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em]">Priority Triage Active</span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-black text-gray-900 tracking-tight leading-[1.1] mb-8">
+                Immediate care, <br />
+                <span class="text-gray-400 italic">just a tap away.</span>
+            </h1>
+            
+            <p class="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed mb-12">
+                Connect with a board-certified General Practitioner in seconds. 
+                Our high-speed triage system ensures you get medical attention 
+                when it matters most.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button onclick="startTriage()" class="w-full sm:w-auto bg-gray-900 text-white px-10 py-5 rounded-[2rem] font-bold text-lg hover:bg-black hover:scale-[1.02] transition-all shadow-2xl hover:shadow-gray-200 active:scale-95">
+                    Consult Virtual GP Now
+                </button>
+                <button class="w-full sm:w-auto bg-white border border-gray-100 text-gray-600 px-10 py-5 rounded-[2rem] font-bold text-lg hover:border-blue-200 hover:text-blue-600 transition-all shadow-sm">
+                    View Network Status
+                </button>
+            </div>
+        </div>
+
+        <!-- Dynamic Visualization Area -->
+        <div class="relative rounded-[3rem] bg-white border border-gray-100 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.05)] overflow-hidden animate-fade-in-up-delayed">
+            <!-- Glass Header -->
+            <div class="p-8 border-b border-gray-50 bg-gray-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-100">
+                        <i data-lucide="pulse" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-gray-900">Priority Queuing</h3>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Average Wait: <span class="text-blue-600">42 Seconds</span></p>
+                    </div>
+                </div>
+                <div class="flex -space-x-3">
+                    @for(int i=1; i<=3; i++) {
+                        <img src="https://picsum.photos/seed/gp-@i/80/80" class="w-10 h-10 rounded-full border-4 border-white shadow-sm ring-1 ring-gray-100">
+                    }
+                    <div class="w-10 h-10 rounded-full border-4 border-white bg-blue-50 flex items-center justify-center text-[10px] font-black text-blue-600 shadow-sm ring-1 ring-gray-100">
+                        +12
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area: Experience Steps -->
+            <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                <div class="p-10 group hover:bg-blue-50/30 transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="stethoscope" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 mb-3">AI Triage</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed">Instant symptom analysis to match you with the right expertise level.</p>
+                </div>
+                
+                <div class="p-10 group hover:bg-blue-50/30 transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="video" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 mb-3">HD Video Consult</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed">Crystal clear communication with screen-sharing and vitals integration.</p>
+                </div>
+
+                <div class="p-10 group hover:bg-blue-50/30 transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 mb-3">Digital Rx</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed">Secure prescriptions sent instantly to your phone and local pharmacy.</p>
+                </div>
+            </div>
+
+            <!-- Interactive Pulse Banner -->
+            <div class="bg-gray-900 p-8 text-white relative overflow-hidden">
+                <div class="absolute inset-0 opacity-20">
+                    <svg class="w-full h-full" viewBox="0 0 400 100" preserveAspectRatio="none">
+                        <path d="M0,50 L50,50 L60,20 L75,80 L85,50 L150,50 L160,10 L180,90 L200,50 L400,50" fill="none" stroke="white" stroke-width="2" class="animate-pulse-line"></path>
+                    </svg>
+                </div>
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full animate-ping"></div>
+                        <p class="text-sm font-bold tracking-wide">SYSTEMS ACTIVE: SECURE PIPELINE ESTABLISHED</p>
+                    </div>
+                    <div class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">End-to-End Encryption Enabled</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trust Section -->
+        <div class="mt-20 text-center animate-fade-in-up-delayed-2">
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8">Trusted by Global Standards</p>
+            <div class="flex flex-wrap justify-center items-center gap-12 opacity-30 grayscale">
+                <span class="text-lg font-black italic tracking-tighter">HIPAA COMPLIANT</span>
+                <span class="text-lg font-black italic tracking-tighter">GDPR SECURE</span>
+                <span class="text-lg font-black italic tracking-tighter">WHO CERTIFIED</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Partial -->
+    @await Html.PartialAsync("_Footer")
+</div>
+
+<style>
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    .animate-fade-in-up-delayed { animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards; opacity: 0; }
+    .animate-fade-in-up-delayed-2 { animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s forwards; opacity: 0; }
+
+    @@keyframes pulseSlow {
+        0%, 100% { transform: scale(1); opacity: 0.3; }
+        50% { transform: scale(1.1); opacity: 0.5; }
+    }
+    .animate-pulse-slow { animation: pulseSlow 8s ease-in-out infinite; }
+    .animate-pulse-slow-delayed { animation: pulseSlow 8s ease-in-out infinite 4s; }
+
+    .animate-pulse-line {
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        animation: pulseLine 3s linear infinite;
+    }
+    @@keyframes pulseLine {
+        to { stroke-dashoffset: 0; }
+    }
+</style>
+
+<script>
+    lucide.createIcons();
+    
+    function startTriage() {
+        // Futuristic animation and redirect to Register/Login if not authenticated
+        // Or directly to Dashboard for real consult
+        const btn = event.currentTarget;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> Initializing Neural Triage...`;
+        lucide.createIcons();
+        
+        setTimeout(() => {
+            window.location.href = '/Identity/Account/Login?returnUrl=/Dashboard/Doctors';
+        }, 1500);
+    }
+</script>

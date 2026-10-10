@@ -1,0 +1,60 @@
+@page
+@model ExternalLoginModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#F8FAFC;padding:1rem;">
+    <div style="width:100%;max-width:24rem;">
+        <div style="background:white;border-radius:1.5rem;padding:2rem;box-shadow:0 10px 25px -5px rgba(37,99,235,0.08);border:1px solid #F1F5F9;">
+            <h1 style="font-size:1.25rem;font-weight:900;color:#0F172A;margin-bottom:.25rem;">Complete Sign-Up</h1>
+            <p style="font-size:.875rem;color:#64748B;margin-bottom:1.5rem;">
+                You've associated your <strong>@Model.ProviderDisplayName</strong> account.
+                Please enter your details below to finish.
+            </p>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div style="background:#FFF1F2;border:1px solid #FECDD3;border-radius:1rem;padding:.875rem 1rem;margin-bottom:1rem;color:#991B1B;font-size:.875rem;font-weight:600;">
+                    @Model.ErrorMessage
+                </div>
+            }
+
+            <form asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input asp-for="Input.Email" type="hidden" />
+
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block;font-size:.75rem;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">Email</label>
+                    <input asp-for="Input.Email" readonly
+                           style="width:100%;padding:.75rem 1rem;background:#F1F5F9;border:1px solid #E2E8F0;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#475569;outline:none;" />
+                </div>
+
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block;font-size:.75rem;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">Phone Number</label>
+                    <input asp-for="Input.PhoneNumber" placeholder="+923001234567"
+                           style="width:100%;padding:.75rem 1rem;background:#F9FAFB;border:1px solid #F3F4F6;border-radius:.75rem;font-size:.875rem;font-weight:500;outline:none;" />
+                    <span asp-validation-for="Input.PhoneNumber" class="text-danger" style="font-size:.75rem;"></span>
+                </div>
+
+                <div style="margin-bottom:1.5rem;">
+                    <label style="display:block;font-size:.75rem;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">Role</label>
+                    <select asp-for="Input.Role"
+                            style="width:100%;padding:.75rem 1rem;background:#F9FAFB;border:1px solid #F3F4F6;border-radius:.75rem;font-size:.875rem;font-weight:500;outline:none;">
+                        <option value="Patient">Patient</option>
+                        <option value="Doctor">Doctor</option>
+                    </select>
+                </div>
+
+                <button type="submit"
+                        style="width:100%;background:#2563EB;color:white;padding:.875rem;border-radius:.75rem;font-weight:800;font-size:.875rem;border:none;cursor:pointer;box-shadow:0 4px 6px -1px rgba(37,99,235,0.25);">
+                    Complete Registration
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

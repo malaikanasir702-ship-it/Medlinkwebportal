@@ -1,0 +1,135 @@
+@model MedLinkPortal.Areas.Doctor.Models.OptimizeProfileViewModel
+@{
+    ViewData["Title"] = "Optimize Profile";
+    Layout = "~/Areas/Doctor/Views/Shared/_DocDash.cshtml";
+}
+
+<div class="max-w-5xl mx-auto py-12 space-y-12">
+    <!-- Hero Section -->
+    <div class="relative rounded-[3rem] overflow-hidden bg-slate-900 shadow-2xl isolate">
+        <!-- Animated Background Effects -->
+        <div class="absolute inset-0">
+            <div class="absolute top-0 right-0 -mr-20 -mt-20 w-[500px] h-[500px] bg-gradient-to-br from-blue-600/30 to-purple-600/30 blur-[100px] rounded-full mix-blend-screen animate-pulse"></div>
+            <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-[400px] h-[400px] bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 blur-[80px] rounded-full mix-blend-screen"></div>
+        </div>
+
+        <div class="relative z-10 px-12 py-20 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-md mb-8">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="text-[10px] font-semibold tracking-widest uppercase text-white">Elite Tier Access</span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-semibold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tight mb-6">
+                Expand. Unlock.<br/>Transcend.
+            </h1>
+            
+            <p class="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                Optimize your diagnostic profile to leverage our neural cross-institutional referral engine. 
+                Gain visibility among top-tier specialists and access complex case consultations.
+            </p>
+        </div>
+    </div>
+
+    <!-- Optimization Form -->
+    <form asp-action="OptimizeProfile" method="post" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        @Html.AntiForgeryToken()
+
+        <!-- Left Column: Inputs -->
+        <div class="lg:col-span-8 space-y-6">
+            <div class="p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-[100px] -z-0 group-hover:bg-blue-500/10 transition-colors"></div>
+                
+                <div class="relative z-10 space-y-8">
+                    <div>
+                        <h3 class="text-xl font-semibold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+                            <i class="fas fa-microchip text-blue-500"></i>
+                            Diagnostic Capabilities
+                        </h3>
+                        <p class="text-sm text-slate-500 mt-2">Tag your advanced diagnostic tools and procedures available at your clinic.</p>
+                    </div>
+
+                    <div class="relative group/input">
+                         <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl opacity-0 group-hover/input:opacity-20 transition duration-500 blur"></div>
+                        <input asp-for="DiagnosticCapabilities" class="relative w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all" placeholder="e.g. 3D Echocardiography, MRI, Genetic Sequencing..." />
+                    </div>
+
+                    <div class="h-px bg-slate-100 dark:bg-white/5"></div>
+
+                    <div>
+                        <h3 class="text-xl font-semibold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+                            <i class="fas fa-network-wired text-purple-500"></i>
+                            Referral Network Preferences
+                        </h3>
+                        <p class="text-sm text-slate-500 mt-2">Define your criteria for incoming cross-institutional patient referrals.</p>
+                        <div class="mt-6 relative group/input">
+                            <textarea asp-for="ReferralPreferences" class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all min-h-[120px]" placeholder="Describe your preferred case complexity and patient demographics..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 rounded-[2.5rem] bg-gradient-to-br from-indigo-900 to-slate-900 text-white shadow-2xl relative overflow-hidden">
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                <div class="relative z-10">
+                    <h3 class="text-xl font-semibold tracking-tight mb-2">Research & Clinical Trials</h3>
+                    <p class="text-indigo-200 text-sm mb-6">Are you interested in participating in multi-center clinical trials?</p>
+                     <textarea asp-for="ResearchInterests" class="w-full bg-white/10 border border-white/10 rounded-2xl px-6 py-4 text-sm font-medium text-white placeholder:text-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-400/50 transition-all min-h-[100px]" placeholder="List your current research interests..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Verification & Submit -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 shadow-xl h-full flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl"></div>
+                
+                <div>
+                     <h3 class="text-lg font-semibold text-slate-900 dark:text-white tracking-tight mb-6">Optimization Impact</h3>
+                     
+                     <div class="space-y-6">
+                         <div class="flex items-start gap-4">
+                             <div class="mt-1 w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                 <i class="fas fa-eye"></i>
+                             </div>
+                             <div>
+                                 <h4 class="font-bold text-slate-900 dark:text-white">Profile Visibility</h4>
+                                 <p class="text-xs text-slate-500 mt-1">Boost search ranking by 40%</p>
+                                 <div class="w-full h-1 bg-slate-100 dark:bg-white/10 rounded-full mt-2 overflow-hidden">
+                                     <div class="h-full bg-blue-500 w-[40%]"></div>
+                                 </div>
+                             </div>
+                         </div>
+                         
+                         <div class="flex items-start gap-4">
+                             <div class="mt-1 w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                 <i class="fas fa-user-plus"></i>
+                             </div>
+                             <div>
+                                 <h4 class="font-bold text-slate-900 dark:text-white">Referral Inflow</h4>
+                                 <p class="text-xs text-slate-500 mt-1">Unlock high-value cases</p>
+                                  <div class="w-full h-1 bg-slate-100 dark:bg-white/10 rounded-full mt-2 overflow-hidden">
+                                     <div class="h-full bg-emerald-500 w-[85%]"></div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+                
+                <div class="mt-12">
+                    <label class="flex items-center gap-3 cursor-pointer group mb-6">
+                        <input asp-for="EliteStatusRequested" type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 transition-colors" checked />
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-400 group-hover:text-blue-600 transition-colors">Request Elite Status verification badge</span>
+                    </label>
+                    
+                    <button type="submit" class="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-semibold text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl">
+                        Apply Configuration
+                    </button>
+                    <a asp-action="Profile" class="block text-center mt-4 text-[10px] uppercase font-bold text-slate-400 hover:text-slate-600 transition-colors">Cancel Optimization</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

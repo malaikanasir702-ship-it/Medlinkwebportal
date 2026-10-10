@@ -1,0 +1,125 @@
+@model MedLinkPortal.Models.Laboratory
+@{
+    ViewData["Title"] = "Lab Profile";
+}
+
+<div class="max-w-4xl mx-auto space-y-10">
+    <div class="flex items-center gap-6">
+        <div class="w-20 h-20 bg-indigo-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+            <i data-lucide="building-2" class="w-10 h-10"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">Lab Profile</h1>
+            <p class="text-slate-500 font-bold mt-1">Manage your laboratory's public information and settings.</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden p-10">
+        <form onsubmit="handleProfileUpdate(event)" class="space-y-8" enctype="multipart/form-data">
+            <input type="hidden" name="Id" value="@Model.Id" />
+            
+            <!-- Logo Upload Section -->
+            <div class="flex flex-col items-center justify-center p-8 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 group/upload hover:border-indigo-400/50 transition-all">
+                <div class="relative w-32 h-32 mb-4 group/img">
+                    <div class="absolute inset-0 bg-indigo-600 rounded-[2.5rem] blur-2xl opacity-0 group-hover/upload:opacity-20 transition-opacity"></div>
+                    <div class="relative w-full h-full bg-white rounded-[2.5rem] border border-slate-100 shadow-xl overflow-hidden flex items-center justify-center">
+                        <img id="logoPreview" src="@(!string.IsNullOrEmpty(Model.LogoUrl) ? Model.LogoUrl : "")" 
+                             class="w-full h-full object-contain @(string.IsNullOrEmpty(Model.LogoUrl) ? "hidden" : "")" />
+                        <div id="logoPlaceholder" class="flex flex-col items-center justify-center text-slate-300 @(!string.IsNullOrEmpty(Model.LogoUrl) ? "hidden" : "")">
+                            <i data-lucide="image" class="w-10 h-10 mb-2"></i>
+                            <span class="text-[9px] font-semibold uppercase">No Logo</span>
+                        </div>
+                    </div>
+                    <label class="absolute -bottom-2 -right-2 w-10 h-10 bg-indigo-600 text-white rounded-xl shadow-lg border-4 border-white flex items-center justify-center cursor-pointer hover:bg-indigo-700 hover:scale-110 active:scale-95 transition-all">
+                        <i data-lucide="camera" class="w-5 h-5"></i>
+                        <input type="file" name="logoFile" class="hidden" accept="image/*" onchange="previewLogo(this)" />
+                    </label>
+                </div>
+                <div class="text-center">
+                    <h4 class="text-sm font-semibold text-slate-900">Laboratory Logo</h4>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">PNG, JPG or SVG • Max 5MB</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-3">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Laboratory Name</label>
+                    <input type="text" value="@Model.Name" disabled class="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-sm text-slate-400 outline-none cursor-not-allowed" />
+                </div>
+                
+                <div class="space-y-3">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Contact Number</label>
+                    <input type="text" name="PhoneNumber" value="@Model.PhoneNumber" required class="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all" />
+                </div>
+
+                <div class="md:col-span-2 space-y-3">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Physical Address</label>
+                    <textarea name="Address" rows="3" required class="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all resize-none">@Model.Address</textarea>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Opening Time</label>
+                    <input type="text" name="OpenTime" value="@Model.OpenTime" required class="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all" />
+                </div>
+
+                <div class="space-y-3">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Closing Time</label>
+                    <input type="text" name="CloseTime" value="@Model.CloseTime" required class="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all" />
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-6 border-t border-slate-50">
+                <p class="text-[10px] font-bold text-slate-400 max-w-xs transition-opacity opacity-60">Updating these details will affect your public listing immediately across the MedLink network.</p>
+                <button type="submit" class="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-semibold text-sm shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 active:scale-95 transition-all">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function previewLogo(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('logoPreview');
+                const placeholder = document.getElementById('logoPlaceholder');
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function handleProfileUpdate(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerText;
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Synchronizing...";
+
+        fetch(`@Url.Action("UpdateProfile", "Dashboard", new { area = "Lab" })`, {
+            method: 'POST',
+            body: formData
+        }).then(r => r.json()).then(res => {
+            if (res.success) {
+                // Show success feedback instead of just reloading
+                submitBtn.classList.remove('bg-indigo-600');
+                submitBtn.classList.add('bg-emerald-500');
+                submitBtn.innerText = "Profile Updated!";
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                alert(res.message || "Failed to update profile.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+            }
+        }).catch(err => {
+            console.error(err);
+            alert("An error occurred.");
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
+        });
+    }
+</script>

@@ -1,0 +1,48 @@
+﻿<section class="py-24 px-6 bg-white">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div class="order-2 lg:order-1 fade-right" data-animate>
+                <img src="https://picsum.photos/seed/accessibility/1200/800"
+                     alt="Inclusive Design"
+                     class="rounded-[2.5rem] shadow-2xl border border-gray-100" />
+            </div>
+            <div class="order-1 lg:order-2 fade-left" data-animate>
+                <div class="inline-flex p-3 rounded-2xl bg-emerald-100 text-emerald-600 mb-6">
+                    <i data-lucide="accessibility" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-4xl font-bold text-gray-900 mb-6 tracking-tight">Built for Everyone, <br /> Everywhere.</h2>
+                <p class="text-lg text-gray-600 mb-10 leading-relaxed">
+                    Inclusivity is at our core. We've designed MedLink to be usable by the elderly, the visually
+                    impaired, and those in low-bandwidth regions.
+                </p>
+
+                <div class="space-y-8 stagger-children" data-animate>
+                    @{
+                        var accessibilityFeatures = new[]
+                        {
+                                        new { Icon = "glasses", Title = "Visual Clarity",
+                                        Desc = "Large typography and high-contrast modes for easy readability." },
+                                        new { Icon = "languages", Title = "Multi-language Support",
+                                        Desc = "Bridging communication gaps with instant translation and native support." },
+                                        new { Icon = "smartphone", Title = "Cross-Device Flow",
+                                        Desc = "Full responsive experience on mobile, tablet, and desktop." }
+                                        };
+                    }
+
+                    @foreach (var feature in accessibilityFeatures)
+                    {
+                        <div class="flex gap-4 fade-up" data-animate>
+                            <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-600">
+                                <i data-lucide="@feature.Icon" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">@feature.Title</h4>
+                                <p class="text-gray-500 text-sm">@feature.Desc</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

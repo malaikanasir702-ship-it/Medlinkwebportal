@@ -1,0 +1,129 @@
+@model MedLinkPortal.Areas.Doctor.Models.WalkInPatient
+@{
+    ViewData["Title"] = "Walk-in Record";
+    Layout = "~/Areas/Doctor/Views/Shared/_DocDash.cshtml";
+}
+
+<div class="max-w-3xl mx-auto space-y-8 reveal">
+
+    @* Header *@
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-16 -top-16 opacity-10">
+            <i class="fas fa-file-medical text-[160px] text-white"></i>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-3">
+                <span class="text-[9px] font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-1.5 rounded-lg uppercase tracking-widest">
+                    <i class="fas fa-walking mr-1.5"></i> Walk-in Patient
+                </span>
+            </div>
+            <h1 class="text-3xl font-semibold text-white tracking-tight">@Model.FullName</h1>
+            <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-2">
+                @(Model.AgeYears.HasValue ? $"{Model.AgeYears} yrs" : "")
+                @(Model.Gender != null ? $" · {Model.Gender}" : "")
+                @(Model.Phone != null ? $" · {Model.Phone}" : "")
+            </p>
+            @if (!string.IsNullOrWhiteSpace(Model.VisitReason))
+            {
+                <p class="text-xs text-slate-400 mt-2 flex items-start gap-2">
+                    <i class="fas fa-stethoscope text-blue-400 mt-0.5"></i>
+                    <span>@Model.VisitReason</span>
+                </p>
+            }
+        </div>
+        <a asp-action="PatientInventory"
+           class="relative z-10 px-6 py-3 bg-white/10 text-white rounded-2xl text-[11px] font-semibold uppercase tracking-widest hover:bg-white/20 transition-all border border-white/10">
+            ← Back
+        </a>
+    </div>
+
+    @* Visit info strip *@
+    <div class="premium-card p-5 flex flex-wrap gap-6">
+        <div>
+            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Visit Date</div>
+            <div class="text-sm font-semibold text-slate-900 dark:text-white">@Model.VisitDate.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</div>
+        </div>
+        <div>
+            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Record Status</div>
+            @if (Model.HasRecord)
+            {
+                <span class="text-xs font-semibold text-emerald-500 flex items-center gap-1.5"><i class="fas fa-check-circle"></i> Filed</span>
+            }
+            else
+            {
+                <span class="text-xs font-semibold text-amber-500 flex items-center gap-1.5"><i class="fas fa-clock"></i> Pending</span>
+            }
+        </div>
+    </div>
+
+    @* Record Form *@
+    <div class="premium-card p-8">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white tracking-tight mb-8">Medical Record</h2>
+
+        <form asp-action="WalkInRecord" asp-route-id="@Model.Id" method="post" class="space-y-7">
+            @Html.AntiForgeryToken()
+
+            @* Vitals *@
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                    <i class="fas fa-heartbeat mr-2 text-red-400"></i> Vitals
+                </label>
+                <input type="text" name="vitals" value="@Model.Vitals"
+                       placeholder="e.g. BP: 120/80, HR: 72, Temp: 98.6°F, SpO2: 98%"
+                       class="w-full px-5 py-3.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" />
+            </div>
+
+            @* Allergies *@
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                    <i class="fas fa-exclamation-triangle mr-2 text-amber-400"></i> Allergies
+                </label>
+                <input type="text" name="allergies" value="@Model.Allergies"
+                       placeholder="e.g. Penicillin, Aspirin, None known"
+                       class="w-full px-5 py-3.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" />
+            </div>
+
+            @* Diagnosis *@
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                    <i class="fas fa-diagnoses mr-2 text-blue-500"></i> Diagnosis <span class="text-red-500">*</span>
+                </label>
+                <textarea name="diagnosis" rows="3" required
+                          placeholder="Primary diagnosis and findings..."
+                          class="w-full px-5 py-3.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none">@Model.Diagnosis</textarea>
+            </div>
+
+            @* Prescription *@
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                    <i class="fas fa-pills mr-2 text-purple-500"></i> Prescription / Medications
+                </label>
+                <textarea name="prescription" rows="4"
+                          placeholder="Tab. Paracetamol 500mg — 1-1-1 × 5 days&#10;Syp. Amoxicillin 250mg — 1tsp TDS × 7 days"
+                          class="w-full px-5 py-3.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none">@Model.Prescription</textarea>
+            </div>
+
+            @* Notes *@
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                    <i class="fas fa-sticky-note mr-2 text-slate-400"></i> Doctor Notes
+                </label>
+                <textarea name="notes" rows="3"
+                          placeholder="Additional observations, follow-up instructions..."
+                          class="w-full px-5 py-3.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none">@Model.Notes</textarea>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <a asp-action="PatientInventory"
+                   class="flex-1 h-12 flex items-center justify-center bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 rounded-2xl text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-200 transition-all">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="flex-1 h-12 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[11px] font-semibold uppercase tracking-widest hover:opacity-90 transition-all shadow-xl flex items-center justify-center gap-2">
+                    <i class="fas fa-save text-xs"></i> Save Record
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>

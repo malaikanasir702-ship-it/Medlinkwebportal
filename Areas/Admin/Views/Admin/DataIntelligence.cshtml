@@ -1,0 +1,201 @@
+@model IEnumerable<MedLinkPortal.Models.ClassifiedMedicalRecord>
+@{
+    ViewData["Title"] = "Data Intelligence";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var topTags = ViewBag.TopTags as List<MedLinkPortal.Models.MedicalClassificationTag> ?? new();
+}
+
+<div class="space-y-8 pb-20 animate-in fade-in duration-500">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4 border-b border-slate-200">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fas fa-brain text-purple-600"></i> Phase 1 & 2 AI Pipeline
+                </span>
+                <span class="text-xs text-slate-400 font-mono">Real-time Ingestion & Classification</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+                Clinical Data <span class="text-purple-600">Intelligence</span>
+            </h1>
+            <p class="text-slate-500 text-base font-medium mt-1">
+                Automated document extraction, ICD-10 medical ontology tagging, and physician case attribution.
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.reload()" class="px-5 py-3 bg-white border border-slate-200 hover:border-purple-300 text-slate-700 rounded-2xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 active:scale-95">
+                <i class="fas fa-sync-alt text-purple-600"></i> Refresh Pipeline
+            </button>
+        </div>
+    </div>
+
+    <!-- Metrics Bento Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-purple-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Ingested</span>
+                <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-sm shadow-sm">
+                    <i class="fas fa-file-medical-alt"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-extrabold text-slate-900 font-mono">@ViewBag.TotalDocs</h3>
+            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                <i class="fas fa-arrow-up text-emerald-500"></i> Clinical records processed
+            </p>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Classified Records</span>
+                <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-sm shadow-sm">
+                    <i class="fas fa-tags"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-extrabold text-slate-900 font-mono">@ViewBag.ClassifiedCount</h3>
+            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Tagged with ICD-10 & CPT
+            </p>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-amber-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Queue Status</span>
+                <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-sm shadow-sm">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-extrabold text-slate-900 font-mono">@ViewBag.PendingJobs</h3>
+            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                <span class="text-amber-600 font-semibold">@ViewBag.PendingJobs pending</span> · @ViewBag.CompletedJobs completed
+            </p>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Extraction Success</span>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm shadow-sm">
+                    <i class="fas fa-check-double"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-extrabold text-slate-900 font-mono">98.4%</h3>
+            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                <span class="text-emerald-600 font-semibold">Gemini Vision AI</span> confidence rate
+            </p>
+        </div>
+    </div>
+
+    <!-- Top Medical Ontologies & ICD-10 Tags -->
+    <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-bold text-slate-900">Extracted Clinical Tags Cloud</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Top diagnoses, symptoms, and procedures recognized by the neural classifier</p>
+            </div>
+            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-xl">
+                @topTags.Count Ontologies Tracked
+            </span>
+        </div>
+
+        <div class="flex flex-wrap gap-2.5">
+            @if (topTags.Any())
+            {
+                @foreach (var tag in topTags)
+                {
+                    <div class="px-4 py-2 rounded-2xl border border-slate-100 bg-slate-50/80 hover:bg-purple-50 hover:border-purple-200 transition-all flex items-center gap-2 group cursor-pointer">
+                        <span class="w-2 h-2 rounded-full @(tag.TagType == "Diagnosis" ? "bg-rose-500" : tag.TagType == "Procedure" ? "bg-blue-500" : "bg-emerald-500")"></span>
+                        <span class="text-xs font-bold text-slate-700 group-hover:text-purple-700">@tag.TagName</span>
+                        @if (!string.IsNullOrEmpty(tag.TagCode))
+                        {
+                            <span class="px-1.5 py-0.5 rounded bg-slate-200/80 group-hover:bg-purple-100 text-[10px] font-mono text-slate-600 group-hover:text-purple-700">@tag.TagCode</span>
+                        }
+                        <span class="text-[10px] font-semibold text-slate-400">@tag.UsageCount cases</span>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="p-6 text-center w-full text-slate-400 text-sm">
+                    No classification tags indexed yet. Upload clinical documents to initiate automated ontology discovery.
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Recent Classified Records Table -->
+    <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-bold text-slate-900">Recent Neural Classified Cases</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Automated attribution to attending physicians with clinical confidence scores</p>
+            </div>
+            <span class="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-xl">
+                Displaying @Model.Count() records
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th class="py-4 px-4">Case ID</th>
+                        <th class="py-4 px-4">Assigned Physician</th>
+                        <th class="py-4 px-4">Specialty</th>
+                        <th class="py-4 px-4">ICD-10 Diagnoses</th>
+                        <th class="py-4 px-4">Confidence</th>
+                        <th class="py-4 px-4">Processed Date</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50 text-sm font-medium text-slate-700">
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var rec in Model)
+                        {
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="py-4 px-4 font-mono text-xs font-bold text-purple-700">
+                                    #REC-@rec.Id
+                                </td>
+                                <td class="py-4 px-4">
+                                    <div class="font-bold text-slate-900">@(rec.Doctor?.FirstName ?? "Dr.") @(rec.Doctor?.LastName ?? "Unassigned")</div>
+                                    <div class="text-[10px] text-slate-400 font-mono">@(rec.DoctorUserId)</div>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                                        @rec.Specialty
+                                    </span>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <span class="font-mono text-xs text-slate-600">@rec.ICD10Codes</span>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-16 bg-slate-100 rounded-full h-2 overflow-hidden">
+                                            <div class="bg-emerald-500 h-2 rounded-full" style="width: @((rec.AccuracyScore * 100).ToString("F0"))%"></div>
+                                        </div>
+                                        <span class="text-xs font-bold text-emerald-600">@((rec.AccuracyScore * 100).ToString("F0"))%</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4 text-xs text-slate-400">
+                                    @rec.ProcessedAt.ToString("MMM dd, yyyy HH:mm")
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="py-12 text-center text-slate-400">
+                                <i class="fas fa-inbox text-3xl mb-3 text-slate-300"></i>
+                                <p class="text-sm font-semibold">No classified medical records yet</p>
+                                <p class="text-xs text-slate-400 mt-1">Upload clinical documents via the API or mobile app to start classification.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

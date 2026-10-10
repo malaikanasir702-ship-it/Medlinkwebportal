@@ -1,0 +1,68 @@
+@model IEnumerable<MedLinkPortal.Models.SubscriptionPlan>
+
+@{
+    ViewData["Title"] = "Subscription Management";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-8 animate-in fade-in duration-700">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <h2 class="text-3xl font-semibold text-slate-900 tracking-tight">Subscription Plans</h2>
+            <p class="text-slate-500 font-medium mt-1 text-sm">Configure pricing and limits for medical professional tiers.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="@Url.Action("Tracking", "Subscription")" class="px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
+                <i class="fas fa-chart-pie text-blue-500"></i> Subscription Tracking
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+        @foreach (var plan in Model)
+        {
+            <div class="bento-card group p-8 flex flex-col h-full bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="w-12 h-12 @(plan.Price == 0 ? "bg-slate-100 text-slate-500" : "bg-blue-100 text-blue-600") rounded-2xl flex items-center justify-center text-xl shadow-inner">
+                        <i class="fas @(plan.Price == 0 ? "fa-seedling" : "fa-crown")"></i>
+                    </div>
+                    @if(plan.IsActive) {
+                        <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-semibold rounded-lg uppercase tracking-wider">Active</span>
+                    } else {
+                        <span class="px-3 py-1 bg-red-50 text-red-600 text-[10px] font-semibold rounded-lg uppercase tracking-wider">Inactive</span>
+                    }
+                </div>
+
+                <div class="flex-1">
+                    <h3 class="text-xl font-semibold text-slate-900 mb-2">@plan.Name</h3>
+                    <div class="flex items-baseline mb-4">
+                        <span class="text-3xl font-semibold text-slate-900">$@plan.Price</span>
+                        <span class="text-slate-400 text-sm font-bold ml-1">/ month</span>
+                    </div>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-6">@plan.Description</p>
+                    
+                    <div class="space-y-3 mb-8">
+                        <div class="flex items-center text-xs font-bold text-slate-600">
+                            <i class="fas fa-users w-5 text-blue-500"></i>
+                            <span>@(plan.PatientLimit == -1 ? "Unlimited" : plan.PatientLimit.ToString()) Patient Records</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(plan.Features)) {
+                            @foreach (var feature in plan.Features.Split('|')) {
+                                <div class="flex items-center text-xs font-medium text-slate-500">
+                                    <i class="fas fa-check w-5 text-emerald-500"></i>
+                                    <span>@feature</span>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-50">
+                    <a href="@Url.Action("Edit", "Subscription", new { id = plan.Id })" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-semibold text-[10px] uppercase tracking-[0.2em] hover:bg-black hover:shadow-2xl transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-edit"></i> Configure Plan
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

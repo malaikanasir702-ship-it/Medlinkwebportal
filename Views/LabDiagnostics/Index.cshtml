@@ -1,0 +1,291 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Lab & Diagnostics - Select City";
+    var cities = ViewBag.Cities as List<MedLinkPortal.Controllers.LabDiagnosticsController.CityWithStats>;
+}
+
+<div class="max-w-5xl mx-auto py-12 px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+    <!-- Glass Header Section -->
+    <div class="relative mb-12 text-center">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 mb-6">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-xs font-black tracking-widest uppercase border border-blue-100/50 backdrop-blur-sm">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                Premium Diagnostics
+            </div>
+            <a href="@Url.Action("MyBookings", "LabDiagnostics")" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-full text-xs font-black tracking-widest uppercase hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/10">
+                <i data-lucide="history" class="w-3.5 h-3.5"></i>
+                Track Lab Report
+            </a>
+        </div>
+        <h1 class="text-5xl md:text-6xl font-black text-slate-9 slate-900 tracking-tight mb-4">
+            Health Check, <span class="text-blue-600">Simplified.</span>
+        </h1>
+        <p class="text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
+            Choose your city to access the most advanced laboratory network in the world.
+        </p>
+    </div>
+
+    <!-- Main Interactive Card -->
+    <div class="relative group">
+        <!-- Background Glows -->
+        <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[3rem] blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
+        
+        <div class="relative bg-white/80 backdrop-blur-2xl border border-white/20 rounded-[3rem] p-8 md:p-14 shadow-2xl overflow-hidden">
+            <!-- Subtle Grid Background -->
+            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none"></div>
+
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Left: Location Selection -->
+                <div class="lg:col-span-7 space-y-10">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-900 mb-2 flex items-center gap-3">
+                            <i data-lucide="map-pin" class="w-6 h-6 text-blue-600"></i>
+                            Find your location
+                        </h2>
+                        <p class="text-slate-500 font-medium">Search for your city or use automatic detection.</p>
+                    </div>
+
+                    <!-- Custom Searchable Dropdown -->
+                    <div class="relative" id="searchContainer">
+                        <div class="group/input relative">
+                            <input type="text" 
+                                   id="citySearch" 
+                                   placeholder="Search for a city..." 
+                                   autocomplete="off"
+                                   class="w-full pl-14 pr-32 py-6 bg-slate-50 border-2 border-transparent focus:border-blue-500/30 focus:bg-white rounded-[1.5rem] text-xl font-bold text-slate-900 shadow-inner transition-all outline-none" />
+                            
+                            <div class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/input:text-blue-600 transition-colors">
+                                <i data-lucide="search" class="w-6 h-6"></i>
+                            </div>
+
+                            <!-- Detect Location Button -->
+                            <button onclick="detectLocation(event)" class="absolute right-4 top-1/2 -translate-y-1/2 px-4 py-2 bg-white text-blue-600 border border-slate-100 rounded-xl text-sm font-black flex items-center gap-2 hover:bg-blue-50 active:scale-95 transition-all shadow-sm">
+                                <i data-lucide="locate-fixed" class="w-4 h-4"></i>
+                                Detect
+                            </button>
+                        </div>
+
+                        <!-- Dropdown Results -->
+                        <div id="searchResults" class="hidden absolute top-full left-0 right-0 mt-4 bg-white/90 backdrop-blur-xl border border-slate-100 rounded-[1.5rem] shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+                            @foreach (var city in cities)
+                            {
+                                <div onclick="selectCity('@city.Id', '@city.Name', @city.LabCount)" 
+                                     class="city-option flex items-center justify-between p-4 hover:bg-blue-50 rounded-2xl cursor-pointer transition-all group/item" 
+                                     data-name="@city.Name.ToLower()"
+                                     data-id="@city.Id"
+                                     data-count="@city.LabCount">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 bg-slate-50 group-hover/item:bg-white rounded-xl flex items-center justify-center text-slate-400 group-hover/item:text-blue-600 transition-colors shadow-sm">
+                                            <i data-lucide="building-2" class="w-5 h-5"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-black text-slate-900">@city.Name</p>
+                                            <p class="text-xs font-bold text-slate-400">@city.LabCount Laboratories available</p>
+                                        </div>
+                                    </div>
+                                    <i data-lucide="arrow-right" class="w-5 h-5 text-slate-300 group-hover/item:text-blue-600 translate-x-[-10px] opacity-0 group-hover/item:translate-x-0 group-hover/item:opacity-100 transition-all"></i>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Popular Cities Chips -->
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">Popular Choices</p>
+                        <div class="flex flex-wrap gap-3">
+                            @foreach (var city in cities.Take(4))
+                            {
+                                <button onclick="selectCity('@city.Id', '@city.Name', @city.LabCount)" 
+                                        class="px-5 py-3 bg-slate-50 hover:bg-blue-600 hover:text-white border border-slate-100 rounded-2xl text-sm font-black transition-all flex items-center gap-2 active:scale-95">
+                                    @city.Name
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Selection Visual -->
+                <div class="lg:col-span-5 h-full flex flex-col justify-end">
+                    <div id="selectionPreview" class="bg-blue-600 rounded-[2rem] p-8 text-white shadow-2xl shadow-blue-600/30 min-h-[300px] flex flex-col items-center justify-center text-center relative overflow-hidden group/pre">
+                        <!-- Abstract Patterns -->
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_-20%,rgba(255,255,255,0.2),transparent)] pointer-events-none"></div>
+                        
+                        <div id="emptyState" class="relative z-10 flex flex-col items-center">
+                            <div class="w-20 h-20 bg-white/10 rounded-[2rem] flex items-center justify-center mb-6 animate-pulse">
+                                <i data-lucide="map" class="w-10 h-10 text-white/50"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-2 tracking-tight">Choice Required</h3>
+                            <p class="text-blue-100 font-medium text-sm">Select a city to unlock diagnostic <br/> packages and home collection.</p>
+                        </div>
+
+                        <div id="selectedState" class="hidden relative z-10 flex flex-col items-center">
+                            <div class="w-24 h-24 bg-white/20 backdrop-blur-md rounded-[2.5rem] flex items-center justify-center mb-8 border border-white/20 shadow-xl">
+                                <i data-lucide="map-pinned" class="w-12 h-12 text-white"></i>
+                            </div>
+                            <h3 id="selectedCityName" class="text-3xl font-black mb-1 tracking-tighter">Karachi</h3>
+                            <p id="selectedCityInfo" class="text-blue-100 font-black tracking-widest uppercase text-[10px] mb-8">15 Labs Available</p>
+                            
+                            <button onclick="navigateToLabs()" class="w-full bg-white text-blue-600 px-8 py-4 rounded-2xl font-black text-lg shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                Start Exploration
+                                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Bento Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+        <div class="bg-white/40 backdrop-blur-md p-8 rounded-[2.5rem] border border-white shadow-lg space-y-4 hover:translate-y-[-5px] transition-all duration-500 group">
+            <div class="w-14 h-14 bg-emerald-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+                <i data-lucide="truck" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <h4 class="text-xl font-black text-slate-900">Swift Collection</h4>
+                <p class="text-slate-500 font-medium">Home sampling available across all partner cities within 60 minutes.</p>
+            </div>
+        </div>
+
+        <div class="bg-white/40 backdrop-blur-md p-8 rounded-[2.5rem] border border-white shadow-lg space-y-4 hover:translate-y-[-5px] transition-all duration-500 group">
+            <div class="w-14 h-14 bg-amber-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
+                <i data-lucide="zap" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <h4 class="text-xl font-black text-slate-900">Instant Digital Reports</h4>
+                <p class="text-slate-500 font-medium">Verified results delivered to your dashboard in less than 24 hours.</p>
+            </div>
+        </div>
+
+        <div class="bg-white/40 backdrop-blur-md p-8 rounded-[2.5rem] border border-white shadow-lg space-y-4 hover:translate-y-[-5px] transition-all duration-500 group">
+            <div class="w-14 h-14 bg-blue-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                <i data-lucide="shield-check" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <h4 class="text-xl font-black text-slate-900">Elite Standards</h4>
+                <p class="text-slate-500 font-medium">Every lab is rigorously vetted for accuracy and patient safety protocols.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Selection State Persistent Logic -->
+<input type="hidden" id="selectedCityId" value="" />
+
+<script>
+    const citySearch = document.getElementById('citySearch');
+    const searchResults = document.getElementById('searchResults');
+    const cityOptions = document.querySelectorAll('.city-option');
+
+    // Search Filtering
+    citySearch.addEventListener('input', (e) => {
+        const value = e.target.value.toLowerCase();
+        let hasMatch = false;
+
+        if (value.length > 0) {
+            searchResults.classList.remove('hidden');
+            cityOptions.forEach(option => {
+                const name = option.dataset.name;
+                if (name.includes(value)) {
+                    option.style.display = 'flex';
+                    hasMatch = true;
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            if (!hasMatch) searchResults.classList.add('hidden');
+        } else {
+            searchResults.classList.add('hidden');
+        }
+    });
+
+    // Close dropdown on click outside
+    document.addEventListener('click', (e) => {
+        if (!document.getElementById('searchContainer').contains(e.target)) {
+            searchResults.classList.add('hidden');
+        }
+    });
+
+    function selectCity(id, name, count) {
+        document.getElementById('selectedCityId').value = id;
+        document.getElementById('citySearch').value = name;
+        
+        // Update Preview UI
+        document.getElementById('emptyState').classList.add('hidden');
+        const selectedState = document.getElementById('selectedState');
+        selectedState.classList.remove('hidden');
+        selectedState.classList.add('animate-in', 'zoom-in-95', 'fade-in');
+        
+        document.getElementById('selectedCityName').innerText = name;
+        document.getElementById('selectedCityInfo').innerText = `${count} Labs Available`;
+        
+        const searchResults = document.getElementById('searchResults');
+        if (searchResults) searchResults.classList.add('hidden');
+    }
+
+    function detectLocation(e) {
+        const btn = e.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Locating...';
+        
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                // For demo purpose, we'll pick the first available city and simulate detection
+                setTimeout(() => {
+                    const firstOption = document.querySelector('.city-option');
+                    if(firstOption) {
+                        const cityId = firstOption.getAttribute('data-id');
+                        const cityName = firstOption.querySelector('p').innerText;
+                        const cityCount = firstOption.getAttribute('data-count');
+                        selectCity(cityId, cityName, cityCount);
+                        
+                        btn.innerHTML = originalText;
+                        lucide.createIcons();
+                    }
+                }, 1500);
+            }, function(error) {
+                btn.innerHTML = originalText;
+                alert("Location access denied or unavailable.");
+            });
+        } else {
+            alert("Geolocation not supported.");
+        }
+    }
+
+    function navigateToLabs() {
+        const cityId = document.getElementById('selectedCityId').value;
+        if (cityId) {
+            const url = `@Url.Action("Labs", "LabDiagnostics")?cityId=${cityId}`;
+            console.log("Navigating to:", url);
+            window.location.href = url;
+        } else {
+            alert("Please select a city first.");
+        }
+    }
+</script>
+
+<style>
+    @@keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    .floating { animation: float 6s ease-in-out infinite; }
+    
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #cbd5e1;
+    }
+</style>

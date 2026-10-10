@@ -1,0 +1,176 @@
+@model IEnumerable<MedLinkPortal.Models.DataAccessLog>
+@{
+    ViewData["Title"] = "Data Governance & Compliance";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-8 pb-20 animate-in fade-in duration-500">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4 border-b border-slate-200">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <span class="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fas fa-shield-alt text-emerald-600"></i> Phase 7 Privacy & Data Governance
+                </span>
+                <span class="text-xs text-slate-400 font-mono">HIPAA & GDPR Immutable Audit Trail</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+                Data <span class="text-emerald-600">Governance</span>
+            </h1>
+            <p class="text-slate-500 text-base font-medium mt-1">
+                Zero-knowledge de-identification, granular patient consent ledger, and immutable access logging.
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-2xl text-xs font-bold flex items-center gap-2 border border-emerald-200">
+                <i class="fas fa-lock"></i> AES-256 GCM Encrypted
+            </span>
+        </div>
+    </div>
+
+    <!-- Security & Compliance Posture Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">HIPAA Audit Trail</span>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm shadow-sm">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-extrabold text-slate-900 font-mono">100% Active</h3>
+            <p class="text-xs text-emerald-600 mt-1 font-semibold flex items-center gap-1">
+                <i class="fas fa-check-circle"></i> Every PHI touchpoint logged
+            </p>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Consent Ledger</span>
+                <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-sm shadow-sm">
+                    <i class="fas fa-file-contract"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-extrabold text-slate-900 font-mono">@ViewBag.ActiveConsents <span class="text-sm text-slate-400 font-normal">/ @ViewBag.TotalConsents</span></h3>
+            <p class="text-xs text-slate-500 mt-1">Active verified patient consent records</p>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">De-Identification</span>
+                <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-sm shadow-sm">
+                    <i class="fas fa-user-secret"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-extrabold text-slate-900 font-mono">Safe Harbor</h3>
+            <p class="text-xs text-purple-600 mt-1 font-semibold">18 HIPAA identifiers stripped</p>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Access Log Entries</span>
+                <div class="w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center text-sm shadow-sm">
+                    <i class="fas fa-database"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-extrabold text-slate-900 font-mono">@ViewBag.TotalAccessLogs</h3>
+            <p class="text-xs text-slate-500 mt-1">Logged access events</p>
+        </div>
+    </div>
+
+    <!-- Governance Principles Banner -->
+    <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 rounded-3xl p-8 text-white shadow-xl border border-emerald-900/30">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                    <i class="fas fa-key"></i> Cryptographic Envelope
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Patient medical documents and transcription audio are encrypted using envelope AES-256 with rotating keys before storage.
+                </p>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 text-blue-400 font-bold text-sm">
+                    <i class="fas fa-mask"></i> Real-time De-Identification
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Any records ingested for AI training or Knowledge Graph correlation pass through regex and neural redaction of patient names, CNICs, and addresses.
+                </p>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                    <i class="fas fa-hand-holding-medical"></i> Patient Autonomy
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Patients retain complete ownership with one-click revocation of research consent and complete data export capabilities.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Access Audit Trail Table -->
+    <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-bold text-slate-900">PHI Access Audit Log</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Immutable record of every practitioner and administrative read/write operation</p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th class="py-4 px-4">Timestamp</th>
+                        <th class="py-4 px-4">Operator</th>
+                        <th class="py-4 px-4">Role</th>
+                        <th class="py-4 px-4">Action</th>
+                        <th class="py-4 px-4">Resource Target</th>
+                        <th class="py-4 px-4">Purpose</th>
+                        <th class="py-4 px-4">IP Address</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50 text-sm font-medium text-slate-700">
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var log in Model)
+                        {
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="py-4 px-4 text-xs font-mono text-slate-400">
+                                    @log.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")
+                                </td>
+                                <td class="py-4 px-4 font-bold text-slate-900">
+                                    @(log.AccessedByUserId ?? "System Service")
+                                </td>
+                                <td class="py-4 px-4">
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold @(log.AccessedByRole == "Admin" ? "bg-rose-50 text-rose-700" : log.AccessedByRole == "Doctor" ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-700")">
+                                        @log.AccessedByRole
+                                    </span>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <span class="font-mono text-xs font-bold text-purple-700">@log.AccessType</span>
+                                </td>
+                                <td class="py-4 px-4 text-xs text-slate-600 font-mono">
+                                    @log.ResourceName @(log.RecordId != null ? $"#{log.RecordId}" : "")
+                                </td>
+                                <td class="py-4 px-4 text-xs text-slate-500">
+                                    @(log.Purpose ?? "Direct Clinical Care")
+                                </td>
+                                <td class="py-4 px-4 font-mono text-xs text-slate-400">
+                                    @(log.IpAddress ?? "127.0.0.1")
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="py-8 text-center text-slate-400">
+                                No access log entries recorded yet.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

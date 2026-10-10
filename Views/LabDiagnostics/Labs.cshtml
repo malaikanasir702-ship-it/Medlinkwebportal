@@ -1,0 +1,151 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Select Laboratory";
+}
+
+<div class="py-12 max-w-7xl mx-auto px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <!-- Sophisticated Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 relative">
+        <div class="space-y-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black tracking-widest uppercase border border-blue-100/50">
+                <i data-lucide="map-pin" class="w-3 h-3"></i>
+                @ViewBag.CityName Regional Network
+            </div>
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+                Accredited <span class="text-blue-600">Centers.</span>
+            </h1>
+            <p class="text-slate-500 font-medium text-lg max-w-xl">
+                Only the top-tier laboratories in @ViewBag.CityName are selected for our premium health network.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- Search Filter -->
+            <div class="relative group">
+                <input type="text" id="labSearch" placeholder="Search laboratories..." 
+                       class="pl-12 pr-6 py-4 bg-white border border-slate-100 rounded-2xl w-full md:w-80 shadow-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-slate-700" />
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
+            </div>
+            
+            <a href="@Url.Action("Index", "LabDiagnostics")" class="p-4 bg-slate-50 hover:bg-white text-slate-400 hover:text-blue-600 border border-slate-100 rounded-2xl transition-all shadow-sm active:scale-95 group">
+                <i data-lucide="map" class="w-6 h-6 transition-transform group-hover:rotate-12"></i>
+            </a>
+        </div>
+    </div>
+
+    @if (Model.Laboratories == null || !Model.Laboratories.Any())
+    {
+        <!-- Premium Empty State -->
+        <div class="relative bg-white/40 backdrop-blur-xl rounded-[3rem] p-16 text-center border border-white shadow-2xl overflow-hidden">
+            <div class="absolute -top-24 -left-24 w-64 h-64 bg-rose-50 rounded-full blur-3xl opacity-50"></div>
+            <div class="relative z-10">
+                <div class="w-24 h-24 bg-rose-50 text-rose-500 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-inner shadow-rose-200/50">
+                    <i data-lucide="search-x" class="w-12 h-12"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-900 mb-3 tracking-tight">Expansion in Progress</h3>
+                <p class="text-slate-500 font-medium mb-10 max-w-md mx-auto">We are currently vetting laboratory partners in @ViewBag.CityName to ensure they meet our elite standards.</p>
+                <a href="@Url.Action("Index", "LabDiagnostics")" class="inline-flex items-center gap-3 px-10 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-600/20 hover:bg-blue-700 active:scale-95 transition-all">
+                    Return to Map
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div id="labGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            @foreach (var lab in Model.Laboratories)
+            {
+                <div class="lab-card group relative bg-white/60 backdrop-blur-lg rounded-[2.5rem] p-8 border border-white shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 hover:translate-y-[-8px] transition-all duration-500" data-name="@lab.Name.ToLower()">
+                    <!-- Home Collection Indicator -->
+                    @if (lab.HomeCollectionAvailable)
+                    {
+                        <div class="absolute top-6 right-8 flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[9px] font-black uppercase tracking-tighter border border-emerald-100 shadow-sm animate-pulse-subtle">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                            Home Visit Available
+                        </div>
+                    }
+
+                    <div class="mb-10">
+                        <div class="w-24 h-24 rounded-3xl bg-white p-4 border border-slate-50 flex items-center justify-center shadow-lg group-hover:scale-105 group-hover:rotate-2 transition-all duration-500 overflow-hidden mb-6">
+                            @if (!string.IsNullOrEmpty(lab.LogoUrl))
+                            {
+                                <img src="@lab.LogoUrl" alt="@lab.Name" class="w-full h-full object-contain filter grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">
+                            }
+                            else
+                            {
+                                <i data-lucide="microscope" class="w-10 h-10 text-slate-300 group-hover:text-blue-500 transition-colors"></i>
+                            }
+                        </div>
+                        
+                        <h3 class="text-2xl font-black text-slate-900 leading-tight mb-2 group-hover:text-blue-600 transition-colors">@lab.Name</h3>
+                        
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-600 rounded-lg border border-amber-100">
+                                <i data-lucide="star" fill="currentColor" class="w-3.5 h-3.5"></i>
+                                <span class="text-xs font-black">@lab.Rating.ToString("F1")</span>
+                            </div>
+                            <span class="text-xs font-bold text-slate-400">Excellent Accreditation</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50 group-hover:bg-white transition-colors">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Reports</p>
+                                <p class="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                                    <i data-lucide="zap" class="w-3.5 h-3.5 text-blue-500 font-bold"></i>
+                                    24h Fast
+                                </p>
+                            </div>
+                            <div class="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50 group-hover:bg-white transition-colors">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Safety</p>
+                                <p class="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                                    <i data-lucide="verified" class="w-3.5 h-3.5 text-blue-500 font-bold"></i>
+                                    Certified
+                                </p>
+                            </div>
+                        </div>
+
+                        <a href="@Url.Action("Tests", "LabDiagnostics", new { labId = lab.Id })" 
+                           class="block w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black text-center shadow-xl shadow-slate-900/10 hover:bg-blue-600 hover:shadow-blue-500/20 active:scale-[0.98] transition-all relative overflow-hidden group/btn">
+                             <span class="relative z-10">Explore Catalog</span>
+                             <div class="absolute inset-x-0 bottom-0 h-1 bg-white/20 scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left"></div>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    const labSearch = document.getElementById('labSearch');
+    const labCards = document.querySelectorAll('.lab-card');
+
+    labSearch.addEventListener('input', (e) => {
+        const value = e.target.value.toLowerCase();
+        labCards.forEach(card => {
+            const name = card.dataset.name;
+            if (name.includes(value)) {
+                card.style.display = 'block';
+                card.classList.add('animate-in', 'fade-in', 'zoom-in-95');
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<style>
+    @@keyframes pulse-subtle {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.85; transform: scale(1.02); }
+    }
+    .animate-pulse-subtle { animation: pulse-subtle 3s infinite ease-in-out; }
+    
+    .lab-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);
+    }
+</style>

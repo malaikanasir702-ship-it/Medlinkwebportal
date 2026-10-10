@@ -1,0 +1,265 @@
+@model MedLinkPortal.Models.PharmacyOrder
+@{
+    ViewData["Title"] = "Payment Successful";
+    Layout = null;
+    bool isOnline = Model.PaymentMethod == MedLinkPortal.Models.PaymentMethod.OnlinePayment;
+
+    string? cardLast4 = null;
+    string? cardBrand = null;
+    string? intentId = null;
+    DateTime? paidAt = null;
+    try { cardLast4 = Model.StripeCardLast4; } catch { }
+    try { cardBrand = Model.StripeCardBrand; } catch { }
+    try { intentId = Model.StripePaymentIntentId; } catch { }
+    try { paidAt = Model.PaidAt; } catch { }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful – MedLink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@@latest/dist/umd/lucide.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .bento-item { border-radius: 1.5rem; border: 1px solid #e2e8f0; background: #fff; }
+        @@keyframes pulse-ring {
+            0% { transform: scale(0.9); opacity: 0.8; }
+            70% { transform: scale(1.1); opacity: 0; }
+            100% { transform: scale(1.1); opacity: 0; }
+        }
+        .pulse-ring::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            background: rgba(16,185,129,0.2);
+            animation: pulse-ring 2s ease-out infinite;
+        }
+        @@keyframes float {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .float { animation: float 3s ease-in-out infinite; }
+        .card-chip {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 4px;
+            width: 28px; height: 20px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="w-full max-w-2xl">
+
+        <!-- Bento Grid -->
+        <div class="grid grid-cols-2 gap-4 auto-rows-auto">
+
+            <!-- [1,1] Hero Success Cell — spans 2 cols -->
+            <div class="bento-item col-span-2 p-8 relative overflow-hidden"
+                 style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);">
+                <!-- Background decorations -->
+                <div class="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10"
+                     style="background: radial-gradient(circle, #10b981, transparent); transform: translate(30%, -30%);"></div>
+                <div class="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-10"
+                     style="background: radial-gradient(circle, #3b82f6, transparent); transform: translate(-30%, 30%);"></div>
+
+                <div class="relative z-10 flex items-center gap-6">
+                    <!-- Animated check icon -->
+                    <div class="relative float shrink-0">
+                        <div class="pulse-ring relative w-20 h-20 rounded-full flex items-center justify-center"
+                             style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 0 40px rgba(16,185,129,0.4);">
+                            <i data-lucide="check" class="w-10 h-10 text-white" style="stroke-width: 3;"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">MedLink Pharmacy</span>
+                            <span class="w-1 h-1 rounded-full bg-emerald-400"></span>
+                            <span class="text-xs font-bold text-white/40 uppercase tracking-widest">Confirmed</span>
+                        </div>
+                        <h1 class="text-3xl font-black text-white leading-tight">
+                            @(isOnline ? "Payment Successful!" : "Order Confirmed!")
+                            <span class="ml-2">@(isOnline ? "🎉" : "✅")</span>
+                        </h1>
+                        <p class="text-white/60 text-sm mt-1 font-medium">
+                            @(isOnline ? "Processed securely via Stripe · Medicines being prepared" : "Cash on delivery · Medicines being prepared")
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- [2,1] Order ID Cell -->
+            <div class="bento-item p-6 flex flex-col justify-between"
+                 style="background: linear-gradient(135deg, #f0fdf4, #dcfce7);">
+                <div class="w-10 h-10 bg-emerald-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-200">
+                    <i data-lucide="hash" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1">Order ID</p>
+                    <p class="text-2xl font-black text-slate-900">#ORD-@Model.Id.ToString("D5")</p>
+                </div>
+            </div>
+
+            <!-- [2,2] Delivery Cell -->
+            <div class="bento-item p-6 flex flex-col justify-between"
+                 style="background: linear-gradient(135deg, #eff6ff, #dbeafe);">
+                <div class="w-10 h-10 bg-blue-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-200">
+                    <i data-lucide="truck" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1">Estimated Delivery</p>
+                    <p class="text-xl font-black text-slate-900">1–3 Business Days</p>
+                    <p class="text-xs text-slate-500 font-medium mt-1">Door-to-door delivery</p>
+                </div>
+            </div>
+
+            @if (isOnline && Model.TotalAmount > 0)
+            {
+                <!-- [3,1] Amount Cell — large -->
+                <div class="bento-item p-6" style="background: linear-gradient(135deg, #0f172a, #1e293b);">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center">
+                            <i data-lucide="banknote" class="w-4 h-4 text-white"></i>
+                        </div>
+                        <span class="text-xs font-bold text-white/40 uppercase tracking-widest">Amount Paid</span>
+                    </div>
+                    <p class="text-4xl font-black text-white mb-1">PKR @Model.TotalAmount.ToString("N0")</p>
+                    <div class="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-500/20 rounded-full mt-2">
+                        <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
+                        <span class="text-xs font-bold text-emerald-400">Payment Confirmed</span>
+                    </div>
+                </div>
+
+                <!-- [3,2] Card Cell — visual card design -->
+                <div class="bento-item p-6 relative overflow-hidden"
+                     style="background: linear-gradient(135deg, #7c3aed, #4f46e5);">
+                    <div class="absolute top-0 right-0 w-40 h-40 rounded-full opacity-20"
+                         style="background: radial-gradient(circle, #a78bfa, transparent); transform: translate(20%, -20%);"></div>
+
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-6">
+                            <span class="text-xs font-bold text-white/50 uppercase tracking-widest">Payment Card</span>
+                            <i data-lucide="credit-card" class="w-5 h-5 text-white/60"></i>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(cardLast4))
+                        {
+                            <div class="card-chip mb-4"></div>
+                            <p class="text-white font-mono text-lg font-bold tracking-widest mb-1">
+                                •••• •••• •••• @cardLast4
+                            </p>
+                            <p class="text-white/60 text-xs font-bold uppercase tracking-widest">
+                                @(cardBrand?.ToUpper() ?? "CARD")
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="text-white/70 text-sm font-medium mt-4">Card details unavailable</p>
+                        }
+                    </div>
+                </div>
+
+                @if (paidAt.HasValue)
+                {
+                    <!-- [4,1] DateTime Cell -->
+                    <div class="bento-item p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center">
+                                <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Date & Time</span>
+                        </div>
+                        <p class="text-xl font-black text-slate-900">@paidAt.Value.ToString("MMM dd, yyyy")</p>
+                        <p class="text-slate-500 font-semibold">@paidAt.Value.ToString("HH:mm")</p>
+                    </div>
+
+                    <!-- [4,2] Status Cell -->
+                    <div class="bento-item p-6" style="background: linear-gradient(135deg, #f0fdf4, #dcfce7);">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                            </div>
+                            <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Status</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                            <p class="text-xl font-black text-slate-900">Paid</p>
+                        </div>
+                        <p class="text-emerald-700 text-xs font-bold mt-1">Secured by Stripe</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(intentId))
+                {
+                    <!-- Transaction ID — full width -->
+                    <div class="bento-item col-span-2 p-5" style="background: #f8fafc;">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="fingerprint" class="w-4 h-4 text-slate-400"></i>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Transaction ID</span>
+                        </div>
+                        <p class="font-mono text-xs text-slate-600 break-all leading-relaxed">@intentId</p>
+                    </div>
+                }
+            }
+
+            @if (Model.OrderItems != null && Model.OrderItems.Any())
+            {
+                <!-- Ordered Items — full width -->
+                <div class="bento-item col-span-2 p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="pill" class="w-4 h-4 text-slate-600"></i>
+                        </div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Ordered Items</span>
+                        <span class="ml-auto text-xs font-bold text-slate-400">@Model.OrderItems.Count item(s)</span>
+                    </div>
+                    <div class="grid grid-cols-1 gap-2">
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-colors">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 bg-white rounded-xl flex items-center justify-center border border-slate-100 shadow-sm">
+                                        <i data-lucide="pill" class="w-4 h-4 text-slate-400"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900 text-sm">@(item.Medicine?.Name ?? "Medicine")</p>
+                                        <p class="text-xs text-slate-400 font-semibold">Qty: @item.Quantity · PKR @item.UnitPrice.ToString("N0") each</p>
+                                    </div>
+                                </div>
+                                <p class="font-black text-slate-900 text-sm">PKR @((item.UnitPrice * item.Quantity).ToString("N0"))</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- CTA Buttons — full width -->
+            <div class="col-span-2 grid grid-cols-2 gap-4">
+                <a href="/Pharmacy/Store"
+                   class="flex items-center justify-center gap-2 py-4 px-6 rounded-2xl font-bold text-sm transition-all shadow-lg active:scale-95"
+                   style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; box-shadow: 0 8px 24px rgba(15,23,42,0.2);">
+                    <i data-lucide="store" class="w-4 h-4"></i>
+                    Continue Shopping
+                </a>
+                <a href="/Pharmacy/MyOrders"
+                   class="flex items-center justify-center gap-2 py-4 px-6 bg-white rounded-2xl font-bold text-sm text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all active:scale-95">
+                    <i data-lucide="package" class="w-4 h-4"></i>
+                    My Orders
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

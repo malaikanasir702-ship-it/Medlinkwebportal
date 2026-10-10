@@ -1,0 +1,318 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Live Emergency Triage";
+}
+
+<div class="relative min-h-[calc(100vh-140px)] flex items-center justify-center p-4" x-data="triageSystem()">
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-[10%] right-[10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div class="absolute bottom-[10%] left-[10%] w-[40%] h-[40%] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse-delayed"></div>
+    </div>
+
+    <!-- MAIN CARD -->
+    <div class="relative w-full max-w-2xl bg-white/80 backdrop-blur-2xl border border-white rounded-[2rem] md:rounded-[3rem] shadow-2xl shadow-blue-900/10 overflow-hidden mx-2 md:mx-0">
+        
+        <!-- HEADER -->
+        <div class="p-5 md:p-8 border-b border-gray-100/50 flex items-center justify-between">
+            <div class="flex items-center gap-3 md:gap-4">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-gray-900 text-white rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg">
+                    <i data-lucide="activity" class="w-5 h-5 md:w-6 md:h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-semibold text-gray-900 tracking-tight">Emergency Triage</h1>
+                    <p class="text-[9px] md:text-[10px] font-semibold text-blue-600 uppercase tracking-widest truncate max-w-[150px] md:max-w-none">Live Bio-link • Session #@Guid.NewGuid().ToString().Substring(0,8).ToUpper()</p>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-2">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Link</span>
+            </div>
+        </div>
+
+        <!-- PROGRESS BAR -->
+        <div class="h-1.5 w-full bg-gray-50 overflow-hidden">
+            <div class="h-full bg-blue-600 transition-all duration-1000" :style="'width: ' + progress + '%'"></div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div class="p-6 md:p-12 min-h-[350px] md:min-h-[400px] flex flex-col justify-center">
+            
+            <!-- STEP 1: INITIAL ASSESSMENT -->
+            <div x-show="step === 1" x-transition.opacity.duration.500ms class="text-center">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-blue-50 text-blue-600 rounded-2xl md:rounded-[2rem] flex items-center justify-center mx-auto mb-6 md:mb-8 animate-bounce-subtle">
+                    <i data-lucide="heart-pulse" class="w-8 h-8 md:w-10 md:h-10"></i>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 mb-3 md:mb-4 tracking-tight leading-tight">How are you feeling?</h2>
+                <p class="text-xs md:text-base text-gray-500 mb-8 md:mb-10 max-w-sm mx-auto leading-relaxed">Our AI-driven triage will assess your symptoms and connect you to a doctor if needed.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                    <button @@click="nextStep('Chest Pain')" class="p-4 md:p-6 bg-white border-2 border-gray-50 rounded-2xl md:rounded-[2rem] hover:border-blue-200 hover:bg-blue-50/50 transition-all group flex items-center justify-center sm:block">
+                        <i data-lucide="flame" class="w-6 h-6 md:w-8 md:h-8 text-rose-500 mr-3 sm:mr-0 sm:mx-auto sm:mb-3 group-hover:scale-110 transition-transform"></i>
+                        <span class="block font-semibold text-xs uppercase tracking-widest text-gray-900">Chest Pain</span>
+                    </button>
+                    <button @@click="nextStep('Short Breath')" class="p-4 md:p-6 bg-white border-2 border-gray-50 rounded-2xl md:rounded-[2rem] hover:border-blue-200 hover:bg-blue-50/50 transition-all group flex items-center justify-center sm:block">
+                        <i data-lucide="wind" class="w-6 h-6 md:w-8 md:h-8 text-blue-500 mr-3 sm:mr-0 sm:mx-auto sm:mb-3 group-hover:scale-110 transition-transform"></i>
+                        <span class="block font-semibold text-xs uppercase tracking-widest text-gray-900">Short Breath</span>
+                    </button>
+                    <button @@click="nextStep('Headache')" class="p-4 md:p-6 bg-white border-2 border-gray-50 rounded-2xl md:rounded-[2rem] hover:border-blue-200 hover:bg-blue-50/50 transition-all group flex items-center justify-center sm:block">
+                        <i data-lucide="zap" class="w-6 h-6 md:w-8 md:h-8 text-amber-500 mr-3 sm:mr-0 sm:mx-auto sm:mb-3 group-hover:scale-110 transition-transform"></i>
+                        <span class="block font-semibold text-xs uppercase tracking-widest text-gray-900">Severe Pain</span>
+                    </button>
+                    <button @@click="nextStep('Other')" class="p-4 md:p-6 bg-white border-2 border-gray-50 rounded-2xl md:rounded-[2rem] hover:border-blue-200 hover:bg-blue-50/50 transition-all group flex items-center justify-center sm:block">
+                        <i data-lucide="plus" class="w-6 h-6 md:w-8 md:h-8 text-gray-400 mr-3 sm:mr-0 sm:mx-auto sm:mb-3 group-hover:scale-110 transition-transform"></i>
+                        <span class="block font-semibold text-xs uppercase tracking-widest text-gray-900">Other</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: DURATION -->
+            <div x-show="step === 2" x-transition.opacity.duration.500ms class="text-center">
+                <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 mb-4 tracking-tight">When did this start?</h2>
+                <p class="text-xs md:text-base text-gray-500 mb-8 md:mb-10">Understanding the timeline helps us prioritize your care.</p>
+                
+                <div class="space-y-3">
+                    <button @@click="nextStep('Just now')" class="w-full p-4 md:p-5 bg-white border-2 border-gray-50 rounded-xl md:rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex items-center justify-between group">
+                        <span class="font-bold text-gray-900 text-sm md:text-base">Just now (within minutes)</span>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-blue-500"></i>
+                    </button>
+                    <button @@click="nextStep('Hours ago')" class="w-full p-4 md:p-5 bg-white border-2 border-gray-50 rounded-xl md:rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex items-center justify-between group">
+                        <span class="font-bold text-gray-900 text-sm md:text-base">A few hours ago</span>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-blue-500"></i>
+                    </button>
+                    <button @@click="nextStep('Days ago')" class="w-full p-4 md:p-5 bg-white border-2 border-gray-50 rounded-xl md:rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left flex items-center justify-between group">
+                        <span class="font-bold text-gray-900 text-sm md:text-base">Days ago</span>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-blue-500"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 3: INTENSITY -->
+            <div x-show="step === 3" x-transition.opacity.duration.500ms class="text-center">
+                <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 mb-4 tracking-tight">Pain Intensity</h2>
+                <p class="text-xs md:text-base text-gray-500 mb-8 md:mb-10">Rate your discomfort on a scale of 1-10.</p>
+                
+                <div class="flex flex-wrap items-center justify-center gap-2 mb-8 md:mb-12 max-w-[320px] md:max-w-none mx-auto">
+                    <template x-for="n in 10">
+                        <button 
+                            @@click="intensity = n" 
+                            :class="intensity >= n ? 'bg-rose-500 text-white border-rose-600' : 'bg-gray-50 text-gray-400 border-transparent'"
+                            class="w-10 h-10 md:w-10 md:h-14 rounded-lg md:rounded-xl border-b-4 font-semibold text-sm transition-all transform hover:scale-110 flex items-center justify-center">
+                            <span x-text="n"></span>
+                        </button>
+                    </template>
+                </div>
+
+                <button @@click="nextStep('Intensity Set')" :disabled="!intensity" class="w-full py-4 md:py-5 bg-gray-900 text-white rounded-xl md:rounded-[2rem] font-semibold uppercase tracking-widest text-xs shadow-xl shadow-gray-900/20 disabled:opacity-50 transition-all">
+                    Continue Assessment
+                </button>
+            </div>
+
+            <!-- STEP 4: AI ANALYSIS SIMULATION -->
+            <div x-show="step === 4" x-transition.opacity.duration.500ms class="text-center">
+                <div class="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-8 md:mb-10">
+                    <div class="absolute inset-0 border-4 border-blue-50 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+                    <div class="absolute inset-4 bg-blue-50 rounded-full flex items-center justify-center">
+                        <i data-lucide="brain" class="w-8 h-8 md:w-10 md:h-10 text-blue-600 animate-pulse"></i>
+                    </div>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 mb-4 tracking-tight">Analyzing Bio-data...</h2>
+                <p class="text-xs md:text-base text-gray-500 mb-8">Cross-referencing your symptoms...</p>
+                
+                <div class="space-y-4 max-w-sm mx-auto">
+                    <div class="flex items-center justify-between text-xs font-bold uppercase tracking-widest">
+                        <span class="text-gray-400">Triage Level</span>
+                        <span class="text-amber-500" x-text="analysisLog">Processing...</span>
+                    </div>
+                    <div class="h-1 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-600 transition-all duration-3000" :style="'width: ' + analysisProgress + '%'"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: FINAL RESULT -->
+            <div x-show="step === 5" x-transition.opacity.duration.500ms>
+                <div class="bg-rose-50 border border-rose-100 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] mb-6 md:mb-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-6 opacity-10">
+                        <i data-lucide="alert-octagon" class="w-20 h-20 text-rose-600"></i>
+                    </div>
+                    <div class="relative z-10 text-center">
+                        <div class="inline-flex items-center gap-2 bg-rose-600 text-white px-4 py-1.5 rounded-full text-[9px] md:text-[10px] font-semibold uppercase tracking-widest mb-4 md:mb-6">
+                            <span x-text="triageData.analysis.priority + ' Priority'"></span>
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 mb-2 md:mb-3 tracking-tighter break-words" x-text="'Connecting to ' + triageData.analysis.specialty"></h2>
+                        <p class="text-gray-600 text-xs md:text-sm font-medium line-clamp-3" x-text="triageData.analysis.summary"></p>
+                    </div>
+                </div>
+                
+                <div class="bg-white border border-gray-100 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-lg mb-6 flex flex-col sm:flex-row items-center gap-4 md:gap-5 text-center sm:text-left">
+                    <img :src="triageData.doctor.image" class="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover border-2 border-gray-100" alt="Doctor Recommneded">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-[9px] font-semibold text-blue-600 uppercase tracking-widest mb-1">Recommended Specialist</h4>
+                        <div class="text-lg md:text-xl font-semibold text-gray-900 truncate" x-text="triageData.doctor.name"></div>
+                        <div class="text-[10px] md:text-xs text-gray-400 font-bold" x-text="triageData.doctor.qualification"></div>
+                        <div class="flex items-center justify-center sm:justify-start gap-1 mt-2">
+                             <div class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                             <span class="text-[9px] md:text-[10px] font-bold text-gray-500">Available Now</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 md:gap-4">
+                    <div class="p-4 md:p-6 bg-white border border-gray-100 rounded-2xl md:rounded-[2rem] text-center shadow-sm">
+                        <h4 class="text-[8px] md:text-[9px] font-semibold text-gray-400 uppercase tracking-widest mb-1 md:mb-2">Estimated wait</h4>
+                        <div class="text-lg md:text-2xl font-semibold text-gray-900" x-text="triageData.analysis.estimatedWait"></div>
+                    </div>
+                    <div class="p-4 md:p-6 bg-white border border-gray-100 rounded-2xl md:rounded-[2rem] text-center shadow-sm">
+                        <h4 class="text-[8px] md:text-[9px] font-semibold text-gray-400 uppercase tracking-widest mb-1 md:mb-2">Doctor ID</h4>
+                        <div class="text-lg md:text-2xl font-semibold text-gray-900" x-text="'GP-' + triageData.doctor.id"></div>
+                    </div>
+                </div>
+
+                <div class="mt-6 md:mt-8 space-y-3">
+                    <button @@click="launchLiveSession()" class="w-full py-4 md:py-5 bg-blue-600 text-white rounded-xl md:rounded-[2rem] font-semibold uppercase tracking-widest text-xs shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center justify-center gap-3">
+                        <i data-lucide="video" class="w-5 h-5"></i>
+                        Launch Live Session
+                    </button>
+                    <button @@click="window.location.href='/Dashboard/Index'" class="w-full py-4 md:py-5 text-gray-400 font-bold text-xs hover:text-gray-900 transition-colors">
+                        Cancel Triage
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FOOTER INFO -->
+        <div class="p-4 md:p-6 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6">
+            <div class="flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i>
+                <span class="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-widest">Clinical Grade</span>
+            </div>
+            <div class="hidden sm:block w-px h-4 bg-gray-200"></div>
+            <div class="flex items-center gap-2">
+                <i data-lucide="fingerprint" class="w-4 h-4 text-blue-500"></i>
+                <span class="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-widest">Secure Link</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function triageSystem() {
+            return {
+                step: 1,
+                progress: 20,
+                intensity: 0,
+                duration: '',
+                analysisProgress: 0,
+                analysisLog: 'Processing...',
+                symptoms: [],
+                triageData: {
+                    analysis: { priority: 'Loading...', summary: 'Please wait...', estimatedWait: '...' },
+                    doctor: { name: 'Finding Doctor...', id: 0, specialty: '...' }
+                },
+                
+                nextStep(value, force = false) {
+                    if (this.step === 2 && value) this.duration = value;
+                    else if (value) this.symptoms.push(value);
+                    
+                    if (this.step === 4 && !force) return; // Managed by simulation
+
+                    this.step++;
+                    this.progress = (this.step / 5) * 100;
+                    
+                    if (this.step === 4) {
+                        this.runAnalysisSimulation();
+                    }
+
+                    // Reset icons for dynamic content
+                    setTimeout(() => lucide.createIcons(), 50);
+                },
+                
+                async runAnalysisSimulation() {
+                    // Start Simulation UI
+                    let interval = setInterval(() => {
+                        if (this.analysisProgress < 90) this.analysisProgress += 5;
+                        if (this.analysisProgress === 30) this.analysisLog = 'Triangulating Symptoms...';
+                        if (this.analysisProgress === 60) this.analysisLog = 'Priority Assignment...';
+                    }, 150);
+
+                    // Real API Call
+                    try {
+                        const formData = new FormData();
+                        formData.append('symptoms', this.symptoms.join(', '));
+                        formData.append('duration', this.duration);
+                        formData.append('intensity', this.intensity);
+
+                        const response = await fetch('/Dashboard/PerformLiveTriage', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const result = await response.json();
+                        if (result.success) {
+                            this.triageData = result;
+                             this.analysisLog = 'Doctor found...';
+                             this.analysisProgress = 100;
+                             clearInterval(interval);
+                             setTimeout(() => this.nextStep(null, true), 500);
+                        } else {
+                            await PremiumModal.error('Triage analysis failed due to temporal sync error. Please try again.', 'Analysis Failure');
+                            location.reload();
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        // Fallback logic could go here, but for now just let it hang or show error
+                        clearInterval(interval);
+                        this.analysisLog = 'Connection Error';
+                    }
+                },
+
+                async launchLiveSession() {
+                    try {
+                        const sessionId = 'triage_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                        const payload = {
+                            sessionId: sessionId,
+                            symptoms: this.symptoms.join(', '),
+                            priority: this.triageData.analysis.priority || 'Emergency',
+                            specialty: this.triageData.analysis.specialty || 'General Practitioner',
+                            doctorId: this.triageData.doctor.id,
+                            doctorUserId: this.triageData.doctor.userId,
+                            patientName: '@(User.Identity?.Name?.Split('@')[0] ?? "Patient")'
+                        };
+
+                        await fetch('/api/patient/trigger-emergency-alert', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        window.location.href = `/Dashboard/ConsultationRoom?id=${sessionId}&doctorUserId=${payload.doctorUserId}&doctorId=${payload.doctorId}`;
+                    } catch (e) {
+                        console.error('Error triggering emergency alert:', e);
+                        const fallbackSessionId = 'triage_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                        window.location.href = `/Dashboard/ConsultationRoom?id=${fallbackSessionId}&doctorUserId=${this.triageData.doctor.userId}&doctorId=${this.triageData.doctor.id}`;
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @@keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-subtle {
+            animation: bounce-subtle 3s ease-in-out infinite;
+        }
+        .animate-pulse-delayed {
+            animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            animation-delay: 2s;
+        }
+    </style>
+}

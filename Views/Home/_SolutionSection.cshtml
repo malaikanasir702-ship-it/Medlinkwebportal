@@ -1,0 +1,36 @@
+﻿<section class="py-24 px-6 bg-gradient-to-b from-white to-blue-50">
+    <div class="max-w-4xl mx-auto text-center fade-down" data-animate>
+        <div class="inline-flex p-3 rounded-2xl bg-blue-100 text-blue-600 mb-8">
+            <i data-lucide="sparkles" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-bold text-gray-900 mb-8 tracking-tight">
+            A Portal Designed for <br />
+            <span class="text-blue-600">Universal Access.</span>
+        </h2>
+        <p class="text-xl text-gray-600 mb-12 leading-relaxed">
+            The Online Health Consultation Portal is a secure web-based ecosystem that bridges the
+            gap between patients and care. By combining AI diagnostics with human expertise, we
+            make healthcare more efficient, accessible, and patient-centric.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left max-w-2xl mx-auto stagger-children" data-animate>
+            @{
+                var pillars = new[]
+                {
+                        "Efficient AI-driven preliminary diagnosis",
+                        "Instant 24/7 global doctor access",
+                        "Unified, secure health record management",
+                        "Seamless video and chat integrations"
+                        };
+            }
+
+            @foreach (var pillar in pillars)
+            {
+                <div class="flex items-center gap-3 bg-white p-4 rounded-2xl border border-blue-100 shadow-sm fade-up" data-animate>
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-blue-500 flex-shrink-0"></i>
+                    <span class="text-gray-700 font-medium">@pillar</span>
+                </div>
+            }
+        </div>
+    </div>
+</section>

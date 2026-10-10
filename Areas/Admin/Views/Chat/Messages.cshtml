@@ -1,0 +1,387 @@
+@using Microsoft.AspNetCore.Identity
+@using MedLinkPortal.Areas.Identity.Pages.Account
+@inject UserManager<ApplicationUser> UserManager
+@model IEnumerable<ApplicationUser>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Messages";
+}
+
+<div class="chat-container flex overflow-hidden bg-white rounded-[32px] border border-slate-100 h-[calc(100vh-140px)] shadow-sm">
+    <!-- Contacts Panel (Sidebar) -->
+    <div id="signalsPanel" class="w-full md:w-80 flex-shrink-0 border-r border-slate-50 flex flex-col bg-slate-50/30 transition-transform duration-300 absolute inset-0 md:relative z-10 md:z-auto">
+        <div class="p-8 border-b border-slate-50">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-slate-900 tracking-tight">Messages</h2>
+                <div class="w-8 h-8 rounded-lg bg-blue-600/10 flex items-center justify-center text-blue-600">
+                    <i class="fas fa-comment-dots text-xs"></i>
+                </div>
+            </div>
+            <div class="relative group">
+                <input type="text" id="patientFilter" placeholder="Filter contacts..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-[11px] font-semibold uppercase tracking-widest placeholder-slate-400 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
+            </div>
+        </div>
+        
+        <div class="flex-grow overflow-y-auto custom-scrollbar">
+            @foreach (var patient in Model)
+            {
+                <button onclick="loadConversation('@patient.Id', '@(patient.FullName ?? patient.Name ?? patient.UserName ?? "Patient")')" 
+                        class="w-full p-6 flex items-center gap-4 hover:bg-white transition-all text-left group contact-item" 
+                        id="contact-@patient.Id">
+                    <div class="relative">
+                        <div class="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center text-slate-600 font-semibold text-lg shadow-inner group-hover:scale-105 transition-transform">
+                            @((patient.FullName ?? patient.Name ?? patient.UserName ?? "PT").Substring(0, 1).ToUpper())
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-semibold text-slate-900 truncate tracking-tight">@(patient.FullName ?? patient.Name ?? patient.UserName ?? "Patient")</h4>
+                        <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tighter truncate">
+                            @patient.Email
+                        </p>
+                    </div>
+                    <div id="unread-@patient.Id" class="hidden">
+                        <div class="bg-blue-600 text-white min-w-[20px] h-5 rounded-full flex items-center justify-center px-1.5 shadow-lg shadow-blue-500/20">
+                            <span class="text-[9px] font-semibold unread-count">0</span>
+                        </div>
+                    </div>
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Communication Hub (Main Area) -->
+    <div id="communicationHub" class="flex-grow flex flex-col bg-white relative w-full md:w-auto absolute inset-0 md:relative z-20 md:z-auto translate-x-full md:translate-x-0 transition-transform duration-300">
+        <!-- Hub Header -->
+        <div id="chatHeader" class="px-8 py-5 border-b border-slate-50 flex items-center justify-between hidden bg-white/80 backdrop-blur-md z-10 sticky top-0">
+            <div class="flex items-center gap-4">
+                <button onclick="backToSignals()" class="md:hidden w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                    <i class="fas fa-chevron-left text-xs"></i>
+                </button>
+                <div class="relative">
+                    <div id="activeUserAvatar" class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-semibold text-lg shadow-xl shadow-blue-500/20">
+                        ?
+                    </div>
+                    <div id="activeUserStatus" class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full shadow-lg"></div>
+                </div>
+                <div class="min-w-0">
+                    <h3 id="activeUserName" class="text-lg font-semibold text-slate-900 tracking-tight leading-none truncate">Select Contact</h3>
+                    <p class="text-[10px] font-semibold text-emerald-500 uppercase tracking-widest mt-2">Secure Connection Active</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-grow overflow-hidden">
+            <!-- Data Stream -->
+            <div id="messagesArea" class="flex-grow p-8 overflow-y-auto flex flex-col gap-6 custom-scrollbar">
+                <div id="messagesList" class="flex flex-col gap-6 flex-grow">
+                    <div class="flex-grow flex items-center justify-center flex-col opacity-20">
+                        <div class="w-24 h-24 bg-slate-50 rounded-[40px] flex items-center justify-center mb-8">
+                            <i class="fas fa-comment-dots text-4xl text-slate-400"></i>
+                        </div>
+                        <h4 class="text-xl font-semibold text-slate-900 uppercase tracking-widest">Select a channel</h4>
+                    </div>
+                </div>
+                
+                <!-- Typing Bubble -->
+                <div id="typingIndicator" class="flex items-center gap-2 mb-4 hidden shrink-0">
+                    <div class="bg-slate-50 px-4 py-3 rounded-full rounded-tl-none flex items-center gap-1.5 ">
+                         <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+                         <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+                         <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+                    </div>
+                    <span class="text-[9px] font-semibold text-slate-300 uppercase tracking-widest animate-pulse">Contact is typing...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Terminal -->
+        <div id="inputArea" class="p-8 hidden bg-white">
+            <form id="chatForm" onsubmit="event.preventDefault(); sendMessage();" class="flex items-center gap-4 p-3 bg-slate-50 rounded-[32px] border border-transparent focus-within:border-blue-500/30 transition-all shadow-inner">
+                <div class="flex gap-2 ml-2">
+                    <label class="cursor-pointer w-10 h-10 flex items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-white rounded-xl transition-all">
+                        <i class="fas fa-image text-sm"></i>
+                        <input type="file" id="imageInput" class="hidden" accept="image/*" onchange="handleImageSelect()">
+                    </label>
+                    <label class="cursor-pointer w-10 h-10 flex items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-white rounded-xl transition-all">
+                        <i class="fas fa-paperclip text-sm"></i>
+                        <input type="file" id="fileInput" class="hidden" onchange="handleFileSelect()">
+                    </label>
+                </div>
+                <div class="flex-grow">
+                    <input type="text" id="messageInput" placeholder="Type a message..." class="w-full bg-transparent border-none text-sm font-bold text-slate-800 placeholder-slate-400 p-0 focus:ring-0">
+                </div>
+                <button type="submit" class="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/30 active:scale-90">
+                    <i class="fas fa-paper-plane text-sm"></i>
+                </button>
+            </form>
+            
+            <div id="attachmentPreview" class="mt-4 hidden flex items-center gap-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-[10px]">
+                     <i class="fas fa-file"></i>
+                </div>
+                <span id="fileName" class="text-[11px] font-semibold text-blue-600 uppercase tracking-tight truncate max-w-[200px]">file.pdf</span>
+                <button onclick="clearAttachment()" class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-red-500 hover:text-white transition-all ml-auto">
+                    <i class="fas fa-times text-[10px]"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+
+<script>
+    let activeRecipientId = null;
+    let connection = null;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const selectedId = '@ViewBag.SelectedPatientId';
+        if (selectedId) {
+            const btn = document.getElementById('contact-' + selectedId);
+            if (btn) btn.click();
+        }
+
+        // Initialize SignalR
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveMessage", (senderId, message, type, url, name, actualSenderId) => {
+             if (activeRecipientId && actualSenderId === activeRecipientId) {
+                 appendMessage({
+                     content: message,
+                     isMe: false,
+                     senderId: actualSenderId,
+                     messageType: type === 'Call' ? 'Call' : 'Text',
+                     timestamp: new Date().toISOString(),
+                     attachmentPath: url,
+                     attachmentType: type === 'image' || type === 'file' ? type : (url && type !== 'Call' ? (type.startsWith('image') ? 'image' : 'file') : null)
+                 });
+                 markAsRead();
+             } else if (actualSenderId !== '@UserManager.GetUserId(User)') {
+                 const badge = document.getElementById('unread-' + actualSenderId);
+                 if (badge) {
+                     badge.classList.remove('hidden');
+                     const countSpan = badge.querySelector('.unread-count');
+                     countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                     const contactBtn = document.getElementById('contact-' + actualSenderId);
+                     if (contactBtn) contactBtn.parentElement.prepend(contactBtn);
+                 }
+             }
+        });
+
+        connection.start().then(() => {
+            console.log("Admin SignalR Connected");
+            if (activeRecipientId) markAsRead();
+        }).catch(err => console.error(err));
+
+        // Typing Indicator
+        let typingTimeout = null;
+        const TYPING_TIMER_LENGTH = 2000;
+        const messageInput = document.getElementById('messageInput');
+        const typingBubble = document.getElementById('typingIndicator');
+         
+        messageInput.addEventListener('keydown', (e) => {
+            if (!activeRecipientId) return;
+            if (!typingTimeout) connection.invoke("UserTyping", activeRecipientId).catch(err => console.error(err));
+            if (typingTimeout) clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                connection.invoke("UserStoppedTyping", activeRecipientId).catch(err => console.error(err));
+                typingTimeout = null;
+            }, TYPING_TIMER_LENGTH);
+        });
+
+        connection.on("UserIsTyping", (senderId) => {
+            if (activeRecipientId && activeRecipientId.toLowerCase() === senderId.toLowerCase()) {
+                typingBubble.classList.remove('hidden');
+                typingBubble.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        connection.on("UserStoppedTyping", (senderId) => {
+            if (activeRecipientId && activeRecipientId.toLowerCase() === senderId.toLowerCase()) {
+                typingBubble.classList.add('hidden');
+            }
+        });
+
+        connection.on("MessagesRead", (readerId) => {
+            if (activeRecipientId && activeRecipientId.toLowerCase() === readerId.toLowerCase()) {
+                document.querySelectorAll('.message-tick').forEach(icon => {
+                    icon.className = "fas fa-check-double text-[10px] text-blue-500 message-tick";
+                });
+            }
+        });
+
+        // Filter contacts
+        document.getElementById('patientFilter').addEventListener('input', function(e) {
+            const filter = e.target.value.toLowerCase();
+            document.querySelectorAll('.contact-item').forEach(item => {
+                const name = item.querySelector('h4').textContent.toLowerCase();
+                const email = item.querySelector('p').textContent.toLowerCase();
+                if (name.includes(filter) || email.includes(filter)) item.style.display = 'flex';
+                else item.style.display = 'none';
+            });
+        });
+    });
+
+    function loadConversation(userId, userName) {
+        activeRecipientId = userId;
+        const hub = document.getElementById('communicationHub');
+        hub.classList.remove('translate-x-full');
+        hub.classList.add('translate-x-0');
+
+        document.querySelectorAll('.contact-item').forEach(item => item.classList.remove('bg-blue-50'));
+        const activeLink = document.getElementById('contact-' + userId);
+        if (activeLink) activeLink.classList.add('bg-blue-50');
+        
+        document.getElementById('chatHeader').classList.remove('hidden');
+        document.getElementById('inputArea').classList.remove('hidden');
+        document.getElementById('activeUserName').textContent = userName;
+        document.getElementById('activeUserAvatar').textContent = userName.charAt(0).toUpperCase();
+        
+        const badge = document.getElementById('unread-' + userId);
+        if (badge) {
+            badge.classList.add('hidden');
+            badge.querySelector('.unread-count').textContent = '0';
+        }
+        
+        fetchMessages();
+        markAsRead();
+    }
+
+    function backToSignals() {
+        document.getElementById('communicationHub').classList.add('translate-x-full');
+        document.getElementById('communicationHub').classList.remove('translate-x-0');
+    }
+
+    async function fetchMessages() {
+        if (!activeRecipientId) return;
+        try {
+            const response = await fetch(`/Admin/Chat/GetMessages?otherUserId=${activeRecipientId}`);
+            const messages = await response.json();
+            renderMessages(messages);
+        } catch (error) { console.error('Error fetching messages:', error); }
+    }
+
+    function renderMessages(messages) {
+        const list = document.getElementById('messagesList');
+        const area = document.getElementById('messagesArea');
+        list.innerHTML = '';
+        if (messages.length === 0) {
+            list.innerHTML = `<div class="flex-grow flex items-center justify-center text-gray-400 flex-col opacity-50"><p>No messages yet. Start the conversation!</p></div>`;
+            return;
+        }
+
+        messages.forEach(msg => {
+            appendMessage(msg, true);
+        });
+        area.scrollTop = area.scrollHeight;
+    }
+
+    function appendMessage(msg, isInitial = false) {
+        const list = document.getElementById('messagesList');
+        const area = document.getElementById('messagesArea');
+        if (!isInitial) {
+            const empty = list.querySelector('.opacity-50');
+            if (empty) list.innerHTML = '';
+        }
+
+        const div = document.createElement('div');
+        const isMe = msg.isMe;
+        div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} group w-full animate-in slide-in-from-bottom-2`;
+        
+        let attachmentHtml = '';
+        if (msg.attachmentPath) {
+            if (msg.attachmentType === 'image') {
+                attachmentHtml = `<img src="${msg.attachmentPath}" class="rounded-2xl mb-3 max-w-full lg:max-w-md border border-slate-100 shadow-sm cursor-pointer" onclick="window.open('${msg.attachmentPath}')">`;
+            } else {
+                attachmentHtml = `<div class="flex items-center gap-3 p-3 bg-black/5 rounded-xl mb-3 border border-black/5">
+                                    <i class="fas fa-file-pdf"></i>
+                                    <a href="${msg.attachmentPath}" target="_blank" class="text-xs font-semibold uppercase tracking-tight truncate max-w-[150px]">Link Attachment</a>
+                                  </div>`;
+            }
+        }
+
+        const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        let tickIcon = isMe ? `<i class="fas ${msg.isRead ? 'fa-check-double text-blue-500' : 'fa-check text-slate-300'} text-[10px] message-tick"></i>` : '';
+
+        div.innerHTML = `
+            <div class="flex flex-col max-w-[80%] ${isMe ? 'items-end' : 'items-start'}">
+                ${attachmentHtml}
+                <div class="px-5 py-3 rounded-[1.5rem] text-sm font-bold shadow-sm ${isMe ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-slate-50 text-slate-800 rounded-tl-none'}">
+                    ${msg.content}
+                </div>
+                <div class="flex items-center gap-1 mt-1">
+                     <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">${time}</span>
+                     ${tickIcon}
+                </div>
+            </div>
+        `;
+        list.appendChild(div);
+        if (!isInitial) area.scrollTop = area.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const fileInput = document.getElementById('fileInput');
+        const imageInput = document.getElementById('imageInput');
+        
+        const content = input.value.trim();
+        const file = fileInput.files[0] || imageInput.files[0];
+        
+        if (!content && !file) return;
+
+        const formData = new FormData();
+        formData.append('receiverId', activeRecipientId);
+        formData.append('content', content);
+        if (file) formData.append('attachment', file);
+
+        input.value = '';
+        clearAttachment();
+        
+        try {
+            const res = await fetch('/Admin/Chat/SendMessage', { method: 'POST', body: formData });
+            if (res.ok) {
+                appendMessage({
+                    content: content,
+                    isMe: true,
+                    timestamp: new Date(),
+                    attachmentPath: file ? URL.createObjectURL(file) : null,
+                    attachmentType: file ? (file.type.startsWith('image/') ? 'image' : 'file') : null,
+                    isRead: false
+                });
+            }
+        } catch (error) { console.error('Error sending message:', error); }
+    }
+
+    function handleFileSelect() {
+        const file = document.getElementById('fileInput').files[0];
+        if (file) { document.getElementById('imageInput').value = ''; showPreview(file.name); }
+    }
+    function handleImageSelect() {
+        const file = document.getElementById('imageInput').files[0];
+        if (file) { document.getElementById('fileInput').value = ''; showPreview(file.name); }
+    }
+    function showPreview(name) {
+        document.getElementById('attachmentPreview').classList.remove('hidden');
+        document.getElementById('fileName').textContent = name;
+    }
+    function clearAttachment() {
+        document.getElementById('fileInput').value = '';
+        document.getElementById('imageInput').value = '';
+        document.getElementById('attachmentPreview').classList.add('hidden');
+    }
+    function markAsRead() {
+        if (activeRecipientId && connection && connection.state === signalR.HubConnectionState.Connected) {
+             connection.invoke("MarkMessagesAsRead", activeRecipientId).catch(err => console.error(err));
+        }
+    }
+</script>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+    .chat-container { height: calc(100vh - 120px) !important; }
+</style>

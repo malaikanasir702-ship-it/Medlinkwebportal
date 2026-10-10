@@ -1,0 +1,180 @@
+@model List<MedLinkPortal.Models.LabBooking>
+@{
+    Layout = "_LabLayout";
+    ViewData["Title"] = "Fulfillment Manager";
+}
+
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Booking Database</h1>
+            <p class="text-slate-500 font-bold text-sm">Review historical and upcoming lab appointments</p>
+        </div>
+        <div class="flex gap-3">
+             <button class="px-5 py-3 bg-white border border-slate-100 rounded-2xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
+                <i data-lucide="filter" class="w-4 h-4"></i>
+                Advanced Filters
+             </button>
+             <button class="px-5 py-3 bg-indigo-600 text-white rounded-2xl text-xs font-semibold shadow-lg shadow-indigo-500/20 hover:scale-105 transition-transform flex items-center gap-2">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Export CSV
+             </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50/50 border-b border-slate-100">
+                        <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Appointment ID</th>
+                        <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Patient Details</th>
+                        <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Included Tests</th>
+                        <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Status</th>
+                        <th class="px-8 py-5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-right">Revenue</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    @foreach (var booking in Model)
+                    {
+                        <tr class="hover:bg-slate-50/10 transition-all">
+                            <td class="px-8 py-6 font-semibold text-indigo-600 text-xs">#LB-@booking.Id.ToString("D5")</td>
+                            <td class="px-8 py-6">
+                                <p class="text-sm font-semibold text-slate-900">@booking.PatientName</p>
+                                <p class="text-[10px] font-bold text-slate-400">@booking.PhoneNumber</p>
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="flex flex-wrap gap-1.5 max-w-xs">
+                                    @foreach(var item in booking.BookingItems)
+                                    {
+                                        <span class="px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-600">@item.MedicalTest.Name</span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <span class="px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-widest
+                                    @(booking.Status == MedLinkPortal.Models.LabBookingStatus.Ready ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-indigo-50 text-indigo-600 border border-indigo-100")">
+                                    @booking.Status
+                                </span>
+                                @if (booking.IsHomeCollection && booking.Status == MedLinkPortal.Models.LabBookingStatus.Booked)
+                                {
+                                    <button onclick="openAssignCollector(@booking.Id)"
+                                            class="mt-2 block px-3 py-1.5 bg-blue-600 text-white text-[9px] font-black rounded-lg hover:bg-blue-700 transition-all">
+                                        🏍 Assign Collector
+                                    </button>
+                                }
+                            </td>
+                            <td class="px-8 py-6 text-right font-semibold text-slate-900">
+                                Rs. @booking.BookingItems.Sum(bi => bi.MedicalTest.Price).ToString("N0")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Collector Rider Modal (Task 6.6) -->
+<div id="assignCollectorModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md mx-4">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-black text-slate-900">🏍️ Assign Collector Rider</h3>
+            <button onclick="closeAssignCollector()" class="text-slate-400 hover:text-slate-700 text-xl font-bold">✕</button>
+        </div>
+
+        <p class="text-sm text-slate-500 mb-4">Select a collector for Booking <strong id="collectorModalBookingId"></strong></p>
+
+        <div id="collectorRidersList" class="space-y-2 mb-6 max-h-60 overflow-y-auto">
+            <p class="text-sm text-slate-400 text-center py-4">Loading riders...</p>
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="closeAssignCollector()"
+                    class="flex-1 py-3 bg-slate-100 text-slate-700 font-bold text-sm rounded-xl hover:bg-slate-200 transition-all">
+                Cancel
+            </button>
+            <button id="confirmCollectorBtn" onclick="confirmAssignCollector()" disabled
+                    class="flex-1 py-3 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+                Assign Collector
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let _currentBookingId = null;
+let _selectedCollectorId = null;
+
+async function openAssignCollector(bookingId) {
+    _currentBookingId = bookingId;
+    _selectedCollectorId = null;
+    document.getElementById('collectorModalBookingId').textContent = `#LB-${String(bookingId).padStart(5,'0')}`;
+    document.getElementById('confirmCollectorBtn').disabled = true;
+    document.getElementById('assignCollectorModal').classList.remove('hidden');
+
+    const res = await fetch('/Lab/Dashboard/AvailableRiders');
+    const riders = await res.json();
+    const container = document.getElementById('collectorRidersList');
+
+    if (!riders.length) {
+        container.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">No available collectors right now.</p>';
+        return;
+    }
+
+    container.innerHTML = riders.map(r => `
+        <div onclick="selectCollector(${r.id}, this)"
+             class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 cursor-pointer hover:border-indigo-300 hover:bg-indigo-50 transition-all"
+             data-rider-id="${r.id}">
+            <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-sm">
+                ${r.name.charAt(0).toUpperCase()}
+            </div>
+            <div class="flex-1">
+                <p class="font-bold text-slate-900 text-sm">${r.name}</p>
+                <p class="text-xs text-slate-400">${r.vehicleType} · ${r.vehicleNumber || '—'}</p>
+            </div>
+            <span class="text-xs font-bold text-emerald-600">Available</span>
+        </div>
+    `).join('');
+}
+
+function selectCollector(riderId, el) {
+    document.querySelectorAll('#collectorRidersList [data-rider-id]').forEach(d => {
+        d.classList.remove('border-indigo-500', 'bg-indigo-50');
+        d.classList.add('border-slate-100');
+    });
+    el.classList.add('border-indigo-500', 'bg-indigo-50');
+    el.classList.remove('border-slate-100');
+    _selectedCollectorId = riderId;
+    document.getElementById('confirmCollectorBtn').disabled = false;
+}
+
+async function confirmAssignCollector() {
+    if (!_selectedCollectorId || !_currentBookingId) return;
+    const btn = document.getElementById('confirmCollectorBtn');
+    btn.textContent = 'Assigning...'; btn.disabled = true;
+
+    const res = await fetch('/Lab/Dashboard/AssignCollectorRider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: _currentBookingId, orderType: 'LabBooking', riderId: _selectedCollectorId })
+    });
+    const data = await res.json();
+    if (data.success) {
+        closeAssignCollector();
+        window.location.reload();
+    } else {
+        alert('Error: ' + (data.message || 'Failed to assign collector'));
+        btn.textContent = 'Assign Collector'; btn.disabled = false;
+    }
+}
+
+function closeAssignCollector() {
+    document.getElementById('assignCollectorModal').classList.add('hidden');
+    _currentBookingId = null; _selectedCollectorId = null;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) lucide.createIcons();
+});
+</script>

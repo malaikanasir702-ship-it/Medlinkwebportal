@@ -1,0 +1,129 @@
+﻿@{
+    ViewData["Title"] = "Live Map Dashboard";
+    Layout = "_Layout";
+}
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="h-screen flex flex-col">
+    <!-- Header bar -->
+    <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-4">
+            <h1 class="text-lg font-black">🗺️ Live Rider Map</h1>
+            <span class="text-xs text-slate-400">Real-time rider positions via SignalR</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="connectionStatus" class="text-xs font-bold text-rose-400">⚫ Disconnected</span>
+            <span id="riderCount" class="text-xs font-bold text-slate-400">0 active riders</span>
+            <a href="/Admin/Rider/TrackingDashboard"
+               class="px-3 py-1.5 bg-slate-700 text-white text-xs font-bold rounded-lg hover:bg-slate-600 transition-all">
+                📊 Table View
+            </a>
+        </div>
+    </div>
+
+    <!-- Map container -->
+    <div id="map" class="flex-1"></div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- SignalR client -->
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+
+<script>
+    // ── Leaflet map setup ────────────────────────────────────────────────
+    const map = L.map('map').setView([30.3753, 69.3451], 6); // Pakistan center
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+        maxZoom: 18
+    }).addTo(map);
+
+    const riderMarkers = {};     // riderId → Leaflet marker
+    let riderCount = 0;
+
+    function getOrCreateMarker(riderId, lat, lng, riderName) {
+        if (riderMarkers[riderId]) {
+            riderMarkers[riderId].marker.setLatLng([lat, lng]);
+            return riderMarkers[riderId];
+        }
+
+        // Color cycle for different riders
+        const colors = ['#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#0891b2'];
+        const color  = colors[Object.keys(riderMarkers).length % colors.length];
+
+        const icon = L.divIcon({
+            className: '',
+            html: `<div style="
+                width:36px; height:36px; border-radius:50%;
+                background:${color}; border:3px solid white;
+                box-shadow:0 2px 8px rgba(0,0,0,.3);
+                display:flex; align-items:center; justify-content:center;
+                font-size:16px; color:white; font-weight:900;
+            ">🏍</div>`,
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
+        });
+
+        const marker = L.marker([lat, lng], { icon })
+            .addTo(map)
+            .bindTooltip(riderName || `Rider ${riderId}`, { permanent: false, direction: 'top' });
+
+        riderMarkers[riderId] = { marker, name: riderName };
+        riderCount++;
+        document.getElementById('riderCount').textContent = `${riderCount} active rider${riderCount !== 1 ? 's' : ''}`;
+        return riderMarkers[riderId];
+    }
+
+    // ── SignalR connection ────────────────────────────────────────────────
+    const jwtToken = '@Html.Raw(ViewBag.JwtToken ?? "")';   // injected from controller if needed
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl('/trackingHub', {
+            accessTokenFactory: () => jwtToken || null
+        })
+        .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+        .configureLogging(signalR.LogLevel.Warning)
+        .build();
+
+    connection.on('ReceiveRiderLocation', (dto) => {
+        if (!dto.riderId) return;
+        getOrCreateMarker(dto.riderId, dto.latitude, dto.longitude, `Rider ${dto.riderId}`);
+    });
+
+    connection.on('SpoofAlert', (data) => {
+        console.warn('[GPS Spoof]', data);
+    });
+
+    connection.onreconnecting(() => {
+        document.getElementById('connectionStatus').textContent = '🟡 Reconnecting...';
+        document.getElementById('connectionStatus').className = 'text-xs font-bold text-amber-400';
+    });
+
+    connection.onreconnected(() => {
+        document.getElementById('connectionStatus').textContent = '🟢 Connected';
+        document.getElementById('connectionStatus').className = 'text-xs font-bold text-emerald-400';
+        connection.invoke('JoinAdminLiveMap').catch(console.error);
+    });
+
+    connection.onclose(() => {
+        document.getElementById('connectionStatus').textContent = '⚫ Disconnected';
+        document.getElementById('connectionStatus').className = 'text-xs font-bold text-rose-400';
+    });
+
+    async function startConnection() {
+        try {
+            await connection.start();
+            document.getElementById('connectionStatus').textContent = '🟢 Connected';
+            document.getElementById('connectionStatus').className = 'text-xs font-bold text-emerald-400';
+            await connection.invoke('JoinAdminLiveMap');
+        } catch (err) {
+            console.error('SignalR connection error:', err);
+            setTimeout(startConnection, 5000);
+        }
+    }
+
+    startConnection();
+</script>

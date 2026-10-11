@@ -73,12 +73,20 @@
                     bool canJoin = isToday && !isFinished && consult.Type != "Physical";
 
                     string clickHandler = "";
-                    if (isFinished || isPast) clickHandler = $"showRestrictedModal('completed', '{consult.Doctor}')";
-                    else if (isFuture) clickHandler = $"showRestrictedModal('upcoming', '{consult.Doctor}', '{consult.RawDate?.ToString("MMM dd")}')";
-                    else if (consult.Type == "Physical") clickHandler = $"showRestrictedModal('physical', '{consult.Doctor}')";
-                    else clickHandler = $"window.location.href='{Url.Action("ConsultationRoom", "Dashboard", new { id = consult.Id })}'";
+                    string apptIsoOv = consult.RawDate.HasValue ? consult.RawDate.Value.ToString("yyyy-MM-dd") : "";
+                    string joinUrlOv = Url.Action("ConsultationRoom", "Dashboard", new { id = consult.Id }) ?? "#";
+                    if (isFinished || isPast) clickHandler = $"showRestrictedModal('completed', '{consult.Doctor.Replace("'", "\\'")}')";
+                    else if (isFuture) clickHandler = $"showRestrictedModal('upcoming', '{consult.Doctor.Replace("'", "\\'")}', '{consult.RawDate?.ToString("MMM dd")}')";
+                    else if (consult.Type == "Physical") clickHandler = $"showRestrictedModal('physical', '{consult.Doctor.Replace("'", "\\'")}')";
+                    else clickHandler = $"handleOverviewJoinClick(this)";
 
-                    <div onclick="@clickHandler" class="page-content hidden cursor-pointer group p-3 md:p-4 rounded-xl md:rounded-2xl border border-gray-50 bg-gray-50/50 hover:bg-white hover:border-blue-100 hover:shadow-xl hover:shadow-blue-900/5 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div onclick="@clickHandler"
+                         data-appt-date="@apptIsoOv"
+                         data-appt-time="@consult.Time"
+                         data-slot-duration="@consult.SlotDuration"
+                         data-join-url="@joinUrlOv"
+                         data-doctor="@consult.Doctor.Replace("'", "\\'")"
+                         class="page-content hidden cursor-pointer group p-3 md:p-4 rounded-xl md:rounded-2xl border border-gray-50 bg-gray-50/50 hover:bg-white hover:border-blue-100 hover:shadow-xl hover:shadow-blue-900/5 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div class="flex items-center gap-3 md:gap-4">
                             <img src="@consult.Image" class="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl object-cover shadow-sm" alt="@consult.Doctor">
                             <div>
@@ -96,8 +104,8 @@
                             </div>
                             @if (canJoin)
                             {
-                                <div class="p-2 md:p-2.5 bg-blue-600 text-white rounded-lg shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all group-hover:scale-105">
-                                    <i data-lucide="video" class="w-3 h-3"></i>
+                                <div class="overview-join-icon p-2 md:p-2.5 bg-gray-200 text-gray-400 rounded-lg transition-all">
+                                    <i data-lucide="lock" class="w-3 h-3"></i>
                                 </div>
                             }
                             else
@@ -600,7 +608,7 @@
         }
     }
 
-    function showRestrictedModal(type, doctor, date = '') {
+    function showRestrictedModal(type, doctor, date = '', minutesLeft = 0) {
         const modal = document.getElementById('restrictedModal');
         const icon = document.getElementById('restrictedIcon');
         const container = document.getElementById('restrictedIconContainer');
@@ -628,10 +636,58 @@
             icon.setAttribute('data-lucide', 'building-2');
             container.classList.add('bg-blue-50', 'text-blue-600');
             physicalAction.classList.remove('hidden');
+        } else if (type === 'tooearly') {
+            const mins = Math.ceil(minutesLeft);
+            title.innerText = 'Room Not Open Yet';
+            message.innerText = `Dr. ${doctor}'s consultation room opens 2 minutes before the scheduled time. ${mins > 0 ? 'Opens in ' + mins + ' minute' + (mins !== 1 ? 's' : '') + '.' : 'Opening shortly.'}`;
+            icon.setAttribute('data-lucide', 'timer');
+            container.classList.add('bg-blue-50', 'text-blue-600');
         }
 
         modal.classList.remove('hidden');
         lucide.createIcons();
+    }
+
+    function parseOverviewApptDateTime(dateStr, timeStr) {
+        if (!dateStr || !timeStr) return null;
+        let t = timeStr.trim();
+        const amPmMatch = t.match(/([AP]M)$/i);
+        t = t.replace(/\s*[AP]M$/i, '').trim();
+        const parts = t.split(':');
+        let hours = parseInt(parts[0], 10) || 0;
+        let minutes = parseInt(parts[1] || '0', 10);
+        if (amPmMatch) {
+            const isPM = amPmMatch[1].toUpperCase() === 'PM';
+            if (isPM && hours < 12) hours += 12;
+            if (!isPM && hours === 12) hours = 0;
+        }
+        const d = new Date(dateStr + 'T00:00:00');
+        d.setHours(hours, minutes, 0, 0);
+        return d;
+    }
+
+    function handleOverviewJoinClick(el) {
+        const dateStr = el.getAttribute('data-appt-date');
+        const timeStr = el.getAttribute('data-appt-time');
+        const slotDuration = parseInt(el.getAttribute('data-slot-duration') || '20', 10);
+        const joinUrl = el.getAttribute('data-join-url');
+        const doctor = el.getAttribute('data-doctor') || 'the Doctor';
+        const apptTime = parseOverviewApptDateTime(dateStr, timeStr);
+        if (!apptTime) { window.location.href = joinUrl; return; }
+
+        const now = new Date();
+        const diffMin = (apptTime - now) / 60000; // positive = future, negative = past
+
+        if (diffMin > 2) {
+            // Too early
+            showRestrictedModal('tooearly', doctor, '', diffMin - 2);
+        } else if (diffMin < -slotDuration) {
+            // Slot ended
+            showRestrictedModal('completed', doctor);
+        } else {
+            // Window open: join
+            window.location.href = joinUrl;
+        }
     }
 
     function closeRestrictedModal() {
@@ -642,4 +698,33 @@
             modal.classList.remove('opacity-0', 'scale-95');
         }, 300);
     }
+
+    function updateOverviewJoinIcons() {
+        document.querySelectorAll('[data-join-url][data-appt-date]').forEach(el => {
+            const iconDiv = el.querySelector('.overview-join-icon');
+            if (!iconDiv) return;
+            const dateStr = el.getAttribute('data-appt-date');
+            const timeStr = el.getAttribute('data-appt-time');
+            const slotDuration = parseInt(el.getAttribute('data-slot-duration') || '20', 10);
+            if (!dateStr || !timeStr) return;
+            const apptTime = parseOverviewApptDateTime(dateStr, timeStr);
+            if (!apptTime) return;
+            const diffMin = (apptTime - new Date()) / 60000;
+            const canJoinNow = diffMin <= 2 && diffMin > -slotDuration;
+            const icon = iconDiv.querySelector('i');
+            if (canJoinNow) {
+                iconDiv.className = 'overview-join-icon p-2 md:p-2.5 bg-blue-600 text-white rounded-lg shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all group-hover:scale-105';
+                if (icon) icon.setAttribute('data-lucide', 'video');
+            } else {
+                iconDiv.className = 'overview-join-icon p-2 md:p-2.5 bg-gray-200 text-gray-400 rounded-lg transition-all';
+                if (icon) icon.setAttribute('data-lucide', 'lock');
+            }
+        });
+        if (window.lucide) lucide.createIcons();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateOverviewJoinIcons();
+        setInterval(updateOverviewJoinIcons, 30000);
+    });
 </script>

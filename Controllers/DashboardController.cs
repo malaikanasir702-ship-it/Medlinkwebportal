@@ -2147,6 +2147,9 @@ namespace MedLinkPortal.Controllers
             ViewBag.CurrentUserId        = userId;
             ViewBag.IsPrescriptionLocked = false;
             ViewBag.PrescriptionData     = null;
+            ViewBag.SlotDurationMinutes  = appt.Doctor?.SlotDuration ?? 20;
+            ViewBag.AppointmentDateUtc   = appt.AppointmentDate.ToString("o"); // ISO 8601
+            ViewBag.AppointmentTimeSlot  = appt.TimeSlot ?? "";
             var mr = await GetBaseModelAsync(); mr.ActiveTab = "appointments";
             return View(mr);
         }

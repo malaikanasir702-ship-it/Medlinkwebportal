@@ -90,23 +90,57 @@
                                     </div>
                                 </div>
                                 @{
-                                    var today = DateTime.Today;
-                                    bool isToday = consult.RawDate.HasValue && consult.RawDate.Value.Date == today;
-                                    bool isPast = consult.RawDate.HasValue && consult.RawDate.Value.Date < today;
-                                    bool isFuture = consult.RawDate.HasValue && consult.RawDate.Value.Date > today;
+                                    var today2 = DateTime.Today;
+                                    bool isToday = consult.RawDate.HasValue && consult.RawDate.Value.Date == today2;
+                                    bool isPast = consult.RawDate.HasValue && consult.RawDate.Value.Date < today2;
+                                    bool isFuture = consult.RawDate.HasValue && consult.RawDate.Value.Date > today2;
                                     bool isFinished = consult.Status == "Completed" || consult.Status == "Cancelled";
-                                    bool canJoin = isToday && !isFinished && consult.Type != "Physical";
-
-                                    string clickHandler = "";
-                                    if (isFinished || isPast) clickHandler = $"showRestrictedModal('completed', '{consult.Doctor}')";
-                                    else if (isFuture) clickHandler = $"showRestrictedModal('upcoming', '{consult.Doctor}', '{consult.RawDate?.ToString("MMM dd")}')";
-                                    else if (consult.Type == "Physical") clickHandler = $"showRestrictedModal('physical', '{consult.Doctor}')";
-                                    else clickHandler = $"window.location.href='{Url.Action("ConsultationRoom", "Dashboard", new { id = consult.Id })}'";
+                                    bool isPhysical = consult.Type == "Physical";
+                                    // Appointment datetime from RawDate + Time string
+                                    string apptIso = consult.RawDate.HasValue
+                                        ? consult.RawDate.Value.ToString("yyyy-MM-dd")
+                                        : "";
+                                    string joinUrl = Url.Action("ConsultationRoom", "Dashboard", new { id = consult.Id }) ?? "#";
+                                    string completedMsg = $"showRestrictedModal('completed','{consult.Doctor.Replace("'","\\'")}')";
+                                    string upcomingMsg  = $"showRestrictedModal('upcoming','{consult.Doctor.Replace("'","\\'")}','{consult.RawDate?.ToString("MMM dd")}')";
+                                    string physicalMsg  = $"showRestrictedModal('physical','{consult.Doctor.Replace("'","\\'")}')";
+                                    string tooEarlyMsg  = $"showRestrictedModal('tooearly','{consult.Doctor.Replace("'","\\'")}')";
                                 }
                                 <div class="flex items-center gap-2 relative" @@click.away="open = false">
-                                    <button onclick="@clickHandler" class="p-2.5 md:p-3 @(canJoin ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700" : "bg-gray-100 text-gray-400") rounded-xl transition-all">
-                                        <i data-lucide="@(canJoin ? "video" : "lock")" class="w-5 h-5"></i>
-                                    </button>
+                                    @if (isFinished || isPast)
+                                    {
+                                        <button onclick="@completedMsg"
+                                                class="p-2.5 md:p-3 bg-gray-100 text-gray-400 rounded-xl transition-all">
+                                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                                        </button>
+                                    }
+                                    else if (isFuture)
+                                    {
+                                        <button onclick="@upcomingMsg"
+                                                class="p-2.5 md:p-3 bg-gray-100 text-gray-400 rounded-xl transition-all">
+                                            <i data-lucide="lock" class="w-5 h-5"></i>
+                                        </button>
+                                    }
+                                    else if (isPhysical)
+                                    {
+                                        <button onclick="@physicalMsg"
+                                                class="p-2.5 md:p-3 bg-gray-100 text-gray-400 rounded-xl transition-all">
+                                            <i data-lucide="building-2" class="w-5 h-5"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <!-- Today, non-physical, non-finished: time-controlled join button -->
+                                        <button id="joinBtn-@consult.Id"
+                                                data-appt-date="@apptIso"
+                                                data-appt-time="@consult.Time"
+                                                data-join-url="@joinUrl"
+                                                data-too-early-fn="@tooEarlyMsg"
+                                                class="join-btn p-2.5 md:p-3 bg-gray-100 text-gray-400 rounded-xl transition-all"
+                                                onclick="handleJoinClick(this)">
+                                            <i data-lucide="lock" class="w-5 h-5"></i>
+                                        </button>
+                                    }
                                     <button @@click="open = !open" class="p-2.5 md:p-3 bg-gray-50 border border-gray-100 text-gray-400 rounded-xl hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm">
                                         <i data-lucide="more-vertical" class="w-4 h-4"></i>
                                     </button>
@@ -333,7 +367,7 @@
 </div>
 
 <script>
-    function showRestrictedModal(type, doctor, date = '') {
+    function showRestrictedModal(type, doctor, date = '', minutesLeft = 0) {
         const modal = document.getElementById('restrictedModal');
         const icon = document.getElementById('restrictedIcon');
         const container = document.getElementById('restrictedIconContainer');
@@ -358,6 +392,12 @@
             message.innerText = `This is a physical in-person consultation at Dr. ${doctor}'s clinic. No digital room is required for this protocol.`;
             icon.setAttribute('data-lucide', 'building-2');
             container.classList.add('bg-blue-50', 'text-blue-600');
+        } else if (type === 'tooearly') {
+            const mins = Math.ceil(minutesLeft);
+            title.innerText = 'Room Not Open Yet';
+            message.innerText = `Dr. ${doctor}'s consultation room opens 2 minutes before the scheduled time. ${mins > 0 ? 'Opens in ' + mins + ' minute' + (mins !== 1 ? 's' : '') + '.' : 'Opening shortly.'}`;
+            icon.setAttribute('data-lucide', 'timer');
+            container.classList.add('bg-blue-50', 'text-blue-600');
         }
 
         modal.classList.remove('hidden');
@@ -372,4 +412,79 @@
             modal.classList.remove('opacity-0', 'scale-95');
         }, 300);
     }
+
+    // ── Time-Based Join Button Logic ──────────────────────────────────────
+    function parseApptDateTime(dateStr, timeStr) {
+        if (!dateStr || !timeStr) return null;
+        let t = timeStr.trim();
+        const amPmMatch = t.match(/([AP]M)$/i);
+        t = t.replace(/\s*[AP]M$/i, '').trim();
+        const parts = t.split(':');
+        let hours = parseInt(parts[0], 10) || 0;
+        let minutes = parseInt(parts[1] || '0', 10);
+        if (amPmMatch) {
+            const isPM = amPmMatch[1].toUpperCase() === 'PM';
+            if (isPM && hours < 12) hours += 12;
+            if (!isPM && hours === 12) hours = 0;
+        }
+        const d = new Date(dateStr + 'T00:00:00');
+        d.setHours(hours, minutes, 0, 0);
+        return d;
+    }
+
+    function handleJoinClick(btn) {
+        const dateStr = btn.getAttribute('data-appt-date');
+        const timeStr = btn.getAttribute('data-appt-time');
+        const joinUrl = btn.getAttribute('data-join-url');
+        const apptTime = parseApptDateTime(dateStr, timeStr);
+        if (!apptTime) { window.location.href = joinUrl; return; }
+
+        const now = new Date();
+        const diffMin = (apptTime - now) / 60000; // positive = future
+
+        if (diffMin > 2) {
+            // Too early — extract doctor name from data attribute
+            const minsUntilOpen = diffMin - 2;
+            const tooEarlyFn = btn.getAttribute('data-too-early-fn') || '';
+            const match = tooEarlyFn.match(/showRestrictedModal\('tooearly','([^']+)'\)/);
+            const docName = match ? match[1] : 'the Doctor';
+            showRestrictedModal('tooearly', docName, '', minsUntilOpen);
+        } else if (diffMin < -120) {
+            // Session ended more than 2 hours ago
+            const tooEarlyFn = btn.getAttribute('data-too-early-fn') || '';
+            const match = tooEarlyFn.match(/showRestrictedModal\('tooearly','([^']+)'\)/);
+            const docName = match ? match[1] : 'the Doctor';
+            showRestrictedModal('completed', docName);
+        } else {
+            // Window: 2 min before to 2 hours after — allow join
+            window.location.href = joinUrl;
+        }
+    }
+
+    function updateJoinButtons() {
+        document.querySelectorAll('.join-btn').forEach(btn => {
+            const dateStr = btn.getAttribute('data-appt-date');
+            const timeStr = btn.getAttribute('data-appt-time');
+            if (!dateStr || !timeStr) return;
+            const apptTime = parseApptDateTime(dateStr, timeStr);
+            if (!apptTime) return;
+            const diffMin = (apptTime - new Date()) / 60000;
+            const canJoinNow = diffMin <= 2 && diffMin > -120;
+            const icon = btn.querySelector('i');
+            if (canJoinNow) {
+                btn.className = 'join-btn p-2.5 md:p-3 bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 rounded-xl transition-all';
+                if (icon) icon.setAttribute('data-lucide', 'video');
+            } else {
+                btn.className = 'join-btn p-2.5 md:p-3 bg-gray-100 text-gray-400 rounded-xl transition-all';
+                if (icon) icon.setAttribute('data-lucide', 'lock');
+            }
+        });
+        if (window.lucide) lucide.createIcons();
+    }
+
+    // Run on load + every 30 seconds to auto-unlock
+    document.addEventListener('DOMContentLoaded', () => {
+        updateJoinButtons();
+        setInterval(updateJoinButtons, 30000);
+    });
 </script>

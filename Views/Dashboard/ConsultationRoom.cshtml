@@ -7,6 +7,9 @@
     var doctorName = ViewBag.DoctorName;
     var doctorImage = ViewBag.DoctorImage;
     var patientName = ViewBag.PatientName;
+    var slotDurationMinutes = (int)(ViewBag.SlotDurationMinutes ?? 20);
+    var appointmentDateUtc = (string)(ViewBag.AppointmentDateUtc ?? "");
+    var appointmentTimeSlot = (string)(ViewBag.AppointmentTimeSlot ?? "");
 }
 
 <!-- Main Responsive Container -->
@@ -28,7 +31,8 @@
         </div>
         <div class="flex items-center gap-3 w-full md:w-auto">
             <div id="callTimer" class="flex-1 md:flex-none text-center bg-gray-50 px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 font-mono border border-gray-100">
-                00:00:00
+                <span id="timerCountdown" class="text-rose-500 font-bold">@slotDurationMinutes:00</span>
+                <span id="timerElapsed" class="hidden text-gray-700">00:00:00</span>
             </div>
             <button type="button" id="leaveCall" class="flex-1 md:flex-none justify-center px-5 py-2 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 transition-all border border-rose-100 flex items-center gap-2">
                 <i data-lucide="phone-off" class="w-4 h-4"></i> <span>Leave</span>
@@ -239,6 +243,38 @@
     <div class="h-4 md:hidden"></div>
 </div>
 
+<!-- Session Ended Modal -->
+<div id="sessionEndedModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-gray-900/70 backdrop-blur-md p-4">
+    <div class="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-br from-slate-900 to-slate-700 p-8 text-center">
+            <div id="sessionEndIcon" class="w-20 h-20 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
+                <i data-lucide="clock-alert" class="w-10 h-10 text-white"></i>
+            </div>
+            <h2 id="sessionEndTitle" class="text-2xl font-bold text-white">Consultation Ended</h2>
+            <p id="sessionEndSubtitle" class="text-slate-400 text-sm mt-1">Your scheduled session time has completed.</p>
+        </div>
+
+        <!-- Body -->
+        <div class="p-8 space-y-4">
+            <div class="bg-slate-50 rounded-2xl p-4 text-center">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Session with</p>
+                <p class="font-bold text-slate-900">@doctorName</p>
+                <p class="text-xs text-slate-500 mt-1">Duration: <span class="font-bold">@slotDurationMinutes minutes</span></p>
+            </div>
+
+            <button onclick="window.location.href='/Dashboard/Appointments'" 
+                    class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-black transition-all shadow-xl">
+                <i data-lucide="calendar" class="w-4 h-4 inline-block mr-2"></i> Back to Appointments
+            </button>
+            <button onclick="closeSessionEndedModal()" 
+                    class="w-full py-3 bg-white text-slate-600 font-bold text-sm rounded-2xl border border-slate-200 hover:bg-slate-50 transition-all">
+                Stay in Room
+            </button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -282,6 +318,9 @@
              console.log("Telemed Bootstrapping...");
              Telemed.init(roomContext);
              window.Telemed = Telemed; // Expose for inline handlers
+
+             // ── Countdown Timer ───────────────────────────────────────────
+             initConsultationTimer(@slotDurationMinutes);
         });
 
         // --- Prescription Actions ---
@@ -506,6 +545,102 @@
         async function showShareFeedback(msg, isError) {
              if (isError) await PremiumModal.error(msg, 'Validation Error');
              else await PremiumModal.alert(msg, 'Information');
+        }
+
+        // ── Consultation Countdown Timer ──────────────────────────────────
+        function initConsultationTimer(slotMinutes) {
+            const totalSeconds = slotMinutes * 60;
+            let elapsed = 0;
+            let timerInterval = null;
+            let sessionEnded = false;
+
+            const countdownEl = document.getElementById('timerCountdown');
+            const elapsedEl   = document.getElementById('timerElapsed');
+            const timerBox    = document.getElementById('callTimer');
+
+            function formatMM_SS(secs) {
+                const m = Math.floor(secs / 60);
+                const s = secs % 60;
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            }
+
+            function formatHH_MM_SS(secs) {
+                const h = Math.floor(secs / 3600);
+                const m = Math.floor((secs % 3600) / 60);
+                const s = secs % 60;
+                return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            }
+
+            // Update display every second
+            timerInterval = setInterval(() => {
+                elapsed++;
+                const remaining = totalSeconds - elapsed;
+
+                if (remaining > 0) {
+                    // Countdown mode
+                    if (countdownEl) countdownEl.textContent = formatMM_SS(remaining);
+                    // Turn orange at 1 minute
+                    if (remaining <= 60 && countdownEl) {
+                        countdownEl.className = 'text-orange-500 font-bold';
+                    }
+                    // Turn red at 30 seconds
+                    if (remaining <= 30 && countdownEl) {
+                        countdownEl.className = 'text-red-600 font-bold animate-pulse';
+                    }
+                } else if (!sessionEnded) {
+                    // Session time is up
+                    sessionEnded = true;
+
+                    // Switch to elapsed timer display
+                    if (countdownEl) countdownEl.classList.add('hidden');
+                    if (elapsedEl) elapsedEl.classList.remove('hidden');
+                    if (timerBox) timerBox.classList.add('bg-red-50', 'border-red-200');
+
+                    // Show session ended modal
+                    showSessionEndedModal();
+                } else {
+                    // Continue counting elapsed time after session ended
+                    const overElapsed = elapsed - totalSeconds;
+                    if (elapsedEl) elapsedEl.textContent = formatHH_MM_SS(overElapsed);
+                }
+            }, 1000);
+
+            // Wire up End Call buttons to also show modal
+            const endBtns = ['btnEndCall', 'leaveCall'];
+            endBtns.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        clearInterval(timerInterval);
+                        showSessionEndedModal(true); // manual end
+                    });
+                }
+            });
+        }
+
+        function showSessionEndedModal(isManual = false) {
+            const modal   = document.getElementById('sessionEndedModal');
+            const title   = document.getElementById('sessionEndTitle');
+            const subtitle= document.getElementById('sessionEndSubtitle');
+            const icon    = document.getElementById('sessionEndIcon').querySelector('i');
+
+            if (isManual) {
+                title.textContent   = 'Call Ended';
+                subtitle.textContent= 'You have ended the consultation.';
+                if (icon) icon.setAttribute('data-lucide', 'phone-off');
+            } else {
+                title.textContent   = 'Consultation Time Up';
+                subtitle.textContent= 'Your scheduled session time has completed.';
+                if (icon) icon.setAttribute('data-lucide', 'clock-alert');
+            }
+
+            if (modal) modal.classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function closeSessionEndedModal() {
+            const modal = document.getElementById('sessionEndedModal');
+            if (modal) modal.classList.add('hidden');
         }
     </script>
 }

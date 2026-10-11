@@ -685,7 +685,13 @@
             // Slot ended
             showRestrictedModal('completed', doctor);
         } else {
-            // Window open: join
+            // Window open: join waiting room then navigate
+            const apptIdMatch = joinUrl.match(/\/(\d+)$/);
+            if (apptIdMatch) {
+                const apptId = parseInt(apptIdMatch[1], 10);
+                const appt = overviewTodayAppointments.find(a => a.appointmentId === apptId);
+                if (appt) joinWaitingRoomOverview(appt.appointmentId, appt.patientId);
+            }
             window.location.href = joinUrl;
         }
     }
@@ -698,6 +704,32 @@
             modal.classList.remove('opacity-0', 'scale-95');
         }, 300);
     }
+
+    async function joinWaitingRoomOverview(appointmentId, patientId) {
+        const key = `wr_joined_${appointmentId}_${new Date().toDateString()}`;
+        if (sessionStorage.getItem(key)) return;
+        try {
+            const res = await fetch('/api/doctor/waiting-room/join', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ patientId, appointmentId })
+            });
+            if (res.ok) sessionStorage.setItem(key, '1');
+        } catch (e) { console.warn('WR join failed:', e); }
+    }
+
+    // Today's video appointments for auto-join
+    const overviewTodayAppointments = [
+        @foreach (var c in Model.UpcomingConsultations.Where(c =>
+            c.RawDate.HasValue &&
+            c.RawDate.Value.Date == DateTime.Today &&
+            c.Status != "Completed" && c.Status != "Cancelled" &&
+            c.Type != "Physical"))
+        {
+            <text>{ appointmentId: @c.Id, patientId: "@Model.PatientId" },</text>
+        }
+    ];
 
     function updateOverviewJoinIcons() {
         document.querySelectorAll('[data-join-url][data-appt-date]').forEach(el => {
@@ -726,5 +758,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         updateOverviewJoinIcons();
         setInterval(updateOverviewJoinIcons, 30000);
+        // Auto-join waiting room for today's appointments on page load
+        overviewTodayAppointments.forEach(a => joinWaitingRoomOverview(a.appointmentId, a.patientId));
     });
 </script>

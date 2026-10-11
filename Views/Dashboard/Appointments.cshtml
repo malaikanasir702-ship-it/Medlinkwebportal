@@ -433,7 +433,7 @@
         return d;
     }
 
-    function handleJoinClick(btn) {
+    async function handleJoinClick(btn) {
         const dateStr = btn.getAttribute('data-appt-date');
         const timeStr = btn.getAttribute('data-appt-time');
         const slotDuration = parseInt(btn.getAttribute('data-slot-duration') || '20', 10);
@@ -459,6 +459,15 @@
             showRestrictedModal('completed', docName);
         } else {
             // Window open: 2 min before start → slot end time
+            // Register in waiting room before entering consultation
+            const apptIdMatch = joinUrl.match(/\/(\d+)$/);
+            if (apptIdMatch) {
+                const apptId = parseInt(apptIdMatch[1], 10);
+                const todayAppt = todayAppointments.find(a => a.appointmentId === apptId);
+                if (todayAppt) {
+                    await joinWaitingRoom(todayAppt.appointmentId, todayAppt.patientId);
+                }
+            }
             window.location.href = joinUrl;
         }
     }
@@ -486,9 +495,51 @@
         if (window.lucide) lucide.createIcons();
     }
 
+    // ── Waiting Room Auto-Join ────────────────────────────────────────────
+    // Today's video appointments passed from server
+    const todayAppointments = [
+        @foreach (var c in Model.UpcomingConsultations.Where(c =>
+            c.RawDate.HasValue &&
+            c.RawDate.Value.Date == DateTime.Today &&
+            c.Status != "Completed" && c.Status != "Cancelled" &&
+            c.Type != "Physical"))
+        {
+            <text>{ appointmentId: @c.Id, patientId: "@Model.PatientId" },</text>
+        }
+    ];
+
+    async function joinWaitingRoom(appointmentId, patientId) {
+        // Track per appointment per day to avoid repeated calls
+        const key = `wr_joined_${appointmentId}_${new Date().toDateString()}`;
+        if (sessionStorage.getItem(key)) return; // already joined this session
+
+        try {
+            const res = await fetch('/api/doctor/waiting-room/join', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ patientId, appointmentId })
+            });
+            if (res.ok) {
+                sessionStorage.setItem(key, '1');
+                console.log(`Joined waiting room for appointment ${appointmentId}`);
+            }
+        } catch (e) {
+            console.warn('Waiting room join failed:', e);
+        }
+    }
+
+    function autoJoinWaitingRooms() {
+        todayAppointments.forEach(a => {
+            joinWaitingRoom(a.appointmentId, a.patientId);
+        });
+    }
+
     // Run on load + every 30 seconds to auto-unlock
     document.addEventListener('DOMContentLoaded', () => {
         updateJoinButtons();
         setInterval(updateJoinButtons, 30000);
+        // Auto-join waiting room for all today's appointments
+        autoJoinWaitingRooms();
     });
 </script>

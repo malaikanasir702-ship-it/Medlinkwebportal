@@ -1250,7 +1250,8 @@ namespace MedLinkPortal.Controllers
                     Type = a.ConsultationType ?? "Video Call",
                     Image = a.Doctor?.Image ?? "https://picsum.photos/seed/doc/100/100",
                     RawDate = a.AppointmentDate,
-                    Status = a.Status
+                    Status = a.Status,
+                    SlotDuration = a.Doctor?.SlotDuration ?? 20
                 }).ToList(),
                 HealthRecords = recordsTask.Result,
                 Medications = medicationsTask.Result,

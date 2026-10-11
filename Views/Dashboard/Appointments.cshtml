@@ -134,6 +134,7 @@
                                         <button id="joinBtn-@consult.Id"
                                                 data-appt-date="@apptIso"
                                                 data-appt-time="@consult.Time"
+                                                data-slot-duration="@consult.SlotDuration"
                                                 data-join-url="@joinUrl"
                                                 data-too-early-fn="@tooEarlyMsg"
                                                 class="join-btn p-2.5 md:p-3 bg-gray-100 text-gray-400 rounded-xl transition-all"
@@ -435,28 +436,29 @@
     function handleJoinClick(btn) {
         const dateStr = btn.getAttribute('data-appt-date');
         const timeStr = btn.getAttribute('data-appt-time');
+        const slotDuration = parseInt(btn.getAttribute('data-slot-duration') || '20', 10);
         const joinUrl = btn.getAttribute('data-join-url');
         const apptTime = parseApptDateTime(dateStr, timeStr);
         if (!apptTime) { window.location.href = joinUrl; return; }
 
         const now = new Date();
-        const diffMin = (apptTime - now) / 60000; // positive = future
+        const diffMin = (apptTime - now) / 60000; // positive = future, negative = past
 
         if (diffMin > 2) {
-            // Too early — extract doctor name from data attribute
+            // Too early — more than 2 min before start
             const minsUntilOpen = diffMin - 2;
             const tooEarlyFn = btn.getAttribute('data-too-early-fn') || '';
             const match = tooEarlyFn.match(/showRestrictedModal\('tooearly','([^']+)'\)/);
             const docName = match ? match[1] : 'the Doctor';
             showRestrictedModal('tooearly', docName, '', minsUntilOpen);
-        } else if (diffMin < -120) {
-            // Session ended more than 2 hours ago
+        } else if (diffMin < -slotDuration) {
+            // Slot has ended (now is past appointmentStart + slotDuration)
             const tooEarlyFn = btn.getAttribute('data-too-early-fn') || '';
             const match = tooEarlyFn.match(/showRestrictedModal\('tooearly','([^']+)'\)/);
             const docName = match ? match[1] : 'the Doctor';
             showRestrictedModal('completed', docName);
         } else {
-            // Window: 2 min before to 2 hours after — allow join
+            // Window open: 2 min before start → slot end time
             window.location.href = joinUrl;
         }
     }
@@ -465,11 +467,13 @@
         document.querySelectorAll('.join-btn').forEach(btn => {
             const dateStr = btn.getAttribute('data-appt-date');
             const timeStr = btn.getAttribute('data-appt-time');
+            const slotDuration = parseInt(btn.getAttribute('data-slot-duration') || '20', 10);
             if (!dateStr || !timeStr) return;
             const apptTime = parseApptDateTime(dateStr, timeStr);
             if (!apptTime) return;
             const diffMin = (apptTime - new Date()) / 60000;
-            const canJoinNow = diffMin <= 2 && diffMin > -120;
+            // Window: starts 2 min before appointment, ends exactly at (start + slotDuration)
+            const canJoinNow = diffMin <= 2 && diffMin > -slotDuration;
             const icon = btn.querySelector('i');
             if (canJoinNow) {
                 btn.className = 'join-btn p-2.5 md:p-3 bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 rounded-xl transition-all';

@@ -206,5 +206,6 @@ namespace MedLinkPortal.Models
         public string Image { get; set; }
         public DateTime? RawDate { get; set; }
         public string Status { get; set; }
+        public int SlotDuration { get; set; } = 20; // minutes, from Doctor.SlotDuration
     }
 }

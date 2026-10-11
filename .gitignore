@@ -38,3 +38,6 @@ firebase-service-account.json
 
 # Environment / local settings if any
 *.user
+# Secret files
+firebase-service-account.json
+appsettings.json

@@ -19,6 +19,19 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ── Sentry Error Monitoring ───────────────────────────────────────────────
+builder.WebHost.UseSentry(options =>
+{
+    options.Dsn = Environment.GetEnvironmentVariable("SENTRY_DSN")
+               ?? builder.Configuration["Sentry:Dsn"]
+               ?? "";
+    options.Debug = false;
+    options.TracesSampleRate = 0.1;
+    options.SendDefaultPii = false;
+    options.Environment = builder.Environment.EnvironmentName;
+    options.AttachStacktrace = true;
+});
+
 // QuestPDF License Configuration
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 

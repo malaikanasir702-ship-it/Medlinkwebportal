@@ -114,6 +114,7 @@ namespace MedLinkPortal.Controllers
         }
 
         [HttpPost]
+        [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("ai")]
         public async Task<IActionResult> SendAiDoctorMessage([FromBody] AiDoctorChatRequest request)
         {
             var userId = _userManager.GetUserId(User);

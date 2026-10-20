@@ -759,6 +759,7 @@ namespace MedLinkPortal.Controllers
         // ─── AI Prescription Scan (Groq qwen/qwen3.8-27b) ───────────────────────
 
         [HttpPost]
+        [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("ai")]
         public async Task<IActionResult> ScanPrescription(IFormFile prescriptionImage)
         {
             if (prescriptionImage == null || prescriptionImage.Length == 0)

@@ -24,7 +24,7 @@ builder.WebHost.UseSentry(options =>
 {
     options.Dsn = Environment.GetEnvironmentVariable("SENTRY_DSN")
                ?? builder.Configuration["Sentry:Dsn"]
-               ?? "";
+               ?? "https://ce1e60ded68b947d662bd70fcadf9492@o4512288909230080.ingest.us.sentry.io/4512288924827648";
     options.Debug = false;
     options.TracesSampleRate = 0.1;
     options.SendDefaultPii = false;

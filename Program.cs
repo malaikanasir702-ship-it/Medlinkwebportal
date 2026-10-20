@@ -254,6 +254,9 @@ else if (System.IO.File.Exists(Path.Combine(builder.Environment.ContentRootPath,
 
 var app = builder.Build();
 
+// ── Sentry Verify: sends a test message on startup to confirm SDK is working
+SentrySdk.CaptureMessage("MedLink portal started — Sentry monitoring active");
+
 // Forwarded Headers (Required for Railway / reverse proxies so HTTPS scheme is detected properly)
 var forwardedHeadersOptions = new ForwardedHeadersOptions
 {

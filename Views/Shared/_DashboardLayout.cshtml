@@ -760,5 +760,38 @@
         }
     </script>
     @await Html.PartialAsync("_GlobalCallOverlay")
+
+    <!-- ── PDPA/GDPR Cookie Consent (Dashboard) ─── -->
+    <div id="cookieBannerDash" class="hidden fixed bottom-4 left-4 right-4 z-[999] md:left-auto md:right-6 md:max-w-sm">
+        <div class="bg-gray-900 text-white rounded-2xl shadow-2xl p-5 border border-white/10">
+            <div class="flex items-start gap-3 mb-4">
+                <span class="text-xl">🍪</span>
+                <div>
+                    <p class="text-sm font-semibold mb-1">Cookie Preferences</p>
+                    <p class="text-xs text-gray-400 leading-relaxed">We use essential cookies for your session and optional analytics. <a href="/Home/Privacy" class="text-blue-400 hover:underline">Privacy Policy</a></p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="acceptCookiesDash('essential')" class="flex-1 py-2 bg-white/10 text-white text-xs font-semibold rounded-xl hover:bg-white/20 transition-all border border-white/10">Essential Only</button>
+                <button onclick="acceptCookiesDash('all')" class="flex-1 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl hover:bg-blue-700 transition-all">Accept All</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            if (!localStorage.getItem('medlink_cookie_consent')) {
+                setTimeout(() => {
+                    const b = document.getElementById('cookieBannerDash');
+                    if (b) b.classList.remove('hidden');
+                }, 2000);
+            }
+        })();
+        function acceptCookiesDash(level) {
+            localStorage.setItem('medlink_cookie_consent', level);
+            localStorage.setItem('medlink_cookie_consent_date', new Date().toISOString());
+            const b = document.getElementById('cookieBannerDash');
+            if (b) { b.style.opacity='0'; b.style.transition='opacity 0.3s'; setTimeout(()=>b.classList.add('hidden'),300); }
+        }
+    </script>
 </body>
 </html>

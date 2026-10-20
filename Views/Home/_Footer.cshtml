@@ -64,13 +64,26 @@
 
         <div class="footer-bottom pt-6 md:pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
             <p class="text-gray-400 text-xs text-center md:text-left">
-                © 2026 MedLink Global Inc. All rights reserved. Designed for excellence.
+                © @DateTime.Now.Year MedLink Health Systems. All rights reserved.
             </p>
             <div class="footer-legal-links flex items-center gap-4 md:gap-6 text-xs text-gray-400">
-                <a href="#" class="hover:text-gray-900">Privacy Policy</a>
-                <a href="#" class="hover:text-gray-900">Terms of Service</a>
-                <a href="#" class="hover:text-gray-900">Cookie Settings</a>
+                <a href="/Home/Privacy" class="hover:text-gray-900">Privacy Policy</a>
+                <a href="/Home/Terms" class="hover:text-gray-900">Terms of Service</a>
+                <button onclick="resetCookieConsent()" class="hover:text-gray-900">Cookie Settings</button>
             </div>
         </div>
     </div>
 </footer>
+
+<script>
+function resetCookieConsent() {
+    localStorage.removeItem('medlink_cookie_consent');
+    localStorage.removeItem('medlink_cookie_consent_date');
+    const banner = document.getElementById('cookieBanner');
+    if (banner) {
+        banner.classList.remove('hidden');
+        banner.style.opacity = '1';
+        banner.style.transform = '';
+    }
+}
+</script>

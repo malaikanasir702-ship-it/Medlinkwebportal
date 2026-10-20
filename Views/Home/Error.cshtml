@@ -1,0 +1,41 @@
+@model MedLinkPortal.Models.ErrorViewModel
+@{
+    ViewData["Title"] = "Something went wrong — MedLink";
+    Layout = "_Layout";
+}
+
+<div class="min-h-[70vh] flex items-center justify-center px-4 py-16">
+    <div class="max-w-lg w-full text-center">
+        <!-- Icon -->
+        <div class="w-24 h-24 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-rose-100">
+            <svg class="w-12 h-12 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+            </svg>
+        </div>
+
+        <!-- Heading -->
+        <h1 class="text-3xl font-bold text-gray-900 mb-3">Something went wrong</h1>
+        <p class="text-gray-500 text-base mb-2">We encountered an unexpected error. Our team has been notified automatically.</p>
+        <p class="text-gray-400 text-sm mb-8">If this keeps happening, please contact us at <a href="mailto:support@@medlink.pk" class="text-blue-600 hover:underline">support&#64;medlink.pk</a></p>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="/" class="px-6 py-3 bg-gray-900 text-white font-semibold text-sm rounded-xl hover:bg-gray-800 transition-all">
+                ← Back to Home
+            </a>
+            <button onclick="window.history.back()" class="px-6 py-3 bg-white text-gray-700 font-semibold text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition-all">
+                Try Previous Page
+            </button>
+        </div>
+
+        <!-- Error ID (for support reference) -->
+        @if (Model?.ShowRequestId == true)
+        {
+            <div class="mt-8 p-4 bg-gray-50 rounded-xl border border-gray-100 text-left">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Error Reference</p>
+                <code class="text-xs text-gray-600 font-mono break-all">@Model.RequestId</code>
+                <p class="text-[10px] text-gray-400 mt-1">Include this ID when contacting support.</p>
+            </div>
+        }
+    </div>
+</div>

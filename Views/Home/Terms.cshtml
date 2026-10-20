@@ -1,0 +1,118 @@
+@{
+    ViewData["Title"] = "Terms of Service — MedLink";
+    Layout = "_Layout";
+}
+
+<div class="max-w-4xl mx-auto px-4 py-16">
+    <div class="mb-12 text-center">
+        <div class="inline-flex items-center gap-2 bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-widest mb-6">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Legal Agreement
+        </div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Terms of Service</h1>
+        <p class="text-gray-500 text-sm">Last updated: @DateTime.Now.ToString("MMMM dd, yyyy") &nbsp;|&nbsp; Effective: January 1, 2025</p>
+    </div>
+
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-10">
+        <p class="text-sm text-amber-800 leading-relaxed">
+            <strong>Important:</strong> MedLink provides a digital health platform to connect patients with licensed healthcare providers.
+            We are <strong>not a medical provider</strong> and do not provide medical advice. Services on this platform are provided by
+            independent licensed doctors and pharmacists. By using MedLink, you agree to these terms.
+        </p>
+    </div>
+
+    <div class="space-y-10 text-sm text-gray-600">
+
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">1. Eligibility</h2>
+            <ul class="space-y-2">
+                <li>• You must be at least 18 years old to create an account</li>
+                <li>• You must provide accurate and current registration information</li>
+                <li>• One person may not maintain multiple accounts</li>
+                <li>• Accounts for minors may be created by a parent or legal guardian</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">2. Medical Disclaimer</h2>
+            <div class="bg-rose-50 border border-rose-100 rounded-xl p-5 leading-relaxed">
+                <p>MedLink facilitates connections between patients and licensed healthcare professionals. Content on this platform is for informational purposes only and does not constitute medical advice, diagnosis, or treatment. In case of a medical emergency, call <strong>115 (Pakistan emergency services)</strong> immediately.</p>
+                <p class="mt-3">Doctors on MedLink are independently licensed professionals. MedLink is not liable for the medical decisions or advice of any doctor registered on the platform.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">3. Appointments & Payments</h2>
+            <ul class="space-y-2 leading-relaxed">
+                <li>• Appointment fees are displayed before booking confirmation</li>
+                <li>• Payments are processed securely by Stripe — MedLink does not store card details</li>
+                <li>• Cancellation policy: Free cancellation up to 2 hours before appointment. No refunds for no-shows</li>
+                <li>• Pharmacy orders are non-refundable once dispatched</li>
+                <li>• Stripe handles all payment disputes — contact support&#64;medlink.pk for assistance</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">4. User Conduct</h2>
+            <p class="mb-3">You agree not to:</p>
+            <ul class="space-y-2">
+                @foreach (var item in new[] {
+                    "Misrepresent your identity or impersonate a healthcare professional",
+                    "Submit false health information or fraudulent prescriptions",
+                    "Attempt to reverse-engineer, scrape, or exploit the platform",
+                    "Harass, abuse, or threaten doctors, pharmacists, or other users",
+                    "Use the platform for any illegal purpose under Pakistani law",
+                    "Share your account credentials with others"
+                })
+                {
+                    <li class="flex items-start gap-2">
+                        <span class="text-rose-500 font-bold shrink-0">✕</span>
+                        @item
+                    </li>
+                }
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">5. AI Features</h2>
+            <p class="leading-relaxed">MedLink's AI tools (symptom checker, prescription scan) are assistive tools only. They do not replace professional medical judgment. Results are informational — always consult a licensed doctor for diagnosis and treatment decisions. AI processing is done via Groq (for prescription scan) and does not permanently store your health images.</p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">6. Telemedicine Rules</h2>
+            <ul class="space-y-2">
+                <li>• Telemedicine consultations require stable internet. MedLink is not responsible for technical failures beyond our control</li>
+                <li>• Consultations are private and may not be recorded without explicit consent of all parties</li>
+                <li>• Doctors may decline to prescribe certain medications via telemedicine per Pakistani medical regulations</li>
+                <li>• Consultation room access is restricted to the appointment time window (2 min before to slot end)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">7. Intellectual Property</h2>
+            <p>All platform content, design, code, and branding are owned by MedLink Health Systems. Your health data belongs to you. You grant MedLink a limited license to process your data solely to provide our services.</p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">8. Limitation of Liability</h2>
+            <p class="leading-relaxed">To the maximum extent permitted by Pakistani law, MedLink shall not be liable for indirect, incidental, or consequential damages arising from platform use. Our total liability for any claim shall not exceed the fees paid by you in the 3 months preceding the claim.</p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">9. Governing Law</h2>
+            <p>These Terms are governed by the laws of the Islamic Republic of Pakistan. Disputes shall be resolved in the courts of Lahore, Pakistan, or through arbitration as mutually agreed.</p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">10. Changes to Terms</h2>
+            <p>We may update these Terms with 30 days' notice via email or in-app notification. Continued use after the effective date constitutes acceptance of the updated Terms.</p>
+        </section>
+
+        <div class="bg-slate-900 rounded-2xl p-8 text-white">
+            <h3 class="font-bold text-lg mb-2">Questions?</h3>
+            <p class="text-slate-400 text-sm mb-3">Contact our legal team:</p>
+            <p>📧 <a href="mailto:legal@@medlink.pk" class="text-blue-400 hover:underline">legal&#64;medlink.pk</a></p>
+            <p class="text-slate-500 text-xs mt-3">© @DateTime.Now.Year MedLink Health Systems. All rights reserved.</p>
+        </div>
+    </div>
+</div>

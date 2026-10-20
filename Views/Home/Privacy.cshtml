@@ -1,6 +1,187 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Privacy Policy — MedLink";
+    Layout = "_Layout";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="max-w-4xl mx-auto px-4 py-16">
+    <!-- Header -->
+    <div class="mb-12 text-center">
+        <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-bold px-4 py-2 rounded-full uppercase tracking-widest mb-6">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Privacy & Data Protection
+        </div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
+        <p class="text-gray-500 text-sm">Last updated: @DateTime.Now.ToString("MMMM dd, yyyy") &nbsp;|&nbsp; Effective: January 1, 2025</p>
+    </div>
+
+    <div class="prose prose-slate max-w-none space-y-10">
+
+        <!-- Intro -->
+        <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100">
+            <p class="text-sm text-blue-800 leading-relaxed">
+                MedLink Health Systems ("MedLink", "we", "us", or "our") is committed to protecting your personal and health data.
+                This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the MedLink
+                platform (web portal and mobile application). By using MedLink, you agree to the practices described in this policy.
+            </p>
+        </div>
+
+        <!-- Section 1 -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 bg-blue-600 text-white text-xs font-black rounded-full flex items-center justify-center">1</span>
+                Information We Collect
+            </h2>
+            <div class="space-y-4 text-sm text-gray-600 leading-relaxed">
+                <p><strong class="text-gray-900">Personal Information:</strong> Name, email address, phone number, date of birth, CNIC/ID, and profile image.</p>
+                <p><strong class="text-gray-900">Health Information:</strong> Medical history, consultation records, prescriptions, lab results, pharmacy orders, and vitals you provide. This is classified as Sensitive Personal Data under Pakistan's PDPA and constitutes Special Category Data under GDPR.</p>
+                <p><strong class="text-gray-900">Payment Information:</strong> Payment method, Stripe transaction IDs, and card last-4 digits (we never store full card numbers — Stripe handles PCI-DSS compliance).</p>
+                <p><strong class="text-gray-900">Usage Data:</strong> Device information, IP address, browser type, pages visited, session duration, and error logs for service improvement.</p>
+                <p><strong class="text-gray-900">Location Data:</strong> GPS coordinates when you use pharmacy delivery tracking (only with your explicit consent).</p>
+            </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 bg-blue-600 text-white text-xs font-black rounded-full flex items-center justify-center">2</span>
+                How We Use Your Information
+            </h2>
+            <ul class="space-y-2 text-sm text-gray-600 list-none">
+                @foreach (var item in new[] {
+                    "To provide telemedicine consultations and connect you with licensed doctors",
+                    "To process pharmacy orders and lab test bookings",
+                    "To send appointment reminders and health notifications",
+                    "To power AI-assisted features (symptom checker, prescription scan) — processed locally and not sold to third parties",
+                    "To comply with legal and regulatory obligations in Pakistan",
+                    "To improve platform performance and prevent fraud",
+                    "To send service-related communications (not marketing, unless you opt in)"
+                })
+                {
+                    <li class="flex items-start gap-2">
+                        <svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        @item
+                    </li>
+                }
+            </ul>
+        </section>
+
+        <!-- Section 3 -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 bg-blue-600 text-white text-xs font-black rounded-full flex items-center justify-center">3</span>
+                Legal Basis for Processing (GDPR / PDPA)
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                @foreach (var (basis, desc) in new[] {
+                    ("Consent", "Location tracking, marketing emails, sharing data with third-party providers"),
+                    ("Contract Performance", "Processing your appointments, payments, and pharmacy orders"),
+                    ("Legal Obligation", "Retaining medical records as required by Pakistani healthcare regulations"),
+                    ("Legitimate Interests", "Platform security, fraud prevention, service quality improvement")
+                })
+                {
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <p class="font-bold text-gray-900 mb-1">@basis</p>
+                        <p class="text-gray-500 text-xs">@desc</p>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- Section 4 -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 bg-blue-600 text-white text-xs font-black rounded-full flex items-center justify-center">4</span>
+                Data Sharing & Third Parties
+            </h2>
+            <div class="text-sm text-gray-600 space-y-3 leading-relaxed">
+                <p>We do <strong class="text-gray-900">not sell</strong> your personal or health data. We share data only with:</p>
+                <ul class="space-y-2 pl-4">
+                    <li>• <strong>Doctors & Pharmacists</strong> — to deliver the medical services you request</li>
+                    <li>• <strong>Stripe</strong> — for payment processing (PCI-DSS Level 1 compliant)</li>
+                    <li>• <strong>Cloudinary</strong> — for secure media storage (prescriptions, profile images)</li>
+                    <li>• <strong>Firebase (Google)</strong> — for push notifications</li>
+                    <li>• <strong>Groq AI</strong> — prescription image analysis (images are not stored by Groq after processing)</li>
+                    <li>• <strong>Legal authorities</strong> — only when required by Pakistani law or court order</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 5 -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 bg-blue-600 text-white text-xs font-black rounded-full flex items-center justify-center">5</span>
+                Your Rights
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                @foreach (var (right, desc) in new[] {
+                    ("Access", "Request a copy of all personal data we hold about you"),
+                    ("Correction", "Request correction of inaccurate or incomplete data"),
+                    ("Deletion", "Request deletion of your account and associated data"),
+                    ("Portability", "Receive your data in a machine-readable format (JSON/CSV)"),
+                    ("Withdraw Consent", "Withdraw consent for optional data processing at any time"),
+                    ("Complain", "Lodge a complaint with Pakistan's PTA or your local data authority")
+                })
+                {
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <p class="font-bold text-gray-900 mb-1">Right to @right</p>
+                        <p class="text-gray-500 text-xs">@desc</p>
+                    </div>
+                }
+            </div>
+            <p class="text-sm text-gray-500 mt-4">To exercise any of these rights, email us at <a href="mailto:privacy@@medlink.pk" class="text-blue-600 font-semibold hover:underline">privacy&#64;medlink.pk</a>. We will respond within 30 days.</p>
+        </section>
+
+        <!-- Section 6 -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 bg-blue-600 text-white text-xs font-black rounded-full flex items-center justify-center">6</span>
+                Data Security
+            </h2>
+            <p class="text-sm text-gray-600 leading-relaxed">
+                We use AES-256 encryption at rest, TLS 1.3 in transit, and implement role-based access controls. 
+                Sensitive health data is stored in Supabase (PostgreSQL) with row-level security. 
+                Passwords are hashed with ASP.NET Identity (PBKDF2). We conduct regular security audits and 
+                use Sentry for real-time error monitoring. No system is 100% secure — please protect your credentials.
+            </p>
+        </section>
+
+        <!-- Section 7 -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 bg-blue-600 text-white text-xs font-black rounded-full flex items-center justify-center">7</span>
+                Data Retention
+            </h2>
+            <div class="text-sm text-gray-600 space-y-2">
+                <p>• <strong>Medical records:</strong> Retained for 7 years as required by Pakistani healthcare law</p>
+                <p>• <strong>Payment records:</strong> Retained for 5 years for tax compliance</p>
+                <p>• <strong>Account data:</strong> Retained until account deletion + 30 days grace period</p>
+                <p>• <strong>Usage/analytics data:</strong> Retained for 12 months</p>
+                <p>• <strong>Location tracking data:</strong> Deleted within 7 days of delivery completion</p>
+            </div>
+        </section>
+
+        <!-- Section 8 -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 bg-blue-600 text-white text-xs font-black rounded-full flex items-center justify-center">8</span>
+                Cookies
+            </h2>
+            <p class="text-sm text-gray-600 leading-relaxed">
+                We use essential cookies (authentication sessions) and optional analytics cookies. 
+                You can manage cookie preferences via the banner on your first visit. 
+                Blocking essential cookies will prevent login. We do not use advertising or tracking cookies.
+            </p>
+        </section>
+
+        <!-- Contact -->
+        <div class="bg-slate-900 rounded-2xl p-8 text-white">
+            <h3 class="font-bold text-lg mb-2">Contact Our Privacy Team</h3>
+            <p class="text-slate-400 text-sm mb-4">For privacy questions, data requests, or concerns:</p>
+            <div class="space-y-1 text-sm">
+                <p>📧 <a href="mailto:privacy@@medlink.pk" class="text-blue-400 hover:underline">privacy&#64;medlink.pk</a></p>
+                <p>🏢 MedLink Health Systems, Pakistan</p>
+                <p class="text-slate-500 text-xs mt-3">We aim to respond to all privacy requests within 30 days.</p>
+            </div>
+        </div>
+    </div>
+</div>

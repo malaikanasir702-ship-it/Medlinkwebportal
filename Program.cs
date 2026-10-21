@@ -232,6 +232,7 @@ builder.Services.AddScoped<MedLinkPortal.Services.GeofenceService>();
 builder.Services.AddScoped<MedLinkPortal.Services.GoogleDirectionsService>();
 builder.Services.AddScoped<MedLinkPortal.Services.TrackingAuditService>();
 builder.Services.AddScoped<MedLinkPortal.Services.ICloudinaryService, MedLinkPortal.Services.CloudinaryService>();
+builder.Services.AddSingleton<MedLinkPortal.Services.AgoraTokenService>();
 builder.Services.AddHostedService<MedLinkPortal.BackgroundServices.NotificationBackgroundService>();
 
 // ── Enterprise AI Layer Services (Phases 1-7) ─────────────────────────────

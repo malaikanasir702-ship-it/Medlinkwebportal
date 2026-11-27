@@ -1,0 +1,7 @@
+@model MedLinkPortal.Models.PatientDashboardModel
+@{
+    ViewData["Title"] = "Apply for Visa Support";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+<!-- Redirect to main VisaSupport page which now has the form -->
+<script>window.location.href = '@Url.Action("VisaSupport")';</script>

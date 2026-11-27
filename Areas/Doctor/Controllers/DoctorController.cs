@@ -1034,6 +1034,8 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
                 PMDCValidityDate = user.PMDCValidityDate,
                 Qualification = user.Qualification,
                 BankAccountNumber = user.BankAccountNumber,
+                BankAccountTitle = user.BankAccountTitle,
+                BankName = user.BankName,
                 TermsConsent = user.TermsConsent,
                 AdminRemarks = user.AdminRemarks,
                 ApprovalDate = user.ApprovalDate,
@@ -1194,6 +1196,8 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
             user.PMDCValidityDate = model.PMDCValidityDate;
             user.Qualification = model.Qualification;
             user.BankAccountNumber = model.BankAccountNumber;
+            user.BankAccountTitle = model.BankAccountTitle;
+            user.BankName = model.BankName;
             user.TermsConsent = model.TermsConsent;
 
             // Sync Core Doctor Entity
@@ -1762,6 +1766,12 @@ namespace MedLinkPortal.Areas.Doctor.Controllers
         // Financial
         [Required(ErrorMessage = "Bank Account / IBAN is required")]
         public string? BankAccountNumber { get; set; }
+
+        [Required(ErrorMessage = "Account Title is required")]
+        public string? BankAccountTitle { get; set; }
+
+        [Required(ErrorMessage = "Bank Name is required")]
+        public string? BankName { get; set; }
 
         [Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the terms")]
         public bool TermsConsent { get; set; }

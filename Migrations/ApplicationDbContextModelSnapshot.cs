@@ -472,6 +472,76 @@ namespace MedLinkPortal.Migrations
                     b.ToTable("Doc_PatientRecords", (string)null);
                 });
 
+            modelBuilder.Entity("MedLinkPortal.Areas.Doctor.Models.WalkInPatient", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AgeYears")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Allergies")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Diagnosis")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("DoctorUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<bool>("HasRecord")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Prescription")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime>("VisitDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("VisitReason")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("Vitals")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DoctorUserId");
+
+                    b.HasIndex("VisitDate");
+
+                    b.ToTable("Doc_WalkInPatients", (string)null);
+                });
+
             modelBuilder.Entity("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -493,6 +563,12 @@ namespace MedLinkPortal.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("BankAccountNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BankAccountTitle")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BankName")
                         .HasColumnType("text");
 
                     b.Property<string>("CNIC")
@@ -948,6 +1024,74 @@ namespace MedLinkPortal.Migrations
                         });
                 });
 
+            modelBuilder.Entity("MedLinkPortal.Models.ClassifiedMedicalRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("AccuracyScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("CPTCodes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("ClinicalDocumentId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("ClinicalHoursContributed")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("DiagnosisTerms")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DoctorUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ICD10Codes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PatientUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProceduresPerformed")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Specialty")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClinicalDocumentId");
+
+                    b.HasIndex("DoctorUserId");
+
+                    b.HasIndex("PatientUserId");
+
+                    b.HasIndex("Specialty");
+
+                    b.ToTable("ClassifiedRecords");
+                });
+
             modelBuilder.Entity("MedLinkPortal.Models.ClinicStaff", b =>
                 {
                     b.Property<int>("Id")
@@ -997,6 +1141,110 @@ namespace MedLinkPortal.Migrations
                     b.HasIndex("StaffUserId");
 
                     b.ToTable("ClinicStaff");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.ClinicalDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("Confidence")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("DoctorUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ExtractedJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OriginalHash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("PatientId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DoctorUserId");
+
+                    b.HasIndex("PatientId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("ClinicalDocuments");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.ConsentRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConsentType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<string>("ConsentVersion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("GrantedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<bool>("IsGranted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PatientUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsentType");
+
+                    b.HasIndex("PatientUserId");
+
+                    b.ToTable("ConsentRecords");
                 });
 
             modelBuilder.Entity("MedLinkPortal.Models.ConsultationTranscript", b =>
@@ -1141,6 +1389,61 @@ namespace MedLinkPortal.Migrations
                     b.ToTable("CpdActivities");
                 });
 
+            modelBuilder.Entity("MedLinkPortal.Models.DataAccessLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccessType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("AccessedByRole")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("AccessedByUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<string>("PatientUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Purpose")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<string>("RecordId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ResourceName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessedByUserId");
+
+                    b.HasIndex("PatientUserId");
+
+                    b.HasIndex("Timestamp");
+
+                    b.ToTable("DataAccessLogs");
+                });
+
             modelBuilder.Entity("MedLinkPortal.Models.Department", b =>
                 {
                     b.Property<int>("Id")
@@ -1241,6 +1544,9 @@ namespace MedLinkPortal.Migrations
                     b.Property<bool>("IsAppealing")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsInConsultation")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsSuspended")
                         .HasColumnType("boolean");
 
@@ -1313,6 +1619,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "12 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu, Punjabi",
                             Name = "Dr. Ahmed Khan",
@@ -1332,6 +1639,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "15 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Fatima Zahra",
@@ -1351,6 +1659,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "8 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Usman Ali",
@@ -1370,6 +1679,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "10 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu, Pashto",
                             Name = "Dr. Ayesha Malik",
@@ -1389,6 +1699,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "14 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Zainab Bibi",
@@ -1408,6 +1719,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "11 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Bilal Hassan",
@@ -1427,6 +1739,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "9 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Sarah Ahmed",
@@ -1446,6 +1759,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "7 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu, Sindhi",
                             Name = "Dr. Hamza Siddiqui",
@@ -1465,6 +1779,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "13 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Mariam Farooq",
@@ -1484,6 +1799,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "16 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Zeeshan Haider",
@@ -1503,6 +1819,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "10 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Hina Nasir",
@@ -1522,6 +1839,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "12 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Omar Sheikh",
@@ -1541,6 +1859,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "8 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Sana Javed",
@@ -1560,6 +1879,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "11 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Faisal Qureshi",
@@ -1579,6 +1899,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "15 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Kiran Shahzadi",
@@ -1598,6 +1919,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "9 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Adnan Mahmood",
@@ -1617,6 +1939,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "10 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Nida Yousaf",
@@ -1636,6 +1959,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "18 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu, Punjabi",
                             Name = "Dr. Rashid Minhas",
@@ -1655,6 +1979,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "6 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Amna Gul",
@@ -1674,6 +1999,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "7 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Waqas Ahmed",
@@ -1693,6 +2019,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "5 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Sadia Noreen",
@@ -1712,6 +2039,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "14 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Naveed Iqbal",
@@ -1731,6 +2059,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "11 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Rabia Basri",
@@ -1750,6 +2079,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "9 Years",
                             Image = "https://img.icons8.com/color/96/doctor-male.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Junaid Akram",
@@ -1769,6 +2099,7 @@ namespace MedLinkPortal.Migrations
                             Experience = "13 Years",
                             Image = "https://img.icons8.com/color/96/doctor-female.png",
                             IsAppealing = false,
+                            IsInConsultation = false,
                             IsSuspended = false,
                             Languages = "English, Urdu",
                             Name = "Dr. Mahira Noor",
@@ -1909,6 +2240,101 @@ namespace MedLinkPortal.Migrations
                     b.HasIndex("PatientId");
 
                     b.ToTable("DoctorVoiceNotes");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.EmployerRequirement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("HospitalName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MinCasesCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MinExperienceYears")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RequiredCertificationsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RequiredProceduresJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RequiredSpecialty")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("SalaryRange")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("VisaSponsorship")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EmployerRequirements");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.ExtractionJob", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClinicalDocumentId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<int>("MaxRetries")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClinicalDocumentId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("ExtractionJobs");
                 });
 
             modelBuilder.Entity("MedLinkPortal.Models.FAQ", b =>
@@ -2112,6 +2538,233 @@ namespace MedLinkPortal.Migrations
                     b.ToTable("Hospitals");
                 });
 
+            modelBuilder.Entity("MedLinkPortal.Models.IntegrationPartner", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApiKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastActiveAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PartnerName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("PartnerType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("PermissionsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WebhookUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApiKey")
+                        .IsUnique();
+
+                    b.ToTable("IntegrationPartners");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.KnowledgeGraph.AnonymizedCaseData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AgeGroup")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CaseHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<double>("ClinicalHours")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("DiagnosesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("IngestedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MedicationsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PrimaryDiagnosis")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ProceduresJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseHash")
+                        .IsUnique();
+
+                    b.ToTable("AnonymizedCaseData");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.KnowledgeGraph.EntityRelationship", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EvidenceCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("LastObservedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PropertiesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RelationshipType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<int>("SourceEntityId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TargetEntityId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Weight")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RelationshipType");
+
+                    b.HasIndex("SourceEntityId");
+
+                    b.HasIndex("TargetEntityId");
+
+                    b.ToTable("EntityRelationships");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.KnowledgeGraph.KnowledgeGraphSnapshot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("InsightsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("SnapshotDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("TotalEntities")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalRelationships")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("KnowledgeGraphSnapshots");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.KnowledgeGraph.MedicalEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<double>("Confidence")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("PropertiesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityType");
+
+                    b.HasIndex("Name");
+
+                    b.ToTable("MedicalEntities");
+                });
+
             modelBuilder.Entity("MedLinkPortal.Models.LabBooking", b =>
                 {
                     b.Property<int>("Id")
@@ -2260,6 +2913,101 @@ namespace MedLinkPortal.Migrations
                     b.ToTable("Laboratories");
                 });
 
+            modelBuilder.Entity("MedLinkPortal.Models.MatchingRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("PatientAge")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PatientGender")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("PatientLocation")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PatientUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ResultsJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Symptoms")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TargetSpecialty")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Urgency")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("PatientUserId");
+
+                    b.ToTable("MatchingRequests");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.MedicalClassificationTag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DoctorUserId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastObservedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TagCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("TagName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("TagType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("UsageCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DoctorUserId");
+
+                    b.HasIndex("TagType");
+
+                    b.ToTable("MedicalClassificationTags");
+                });
+
             modelBuilder.Entity("MedLinkPortal.Models.MedicalTest", b =>
                 {
                     b.Property<int>("Id")
@@ -2396,6 +3144,9 @@ namespace MedLinkPortal.Migrations
                     b.Property<bool>("IsAcceptedByUser")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsCustomProposal")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("RecoveryDays")
                         .HasColumnType("text");
 
@@ -2466,6 +3217,28 @@ namespace MedLinkPortal.Migrations
 
                     b.Property<bool>("TravelWithFamily")
                         .HasColumnType("boolean");
+
+                    b.Property<bool>("WantsHotel")
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("HotelPreference")
+                        .HasColumnType("text")
+                        .HasDefaultValue("Not Required");
+
+                    b.Property<int?>("HotelNights")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("WantsAirportPickup")
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("TransportPreference")
+                        .HasColumnType("text")
+                        .HasDefaultValue("Not Required");
+
+                    b.Property<int?>("PreArrivalAppointmentId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("TreatmentType")
                         .IsRequired()
@@ -2681,6 +3454,9 @@ namespace MedLinkPortal.Migrations
                     b.Property<double?>("DestinationLongitude")
                         .HasColumnType("double precision");
 
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("PatientId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -2707,6 +3483,18 @@ namespace MedLinkPortal.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<string>("StripeCardBrand")
+                        .HasColumnType("text");
+
+                    b.Property<string>("StripeCardLast4")
+                        .HasColumnType("text");
+
+                    b.Property<string>("StripeChargeId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("StripePaymentIntentId")
+                        .HasColumnType("text");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
@@ -2750,6 +3538,92 @@ namespace MedLinkPortal.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("PharmacyOrderItems");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.PhysicianCredentialProfile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CpdPoints")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("CredentialScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("DoctorUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ExpertiseTags")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("MdcVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PmcNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("PmcVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PrimarySpecialty")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("ProfileGeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SecondarySpecialties")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TierLevel")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("TopProcedures")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TotalCasesProcessed")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("TotalClinicalHours")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("TotalConsultations")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalPrescriptions")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalProceduresPerformed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalReferralsMade")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CredentialScore");
+
+                    b.HasIndex("DoctorUserId")
+                        .IsUnique();
+
+                    b.HasIndex("TierLevel");
+
+                    b.ToTable("PhysicianCredentialProfiles");
                 });
 
             modelBuilder.Entity("MedLinkPortal.Models.Prescription", b =>
@@ -3755,6 +4629,27 @@ namespace MedLinkPortal.Migrations
                     b.Navigation("Doctor");
                 });
 
+            modelBuilder.Entity("MedLinkPortal.Models.ClassifiedMedicalRecord", b =>
+                {
+                    b.HasOne("MedLinkPortal.Models.ClinicalDocument", "ClinicalDocument")
+                        .WithMany()
+                        .HasForeignKey("ClinicalDocumentId");
+
+                    b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorUserId");
+
+                    b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientUserId");
+
+                    b.Navigation("ClinicalDocument");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
+                });
+
             modelBuilder.Entity("MedLinkPortal.Models.ClinicStaff", b =>
                 {
                     b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "Doctor")
@@ -3772,6 +4667,32 @@ namespace MedLinkPortal.Migrations
                     b.Navigation("Doctor");
 
                     b.Navigation("StaffUser");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.ClinicalDocument", b =>
+                {
+                    b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorUserId");
+
+                    b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.ConsentRecord", b =>
+                {
+                    b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "PatientUser")
+                        .WithMany()
+                        .HasForeignKey("PatientUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PatientUser");
                 });
 
             modelBuilder.Entity("MedLinkPortal.Models.ConsultationTranscript", b =>
@@ -3794,6 +4715,21 @@ namespace MedLinkPortal.Migrations
                         .IsRequired();
 
                     b.Navigation("Doctor");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.DataAccessLog", b =>
+                {
+                    b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "AccessedByUser")
+                        .WithMany()
+                        .HasForeignKey("AccessedByUserId");
+
+                    b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "PatientUser")
+                        .WithMany()
+                        .HasForeignKey("PatientUserId");
+
+                    b.Navigation("AccessedByUser");
+
+                    b.Navigation("PatientUser");
                 });
 
             modelBuilder.Entity("MedLinkPortal.Models.Doctor", b =>
@@ -3880,6 +4816,17 @@ namespace MedLinkPortal.Migrations
                     b.Navigation("Patient");
                 });
 
+            modelBuilder.Entity("MedLinkPortal.Models.ExtractionJob", b =>
+                {
+                    b.HasOne("MedLinkPortal.Models.ClinicalDocument", "ClinicalDocument")
+                        .WithMany()
+                        .HasForeignKey("ClinicalDocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClinicalDocument");
+                });
+
             modelBuilder.Entity("MedLinkPortal.Models.FamilyLink", b =>
                 {
                     b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "MemberUser")
@@ -3908,6 +4855,25 @@ namespace MedLinkPortal.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.KnowledgeGraph.EntityRelationship", b =>
+                {
+                    b.HasOne("MedLinkPortal.Models.KnowledgeGraph.MedicalEntity", "SourceEntity")
+                        .WithMany()
+                        .HasForeignKey("SourceEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MedLinkPortal.Models.KnowledgeGraph.MedicalEntity", "TargetEntity")
+                        .WithMany()
+                        .HasForeignKey("TargetEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SourceEntity");
+
+                    b.Navigation("TargetEntity");
                 });
 
             modelBuilder.Entity("MedLinkPortal.Models.LabBooking", b =>
@@ -3968,6 +4934,24 @@ namespace MedLinkPortal.Migrations
                         .IsRequired();
 
                     b.Navigation("City");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.MatchingRequest", b =>
+                {
+                    b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "PatientUser")
+                        .WithMany()
+                        .HasForeignKey("PatientUserId");
+
+                    b.Navigation("PatientUser");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.MedicalClassificationTag", b =>
+                {
+                    b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorUserId");
+
+                    b.Navigation("Doctor");
                 });
 
             modelBuilder.Entity("MedLinkPortal.Models.MedicalTest", b =>
@@ -4072,6 +5056,17 @@ namespace MedLinkPortal.Migrations
                     b.Navigation("Medicine");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("MedLinkPortal.Models.PhysicianCredentialProfile", b =>
+                {
+                    b.HasOne("MedLinkPortal.Areas.Identity.Pages.Account.ApplicationUser", "DoctorUser")
+                        .WithMany()
+                        .HasForeignKey("DoctorUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DoctorUser");
                 });
 
             modelBuilder.Entity("MedLinkPortal.Models.Prescription", b =>

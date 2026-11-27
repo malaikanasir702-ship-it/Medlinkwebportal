@@ -21,17 +21,20 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Sentry Error Monitoring ───────────────────────────────────────────────
-builder.WebHost.UseSentry(options =>
+var sentryDsn = Environment.GetEnvironmentVariable("SENTRY_DSN")
+             ?? builder.Configuration["Sentry:Dsn"];
+if (!string.IsNullOrWhiteSpace(sentryDsn) && sentryDsn != "YOUR_SENTRY_DSN")
 {
-    options.Dsn = Environment.GetEnvironmentVariable("SENTRY_DSN")
-               ?? builder.Configuration["Sentry:Dsn"]
-               ?? "https://ce1e60ded68b947d662bd70fcadf9492@o4512288909230080.ingest.us.sentry.io/4512288924827648";
-    options.Debug = false;
-    options.TracesSampleRate = 0.1;
-    options.SendDefaultPii = false;
-    options.Environment = builder.Environment.EnvironmentName;
-    options.AttachStacktrace = true;
-});
+    builder.WebHost.UseSentry(options =>
+    {
+        options.Dsn = sentryDsn;
+        options.Debug = false;
+        options.TracesSampleRate = 0.1;
+        options.SendDefaultPii = false;
+        options.Environment = builder.Environment.EnvironmentName;
+        options.AttachStacktrace = true;
+    });
+}
 
 // QuestPDF License Configuration
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
@@ -43,7 +46,21 @@ builder.Services.AddControllersWithViews()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 builder.Services.AddRazorPages();
-builder.Services.AddSignalR();
+
+var redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING")
+                   ?? builder.Configuration["Redis:ConnectionString"];
+var hasRedis = !string.IsNullOrWhiteSpace(redisConnection) && redisConnection != "YOUR_REDIS_CONNECTION_STRING";
+
+var signalRBuilder = builder.Services.AddSignalR();
+if (hasRedis)
+{
+    signalRBuilder.AddStackExchangeRedis(redisConnection!, options =>
+    {
+        options.Configuration.ChannelPrefix = StackExchange.Redis.RedisChannel.Literal("MedLinkPortal");
+    });
+}
+
+builder.Services.AddHealthChecks();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
@@ -110,9 +127,35 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("MobilePolicy", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        // Allow Railway production domain and any configured frontend origins.
+        // Set CORS_ALLOWED_ORIGINS env var on Railway (comma-separated) to override.
+        var allowedOrigins = (
+            Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
+            ?? builder.Configuration["Cors:AllowedOrigins"]
+            ?? ""
+        )
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        if (allowedOrigins.Length > 0)
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        }
+        else if (builder.Environment.IsDevelopment())
+        {
+            // Fallback for local dev only
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
+        else
+        {
+            // In production without CORS_ALLOWED_ORIGINS, deny cross-origin browser requests
+            // (Native mobile apps do not use browser CORS)
+            policy.WithOrigins(Array.Empty<string>());
+        }
     });
 });
 
@@ -162,11 +205,16 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false, // Relaxed for easier development connectivity
-        ValidateAudience = false, // Relaxed for easier development connectivity
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "MedLinkPortal",
+        ValidAudience = builder.Configuration["Jwt:Audience"] ?? "MedLinkPortalUsers",
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"] ?? "MedLink-Mobile-Super-Secret-Key-2026-Security-Node")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+            Environment.GetEnvironmentVariable("JWT_SECRET")
+            ?? builder.Configuration["Jwt:Secret"]
+            ?? throw new InvalidOperationException("JWT Secret is not configured."))),
         ClockSkew = TimeSpan.Zero
     };
     options.Events = new JwtBearerEvents
@@ -220,10 +268,10 @@ builder.Services.AddHttpClient("GeminiAI", client =>
 {
     AutomaticDecompression = DecompressionMethods.None
 });
-// MedLinkAI (FastAPI → Ollama): default 100s HttpClient timeout breaks long streamed LLM responses; use dedicated client
+// MedLinkAI (FastAPI → Ollama): LLM responses can be slow; use a generous but bounded timeout.
 builder.Services.AddHttpClient("MedLinkAI", client =>
 {
-    client.Timeout = TimeSpan.FromHours(24);
+    client.Timeout = TimeSpan.FromMinutes(10);
 });
 builder.Services.AddScoped<MedLinkPortal.Services.IAiChatService, MedLinkPortal.Services.AiChatService>();
 builder.Services.AddScoped<MedLinkPortal.Services.INotificationService, MedLinkPortal.Services.NotificationService>();
@@ -262,8 +310,19 @@ builder.Services.AddScoped<MedLinkPortal.Services.IDataGovernanceService, MedLin
 builder.Services.AddScoped<MedLinkPortal.Services.IFhirAdapterService, MedLinkPortal.Services.FhirAdapterService>();
 
 
-// Session
-builder.Services.AddDistributedMemoryCache();
+// Session & Distributed Cache
+if (hasRedis)
+{
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnection;
+        options.InstanceName = "MedLinkPortal:";
+    });
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+}
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -272,7 +331,8 @@ builder.Services.AddSession(options =>
 });
 
 // Stripe Configuration
-StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+StripeConfiguration.ApiKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY")
+                           ?? builder.Configuration["Stripe:SecretKey"];
 
 // Firebase Admin SDK Initialization
 var firebaseJson = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT");
@@ -381,28 +441,42 @@ app.MapControllerRoute(
 app.MapRazorPages()
    .RequireRateLimiting("auth"); // Login/Register brute force protection
 
-// ── Health check — Railway uses this to know the app is ready ─────────────
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+// ── Health check — verifies DB connectivity before Railway marks instance ready ──
+app.MapGet("/health", async (ApplicationDbContext dbContext, CancellationToken ct) =>
+{
+    try
+    {
+        var canConnect = await dbContext.Database.CanConnectAsync(ct);
+        if (!canConnect)
+        {
+            return Results.Json(new { status = "unhealthy", database = "unreachable", timestamp = DateTime.UtcNow }, statusCode: 503);
+        }
+        return Results.Ok(new { status = "healthy", database = "connected", timestamp = DateTime.UtcNow });
+    }
+    catch (Exception)
+    {
+        return Results.Json(new { status = "unhealthy", database = "error", timestamp = DateTime.UtcNow }, statusCode: 503);
+    }
+});
 
 app.MapHub<MedLinkPortal.Hubs.ConsultationHub>("/consultationHub");
 app.MapHub<MedLinkPortal.Hubs.ChatHub>("/chatHub");
 app.MapHub<MedLinkPortal.Hubs.NotificationHub>("/notificationHub");
 app.MapHub<MedLinkPortal.Hubs.TrackingHub>("/trackingHub");
 
-// Seed Roles and Admin User (Optional)
+// Seed Roles and Optional Initial Users
 using (var scope = app.Services.CreateScope())
 {
     try
     {
         // Ensure Database Schema is up to date
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
         dbContext.Database.Migrate();
 
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        // Create roles if they don't exist
+        // Create roles if they don't exist (idempotent)
         string[] roleNames = { "Admin", "Doctor", "Patient", "Pharmacist", "LabAdmin", "Rider" };
 
         foreach (var roleName in roleNames)
@@ -413,47 +487,44 @@ using (var scope = app.Services.CreateScope())
             }
         }
 
-        // Seed Admin
-        var adminEmail = "admin@medlink.com";
-        var adminPassword = "Admin@123";
-        if (await userManager.FindByEmailAsync(adminEmail) == null)
+        // Only seed default accounts in Development OR when ENABLE_INITIAL_SEED=true is explicitly set.
+        // Existing accounts already in the database remain untouched and continue to work normally.
+        var enableInitialSeed = app.Environment.IsDevelopment()
+            || string.Equals(Environment.GetEnvironmentVariable("ENABLE_INITIAL_SEED"), "true", StringComparison.OrdinalIgnoreCase);
+
+        if (enableInitialSeed)
         {
-            var adminUser = new ApplicationUser { UserName = adminEmail, Email = adminEmail, FirstName = "Admin", LastName = "User", EmailConfirmed = true, PhoneNumber = "+1234567890" };
-            var result = await userManager.CreateAsync(adminUser, adminPassword);
-            if (result.Succeeded) await userManager.AddToRoleAsync(adminUser, "Admin");
+            var seedUsers = new (string Email, string? Password, string Role, string FirstName, string LastName, string Phone, string? Specialist)[]
+            {
+                ("admin@medlink.com",      Environment.GetEnvironmentVariable("SEED_ADMIN_PASSWORD")      ?? (app.Environment.IsDevelopment() ? "Admin@123" : null),      "Admin",      "Admin", "User",       "+1234567890", null),
+                ("labadmin@medlink.com",   Environment.GetEnvironmentVariable("SEED_LABADMIN_PASSWORD")   ?? (app.Environment.IsDevelopment() ? "LabAdmin@123" : null),   "LabAdmin",   "Lab",   "Manager",    "+1122334466", null),
+                ("doctor@medlink.com",     Environment.GetEnvironmentVariable("SEED_DOCTOR_PASSWORD")     ?? (app.Environment.IsDevelopment() ? "Doctor@123" : null),     "Doctor",     "Doctor","Who",        "+1987654321", "General Practitioner"),
+                ("pharmacist@medlink.com", Environment.GetEnvironmentVariable("SEED_PHARMACIST_PASSWORD") ?? (app.Environment.IsDevelopment() ? "Pharmacist@123" : null), "Pharmacist", "Main",  "Pharmacist", "+1122334455", null),
+            };
+
+            foreach (var u in seedUsers)
+            {
+                if (string.IsNullOrWhiteSpace(u.Password)) continue;
+                if (await userManager.FindByEmailAsync(u.Email) == null)
+                {
+                    var user = new ApplicationUser
+                    {
+                        UserName = u.Email,
+                        Email = u.Email,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
+                        EmailConfirmed = true,
+                        PhoneNumber = u.Phone,
+                        Specialist = u.Specialist,
+                        IsAvailable = u.Role == "Doctor"
+                    };
+                    var result = await userManager.CreateAsync(user, u.Password);
+                    if (result.Succeeded) await userManager.AddToRoleAsync(user, u.Role);
+                }
+            }
         }
 
-        // Seed Lab Admin
-        var labAdminEmail = "labadmin@medlink.com";
-        var labAdminPassword = "LabAdmin@123";
-        if (await userManager.FindByEmailAsync(labAdminEmail) == null)
-        {
-            var labAdminUser = new ApplicationUser { UserName = labAdminEmail, Email = labAdminEmail, FirstName = "Lab", LastName = "Manager", EmailConfirmed = true, PhoneNumber = "+1122334466" };
-            var labResult = await userManager.CreateAsync(labAdminUser, labAdminPassword);
-            if (labResult.Succeeded) await userManager.AddToRoleAsync(labAdminUser, "LabAdmin");
-        }
-
-        // Seed Doctor
-        var doctorEmail = "doctor@medlink.com";
-        var doctorPassword = "Doctor@123";
-        if (await userManager.FindByEmailAsync(doctorEmail) == null)
-        {
-            var doctorUser = new ApplicationUser { UserName = doctorEmail, Email = doctorEmail, FirstName = "Doctor", LastName = "Who", EmailConfirmed = true, PhoneNumber = "+1987654321", Specialist = "General Practitioner", IsAvailable = true };
-            var docResult = await userManager.CreateAsync(doctorUser, doctorPassword);
-            if (docResult.Succeeded) await userManager.AddToRoleAsync(doctorUser, "Doctor");
-        }
-
-        // Seed Pharmacist
-        var pharmacistEmail = "pharmacist@medlink.com";
-        var pharmacistPassword = "Pharmacist@123";
-        if (await userManager.FindByEmailAsync(pharmacistEmail) == null)
-        {
-            var pharmacistUser = new ApplicationUser { UserName = pharmacistEmail, Email = pharmacistEmail, FirstName = "Main", LastName = "Pharmacist", EmailConfirmed = true, PhoneNumber = "+1122334455" };
-            var pharmResult = await userManager.CreateAsync(pharmacistUser, pharmacistPassword);
-            if (pharmResult.Succeeded) await userManager.AddToRoleAsync(pharmacistUser, "Pharmacist");
-        }
-
-        // Seed Medicines
+        // Seed Medicines (only if table is empty)
         if (!dbContext.Medicines.Any())
         {
             dbContext.Medicines.AddRange(new List<Medicine>
@@ -469,15 +540,23 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while running database migrations or seeding.");
+        logger.LogCritical(ex, "Fatal error occurred while running database migrations or seeding.");
+        if (!app.Environment.IsDevelopment())
+        {
+            throw; // Fail fast in production so orchestrator doesn't route traffic to a broken schema
+        }
     }
 }
 
-app.MapGet("/api/dev/seed-all", async (IServiceProvider sp) =>
+// ── Dev seed endpoint — only available in Development environment ──────────
+if (app.Environment.IsDevelopment())
 {
-    await MedLinkPortal.Services.DatabaseSeederService.SeedAllAsync(sp);
-    return Results.Ok(new { message = "Comprehensive seeding completed successfully!" });
-});
+    app.MapGet("/api/dev/seed-all", async (IServiceProvider sp) =>
+    {
+        await MedLinkPortal.Services.DatabaseSeederService.SeedAllAsync(sp);
+        return Results.Ok(new { message = "Comprehensive seeding completed successfully!" });
+    });
+}
 
 if (args.Contains("--seed"))
 {

@@ -134,6 +134,55 @@
                      </div>
                 </div>
 
+                <!-- Pre-Arrival Consultation Banner -->
+                @{
+                    var tourismReq = ViewBag.TourismRequest as MedLinkPortal.Models.MedicalTourismRequest;
+                    var preAppt = tourismReq?.PreArrivalAppointment;
+                }
+                @if (preAppt != null)
+                {
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[40px] p-8 md:p-10 text-white relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[60px] -mr-32 -mt-32"></div>
+                        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                            <div class="flex items-center gap-6">
+                                <div class="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="video" class="w-8 h-8 text-white"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="px-3 py-1 bg-white/20 rounded-full text-[9px] font-black uppercase tracking-widest">Pre-Arrival Consultation</span>
+                                        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                    </div>
+                                    <h4 class="text-xl font-black tracking-tight">Online Session with Dr. @(preAppt.Doctor?.Name ?? "Your Assigned Specialist")</h4>
+                                    <p class="text-blue-200 text-sm font-medium mt-1">
+                                        Scheduled: @preAppt.AppointmentDate.ToString("MMMM dd, yyyy") at @preAppt.TimeSlot
+                                    </p>
+                                    <p class="text-blue-300 text-xs font-medium mt-1">
+                                        @preAppt.Notes?.Split('.')[0]
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="@Url.Action("Appointments", "Dashboard")"
+                               class="flex-shrink-0 flex items-center gap-3 px-8 py-4 bg-white text-blue-700 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-50 transition-all shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap">
+                                <i data-lucide="video" class="w-4 h-4"></i>
+                                Join Consultation
+                            </a>
+                        </div>
+                    </div>
+                }
+                else if (tourismReq != null && !tourismReq.PreArrivalAppointmentId.HasValue)
+                {
+                    <div class="bg-amber-50 border border-amber-200 rounded-[32px] p-6 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+                            <i data-lucide="clock" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="font-black text-amber-800 text-sm">Pre-Arrival Consultation Pending</p>
+                            <p class="text-amber-600 text-xs font-medium mt-0.5">Your coordinator will schedule an online consultation with the assigned doctor shortly.</p>
+                        </div>
+                    </div>
+                }
+
                 <!-- CTA -->
                 <div class="pt-10 flex items-center justify-between border-t border-slate-100">
                     <div class="hidden md:block">

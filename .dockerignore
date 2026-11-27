@@ -1,0 +1,32 @@
+# Build & IDE artifacts
+bin/
+obj/
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+node_modules/
+
+# Git & archives
+.git/
+.gitignore
+*.zip
+
+# Local secrets & environment overrides (never bake into image)
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.Local.json
+firebase-service-account.json
+.env
+.env.*
+
+# Runtime logs & local uploads
+wwwroot/logs/
+wwwroot/uploads/
+Logs/
+logs/
+

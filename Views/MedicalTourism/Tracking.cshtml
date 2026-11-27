@@ -136,6 +136,13 @@
                                 <div class="flex flex-wrap items-center gap-4 justify-end border-t border-slate-50 pt-8 mt-auto">
                                     @if(request.AssignedPackageId.HasValue)
                                     {
+                                        @if(request.PreArrivalAppointmentId.HasValue)
+                                        {
+                                            <a href="@Url.Action("Appointments", "Dashboard")" 
+                                               class="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 animate-pulse-slow">
+                                                <i data-lucide="video" class="w-4 h-4"></i> Join Pre-Arrival Consultation
+                                            </a>
+                                        }
                                         <a href="@Url.Action("Package", new { id = request.AssignedPackageId })" class="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all">
                                             <i data-lucide="eye" class="w-4 h-4"></i> View Package
                                         </a>

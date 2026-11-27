@@ -1,0 +1,232 @@
+@model MedLinkPortal.Models.VisaApplication
+@using MedLinkPortal.Models
+@{
+    ViewData["Title"] = $"Visa Application — {Model.ReferenceId}";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6 max-w-5xl mx-auto space-y-6 animate-in fade-in duration-700">
+
+    <!-- Header -->
+    <div class="flex items-center gap-4">
+        <a asp-action="Index" class="w-10 h-10 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:shadow-md transition-all">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+            <div class="flex items-center gap-3 mb-1">
+                <h1 class="text-2xl font-black text-gray-900">@Model.ReferenceId</h1>
+                <span class="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border
+                    @(Model.Status == VisaStatus.VisaApproved ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                      Model.Status == VisaStatus.VisaRejected ? "bg-red-50 text-red-700 border-red-200" :
+                      "bg-indigo-50 text-indigo-700 border-indigo-200")">
+                    @Model.Status
+                </span>
+            </div>
+            <p class="text-gray-400 text-sm">Submitted @Model.CreatedAt.ToString("MMMM dd, yyyy")</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Left: Application Details -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- Patient Info -->
+            <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm">
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <i data-lucide="user" class="w-4 h-4"></i> Patient Information
+                </h3>
+                <div class="grid grid-cols-2 gap-5">
+                    @foreach (var (label, value) in new[] {
+                        ("Full Name", Model.FullName),
+                        ("Nationality", Model.Nationality),
+                        ("Passport Number", Model.PassportNumber),
+                        ("Passport Expiry", Model.PassportExpiry?.ToString("MMM dd, yyyy") ?? "—"),
+                        ("Treatment Needed", Model.TreatmentType),
+                        ("Planned Arrival", Model.PlannedArrivalDate?.ToString("MMM dd, yyyy") ?? "—"),
+                        ("Email", ViewBag.PatientEmail as string ?? "—"),
+                        ("Phone", ViewBag.PatientPhone as string ?? "—"),
+                    })
+                    {
+                        <div>
+                            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">@label</p>
+                            <p class="text-sm font-bold text-gray-900">@value</p>
+                        </div>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.MedicalReportsUrl))
+                {
+                    <div class="mt-6 pt-5 border-t border-gray-50">
+                        <a href="@Model.MedicalReportsUrl" target="_blank"
+                           class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all">
+                            <i data-lucide="external-link" class="w-4 h-4"></i> View Medical Reports
+                        </a>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.AdditionalNotes))
+                {
+                    <div class="mt-4 p-4 bg-gray-50 rounded-2xl">
+                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Notes from Patient</p>
+                        <p class="text-sm text-gray-600">@Model.AdditionalNotes</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Invitation Letter -->
+            <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm">
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-5 flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> Invitation Letter
+                </h3>
+                @if (!string.IsNullOrEmpty(Model.InvitationLetterUrl))
+                {
+                    <div class="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                                <i data-lucide="check-circle" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-black text-emerald-800">Letter Generated</p>
+                                <a href="@Model.InvitationLetterUrl" target="_blank" class="text-xs text-emerald-600 hover:underline">View / Download PDF</a>
+                            </div>
+                        </div>
+                        <button onclick="generateLetter()" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-700 transition-all">
+                            Regenerate
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-6">
+                        <p class="text-gray-400 text-sm mb-4">No invitation letter generated yet</p>
+                        <button onclick="generateLetter()" id="generateBtn"
+                                class="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2 mx-auto">
+                            <i data-lucide="file-plus" class="w-4 h-4"></i> Generate Invitation Letter (PDF)
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Right: Status Update -->
+        <div class="space-y-6">
+            <div class="bg-slate-900 rounded-[2rem] p-8 text-white">
+                <h3 class="text-[10px] font-black text-white/40 uppercase tracking-widest mb-6">Update Status</h3>
+                <form asp-action="UpdateStatus" asp-controller="Visa" asp-area="Admin" method="post" class="space-y-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-white/40 uppercase tracking-widest">New Status</label>
+                        <select name="status" class="w-full bg-white/10 border border-white/20 text-white rounded-2xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
+                            @foreach (var status in Enum.GetValues(typeof(VisaStatus)))
+                            {
+                                var isSelected = Model.Status.ToString() == status.ToString();
+                                <option value="@status" selected="@isSelected" class="text-slate-900 bg-white">@status.ToString()?.Replace("Documents", "Docs ")</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-white/40 uppercase tracking-widest">Admin Notes (visible to patient)</label>
+                        <textarea name="adminNotes" rows="3"
+                                  class="w-full bg-white/10 border border-white/20 text-white rounded-2xl px-4 py-3 font-medium text-sm resize-none outline-none focus:ring-2 focus:ring-indigo-500 placeholder-white/30"
+                                  placeholder="Optional message to patient...">@Model.AdminNotes</textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-white/40 uppercase tracking-widest">Invitation Letter URL (optional override)</label>
+                        <input type="url" name="invitationLetterUrl" value="@Model.InvitationLetterUrl"
+                               class="w-full bg-white/10 border border-white/20 text-white rounded-2xl px-4 py-3 font-medium text-sm outline-none focus:ring-2 focus:ring-indigo-500 placeholder-white/30"
+                               placeholder="https://..." />
+                    </div>
+
+                    <button type="submit"
+                            class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg active:scale-95">
+                        Update & Notify Patient
+                    </button>
+                </form>
+            </div>
+
+            <!-- Status Timeline -->
+            <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-5">Progress</h3>
+                <div class="relative pl-6 border-l-2 border-gray-100 space-y-5">
+                    @{
+                        var steps = new[] {
+                            (VisaStatus.Submitted, "Application Submitted", "send"),
+                            (VisaStatus.DocumentsUnderReview, "Documents Under Review", "file-search"),
+                            (VisaStatus.InvitationIssued, "Invitation Letter Issued", "file-check"),
+                            (VisaStatus.EmbassySubmitted, "Embassy Submission", "building"),
+                            (VisaStatus.VisaApproved, "Visa Approved", "check-circle"),
+                        };
+                        foreach (var (s, label, icon) in steps)
+                        {
+                            bool done = (int)Model.Status >= (int)s;
+                            bool isCurrent = Model.Status == s;
+                        <div class="relative flex items-start gap-3">
+                            <div class="absolute -left-8 top-1 w-4 h-4 rounded-full border-2 @(done ? "bg-indigo-600 border-indigo-600" : "bg-white border-gray-200") flex items-center justify-center">
+                                @if (done)
+                                {
+                                    <span class="text-white text-[8px] font-black">✓</span>
+                                }
+                            </div>
+                            <div class="@(!done ? "opacity-40" : "")">
+                                <p class="text-xs font-black @(isCurrent ? "text-indigo-600" : "text-gray-700")">@label</p>
+                                @if (isCurrent)
+                                {
+                                    <p class="text-[9px] text-indigo-400 font-bold uppercase tracking-wider mt-0.5">Current Stage</p>
+                                }
+                            </div>
+                        </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    lucide.createIcons();
+
+    async function generateLetter() {
+        const btn = document.getElementById('generateBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin inline"></i> Generating...';
+            lucide.createIcons();
+        }
+
+        try {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const resp = await fetch('/Admin/Visa/GenerateInvitationLetter/@Model.Id', {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': token ?? '' }
+            });
+
+            if (resp.ok) {
+                const data = await resp.json().catch(() => null);
+                if (data?.success && data?.url) {
+                    window.open(data.url, '_blank');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    // PDF direct download
+                    const blob = await resp.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Invitation_@(Model.ReferenceId).pdf';
+                    a.click();
+                    setTimeout(() => location.reload(), 1000);
+                }
+            }
+        } catch (e) {
+            alert('Error generating letter. Please try again.');
+        }
+    }
+</script>
+@Html.AntiForgeryToken()
+}

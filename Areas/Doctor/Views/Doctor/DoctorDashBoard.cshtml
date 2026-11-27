@@ -343,17 +343,24 @@
                         @foreach (var appt in Model.TodayAppointments.Take(4))
                         {
                             var statusColor = appt.ConsultationType == "Emergency" ? "bg-red-500" :
+                                             appt.ConsultationType == "Tourism Pre-Arrival" ? "bg-indigo-600" :
                                              appt.Status == "Pending" ? "bg-amber-500" : "bg-blue-500";
                             
                             <div class="relative pl-10 group">
                                 <div class="absolute left-0 top-1.5 w-9 h-9 @statusColor rounded-xl border-4 border-white dark:border-slate-900 z-10 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                     <i class="fas @(appt.ConsultationType == "Emergency" ? "fa-bolt" : "fa-check") text-white text-[10px]"></i>
+                                     <i class="fas @(appt.ConsultationType == "Emergency" ? "fa-bolt" : appt.ConsultationType == "Tourism Pre-Arrival" ? "fa-globe" : "fa-check") text-white text-[10px]"></i>
                                 </div>
-                                <div class="p-3 lg:p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-transparent group-hover:border-slate-100 dark:group-hover:border-white/5 transition-all cursor-pointer">
+                                <div class="p-3 lg:p-4 @(appt.ConsultationType == "Tourism Pre-Arrival" ? "bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100" : "bg-slate-50 dark:bg-white/5 border border-transparent group-hover:border-slate-100") rounded-2xl dark:group-hover:border-white/5 transition-all cursor-pointer">
+                                    @if(appt.ConsultationType == "Tourism Pre-Arrival")
+                                    {
+                                        <span class="inline-flex items-center gap-1 text-[8px] font-black text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full mb-1 uppercase tracking-wider">
+                                            <i class="fas fa-globe text-[7px]"></i> International
+                                        </span>
+                                    }
                                     <p class="text-[9px] lg:text-[10px] font-semibold text-slate-400 uppercase tracking-tighter mb-1">@appt.ScheduledTime.ToString("hh:mm tt")</p>
                                     <p class="text-sm font-semibold text-slate-800 dark:text-white group-hover:text-blue-500 transition-colors">@(appt.Patient?.Name ?? appt.Patient?.UserName ?? "Patient")</p>
                                     <div class="flex items-center mt-1 lg:mt-2">
-                                        <span class="text-[10px] lg:text-[11px] font-medium text-slate-500 dark:text-slate-400">@appt.ConsultationType</span>
+                                        <span class="text-[10px] lg:text-[11px] font-medium @(appt.ConsultationType == "Tourism Pre-Arrival" ? "text-indigo-500 font-bold" : "text-slate-500 dark:text-slate-400")">@appt.ConsultationType</span>
                                         <span class="mx-2 text-slate-300">/</span>
                                         <span class="text-[10px] lg:text-[11px] font-semibold text-blue-500 uppercase">Room 0@(new Random().Next(1,9))</span>
                                     </div>

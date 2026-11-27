@@ -1,173 +1,220 @@
-@model List<MedLinkPortal.Models.WalletTransaction>
-
+@model IEnumerable<MedLinkPortal.Models.WalletTransaction>
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Payment Requests";
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var bankInfo = ViewBag.DoctorBankInfo as Dictionary<string, (string, string, string)>
+                   ?? new Dictionary<string, (string, string, string)>();
 }
 
-<div class="space-y-6 animate-in fade-in duration-700">
+<div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+
     <!-- Header -->
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-semibold text-slate-800 tracking-tight">Payment Requests</h1>
-            <p class="text-slate-500 font-medium mt-1">Manage and approve doctor withdrawal requests.</p>
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Payment Requests</h1>
+            <p class="text-sm text-gray-500 font-medium mt-1 uppercase tracking-widest">Doctor Withdrawal Disbursements</p>
         </div>
         <div class="flex items-center gap-3">
-             <div class="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm border border-blue-100 shadow-sm">
-                Total Shown: @Model.Count
+            <div class="px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-700 uppercase tracking-widest flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                @Model.Count(t => t.Status == "Pending" || t.Status == "pending") Pending
+            </div>
+            <div class="px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-700 uppercase tracking-widest flex items-center gap-2">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                @Model.Count(t => t.Status == "Approved") Approved
             </div>
         </div>
     </div>
 
-    <!-- Main Content Card -->
-    <div class="bento-card p-6 lg:p-8">
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="border-b border-slate-100">
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Ref ID</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Doctor</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Amount</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Fee (2%)</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Net Payable</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100" id="requestsTableBody">
-                    @if (Model != null && Model.Any())
-                    {
-                        @foreach (var item in Model)
-                        {
-                            <tr id="row-@item.Id" class="group hover:bg-slate-50/50 transition-colors">
-                                <td class="px-6 py-4 text-sm font-bold text-slate-500">#@item.Id.ToString("D5")</td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-md mr-3">
-                                            @((item.Doctor?.UserName?.FirstOrDefault() ?? 'D').ToString().ToUpper())
-                                        </div>
-                                        <div>
-                                            <span class="block text-sm font-bold text-slate-800">@(item.Doctor?.UserName ?? "Doctor")</span>
-                                            <span class="block text-[10px] font-medium text-slate-400">@item.Doctor?.Email</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="text-sm font-bold text-slate-700">@item.TransactionDate.ToString("MMM dd, yyyy")</span>
-                                    <span class="block text-[10px] font-medium text-slate-400">@item.TransactionDate.ToString("hh:mm tt")</span>
-                                </td>
-                                <td class="px-6 py-4 text-sm font-bold text-slate-900">PKR @item.Amount.ToString("N2")</td>
-                                <td class="px-6 py-4 text-sm font-medium text-slate-500">PKR @item.PlatformFee.ToString("N2")</td>
-                                <td class="px-6 py-4 text-sm font-semibold text-emerald-600">PKR @item.NetAmount.ToString("N2")</td>
-                                <td class="px-6 py-4">
-                                    @if (item.Status == "Pending" || item.Status == "pending")
-                                    {
-                                        <button onclick="approvePayment(@item.Id)" class="group/btn relative overflow-hidden bg-slate-900 hover:bg-emerald-600 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-emerald-500/30 active:scale-95 flex items-center gap-2">
-                                            <i class="fas fa-check-circle"></i>
-                                            <span>Approve</span>
-                                        </button>
-                                    }
-                                    else if (item.Status == "Approved")
-                                    {
-                                        <span class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-xl font-semibold uppercase tracking-widest text-[10px]">
-                                            <i class="fas fa-check text-emerald-600"></i>
-                                            Approved
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="inline-flex items-center px-4 py-2 bg-slate-100 text-slate-500 rounded-xl font-bold italic">
-                                            @item.Status
-                                        </span>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="7" class="px-6 py-20 text-center">
-                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas fa-check text-slate-300 text-2xl"></i>
-                                </div>
-                                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-widest">All Caught Up</h3>
-                                <p class="text-xs font-medium text-slate-400 mt-1">No pending withdrawal requests found.</p>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    <!-- Info Banner -->
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-start gap-3">
+        <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+        <div>
+            <p class="text-sm font-bold text-blue-800">Manual Transfer Required</p>
+            <p class="text-xs text-blue-600 mt-1 leading-relaxed">
+                Transfer the <strong>Net Amount</strong> to the doctor's bank account shown below, then click Approve and enter the bank reference number. Platform commission has already been deducted.
+            </p>
         </div>
     </div>
-</div>
 
-<!-- Debug Info Container -->
-<div class="mt-12 p-6 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
-    <div class="flex items-center gap-3 mb-4">
-        <div class="p-2 bg-slate-200 rounded-lg">
-            <i data-lucide="terminal" class="w-4 h-4 text-slate-600"></i>
+    @if (!Model.Any())
+    {
+        <div class="bg-white rounded-[2rem] border border-gray-100 p-20 text-center">
+            <div class="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-gray-300">
+                <i data-lucide="banknote" class="w-10 h-10"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900">No Pending Requests</h3>
+            <p class="text-gray-400 text-sm mt-2">All withdrawal requests have been processed.</p>
         </div>
-        <h2 class="text-sm font-semibold text-slate-800 uppercase tracking-widest">Debug Console</h2>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-            <span class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Total DB Transactions</span>
-            <span class="text-2xl font-semibold text-slate-800">@ViewBag.DebugTotalCount</span>
-        </div>
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-            <span class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Total Recorded Withdrawals</span>
-            <span class="text-2xl font-semibold text-emerald-600">@ViewBag.DebugPendingCount</span>
-        </div>
-    </div>
-    
-    <div class="mt-4 p-4 bg-slate-900 rounded-2xl">
-        <code class="text-xs text-slate-300 font-mono">
-            // Current SQL Filter<br/>
-            SELECT * FROM WalletTransactions WHERE TransactionType = 'WITHDRAWAL' AND (Status = 'Pending' OR Status = 'pending' OR Status = 'Approved')
-        </code>
-    </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
-    });
-
-    async function approvePayment(id) {
-        if (!confirm('Are you sure you want to approve this payment? This action cannot be undone.')) return;
-
-        const row = document.getElementById(`row-${id}`);
-        // Optimistic UI interaction
-        row.classList.add('opacity-50', 'pointer-events-none');
-        
-        try {
-            const formData = new FormData();
-            formData.append('id', id);
-
-            const response = await fetch('@Url.Action("ApproveWithdrawal", "Admin")', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                // Success State
-                row.classList.remove('opacity-50', 'pointer-events-none');
-                row.classList.add('bg-emerald-50/50', 'transition-all', 'duration-500');
-                
-                // Refresh to show updated statuses
-                location.reload(); 
-            } else {
-                alert('Failed to approve payment. Please try again.');
-                row.classList.remove('opacity-50', 'pointer-events-none');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred.');
-            row.classList.remove('opacity-50', 'pointer-events-none');
-        }
     }
-</script>
+    else
+    {
+        <div class="space-y-4">
+            @foreach (var req in Model)
+            {
+                var isPending = req.Status == "Pending" || req.Status == "pending";
+                var bank = bankInfo.ContainsKey(req.DoctorId ?? "") ? bankInfo[req.DoctorId!] : ("—", "—", "—");
+                var netAmt = req.NetAmount > 0 ? req.NetAmount : req.Amount;
+                var borderColor = isPending ? "border-amber-200" : "border-emerald-200";
+                var statusBg = isPending ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-emerald-50 text-emerald-700 border-emerald-200";
+
+                <div class="bg-white rounded-[2rem] border @borderColor border-l-4 shadow-sm p-6 space-y-5" id="req-@req.Id">
+
+                    <!-- Top row: Doctor + Status -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg uppercase">
+                                @(req.Doctor?.FirstName?.FirstOrDefault() ?? 'D')
+                            </div>
+                            <div>
+                                <h4 class="text-base font-bold text-gray-900">@(req.Doctor?.FullName ?? req.Doctor?.Email ?? "Unknown Doctor")</h4>
+                                <p class="text-xs text-gray-400 font-medium">@req.Doctor?.Email</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest border @statusBg">
+                                @req.Status
+                            </span>
+                            <span class="text-xs text-gray-400">@req.TransactionDate.ToString("MMM dd, yyyy hh:mm tt")</span>
+                        </div>
+                    </div>
+
+                    <!-- Amount breakdown -->
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-gray-50 rounded-2xl p-4 text-center border border-gray-100">
+                            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Requested</p>
+                            <p class="text-lg font-bold text-gray-900">PKR @req.Amount.ToString("N0")</p>
+                        </div>
+                        <div class="bg-red-50 rounded-2xl p-4 text-center border border-red-100">
+                            <p class="text-[9px] font-bold text-red-400 uppercase tracking-widest mb-1">Platform Fee</p>
+                            <p class="text-lg font-bold text-red-600">- PKR @req.PlatformFee.ToString("N0")</p>
+                        </div>
+                        <div class="bg-emerald-50 rounded-2xl p-4 text-center border border-emerald-100">
+                            <p class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest mb-1">Transfer Amount</p>
+                            <p class="text-xl font-black text-emerald-700">PKR @netAmt.ToString("N0")</p>
+                        </div>
+                    </div>
+
+                    <!-- Bank Details -->
+                    <div class="bg-slate-900 rounded-2xl p-5 text-white relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-5">
+                            <i data-lucide="credit-card" class="w-20 h-20"></i>
+                        </div>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i data-lucide="landmark" class="w-3.5 h-3.5"></i> Bank Transfer Details
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
+                            <div>
+                                <p class="text-[9px] text-slate-400 font-semibold uppercase tracking-widest mb-1">Bank</p>
+                                <p class="text-sm font-bold text-white">@bank.Item1</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] text-slate-400 font-semibold uppercase tracking-widest mb-1">Account Title</p>
+                                <p class="text-sm font-bold text-white">@bank.Item2</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] text-slate-400 font-semibold uppercase tracking-widest mb-1">IBAN / Account No.</p>
+                                <p class="text-sm font-bold text-emerald-400 font-mono tracking-wider">@bank.Item3</p>
+                                <button onclick="copyToClipboard('@bank.Item3', this)" class="mt-1 text-[9px] text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+                                    <i data-lucide="copy" class="w-3 h-3"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(req.Description))
+                    {
+                        <p class="text-xs text-gray-400 italic px-1">@req.Description</p>
+                    }
+
+                    @if (req.ProcessedDate.HasValue)
+                    {
+                        <p class="text-xs text-gray-400 px-1">
+                            <span class="font-semibold">Processed:</span> @req.ProcessedDate.Value.ToString("MMM dd, yyyy hh:mm tt") by @req.ProcessedBy
+                        </p>
+                    }
+
+                    <!-- Action -->
+                    @if (isPending)
+                    {
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-2 border-t border-gray-100">
+                            <input type="text" id="ref-@req.Id"
+                                   class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
+                                   placeholder="Bank transaction reference # (optional)" />
+                            <button onclick="approveWithdrawal(@req.Id)"
+                                    class="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-700 active:scale-95 transition-all shadow-lg shadow-emerald-600/20 flex items-center gap-2 whitespace-nowrap">
+                                <i data-lucide="check" class="w-4 h-4"></i>
+                                Mark as Transferred
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i data-lucide="check" class="w-3 h-3 inline"></i> Copied!';
+                btn.classList.add('text-emerald-400');
+                lucide.createIcons();
+                setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('text-emerald-400'); lucide.createIcons(); }, 2000);
+            });
+        }
+
+        async function approveWithdrawal(id) {
+            const refInput = document.getElementById('ref-' + id);
+            const paymentRef = refInput ? refInput.value.trim() : '';
+
+            const confirmed = await PremiumModal.confirm(
+                `Have you transferred the funds to the doctor's bank account?\n\nOnce approved, this cannot be undone.`,
+                'Confirm Approval'
+            );
+            if (!confirmed) return;
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                const params = new URLSearchParams({ paymentReference: paymentRef });
+
+                const resp = await fetch(`/Admin/Admin/ApproveWithdrawal/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token ?? ''
+                    },
+                    body: params.toString()
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    const card = document.getElementById('req-' + id);
+                    if (card) {
+                        card.classList.add('opacity-50', 'pointer-events-none', 'scale-95', 'transition-all', 'duration-500');
+                        setTimeout(() => card.remove(), 600);
+                    }
+                    showToast('Payment marked as transferred ✓', 'success');
+                } else {
+                    await PremiumModal.error(data.message || 'Approval failed', 'Error');
+                }
+            } catch (err) {
+                console.error(err);
+                await PremiumModal.error('Network error. Please try again.', 'Error');
+            }
+        }
+
+        function showToast(msg, type = 'success') {
+            const t = document.createElement('div');
+            t.className = `fixed bottom-6 right-6 px-6 py-3 rounded-2xl text-white text-sm font-bold shadow-2xl z-[200] animate-in slide-in-from-bottom duration-300 ${type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`;
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+    </script>
+    @Html.AntiForgeryToken()
+}

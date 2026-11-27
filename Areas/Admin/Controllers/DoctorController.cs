@@ -269,6 +269,8 @@ namespace MedLinkPortal.Areas.Admin.Controllers
                 PMDCValidityDate = user.PMDCValidityDate,
                 Qualification = user.Qualification,
                 BankAccountNumber = user.BankAccountNumber,
+                BankAccountTitle = user.BankAccountTitle,
+                BankName = user.BankName,
                 TermsConsent = user.TermsConsent,
 
                 // Documents

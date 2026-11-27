@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using MedLinkPortal.Models;
 using MedLinkPortal.Areas.Admin.Models;
+using Microsoft.AspNetCore.Identity;
+using MedLinkPortal.Areas.Identity.Pages.Account;
 
 namespace MedLinkPortal.Areas.Admin.Controllers
 {
@@ -13,11 +15,13 @@ namespace MedLinkPortal.Areas.Admin.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AdminController(ApplicationDbContext context, IDbContextFactory<ApplicationDbContext> contextFactory)
+        public AdminController(ApplicationDbContext context, IDbContextFactory<ApplicationDbContext> contextFactory, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _contextFactory = contextFactory;
+            _userManager = userManager;
         }
         public async Task<IActionResult> Index()
         {
@@ -222,14 +226,33 @@ namespace MedLinkPortal.Areas.Admin.Controllers
                 .OrderByDescending(t => t.TransactionDate)
                 .ToListAsync();
 
+            // Load bank details for each doctor (decrypted via UserManager)
+            var doctorBankInfo = new Dictionary<string, (string BankName, string AccountTitle, string IBAN)>();
+            foreach (var req in requests)
+            {
+                if (req.DoctorId != null && !doctorBankInfo.ContainsKey(req.DoctorId))
+                {
+                    var user = await _userManager.FindByIdAsync(req.DoctorId);
+                    if (user != null)
+                    {
+                        doctorBankInfo[req.DoctorId] = (
+                            user.BankName ?? "—",
+                            user.BankAccountTitle ?? "—",
+                            user.BankAccountNumber ?? "—"
+                        );
+                    }
+                }
+            }
+
             ViewBag.DebugTotalCount = allCount;
             ViewBag.DebugPendingCount = pendingWithdrawCount;
+            ViewBag.DoctorBankInfo = doctorBankInfo;
 
             return View(requests);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ApproveWithdrawal(int id)
+        public async Task<IActionResult> ApproveWithdrawal(int id, string? paymentReference = null)
         {
             var strategy = _context.Database.CreateExecutionStrategy();
 
@@ -250,16 +273,24 @@ namespace MedLinkPortal.Areas.Admin.Controllers
                     walletTx.ProcessedDate = DateTime.Now;
                     walletTx.ProcessedBy = User.Identity?.Name ?? "Admin";
 
-                    // Update Doctor's Total Withdrawn
+                    // Append payment reference if provided
+                    if (!string.IsNullOrWhiteSpace(paymentReference))
+                    {
+                        walletTx.Description = (walletTx.Description ?? "") + $" | Ref: {paymentReference}";
+                    }
+
+                    // Update Doctor's financials — WalletBalance already deducted at withdrawal request time
+                    // (DoctorController.RequestWithdrawal deducts balance on request)
+                    // We only need to increment TotalWithdrawn here
                     if (walletTx.Doctor != null)
                     {
-                        walletTx.Doctor.TotalWithdrawn += walletTx.Amount;
+                        walletTx.Doctor.TotalWithdrawn += walletTx.NetAmount > 0 ? walletTx.NetAmount : walletTx.Amount;
                     }
 
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 
-                    return Json(new { success = true, message = "Withdrawal request approved successfully." });
+                    return Json(new { success = true, message = "Withdrawal approved and payment recorded successfully." });
                 }
                 catch (Exception ex)
                 {
@@ -327,6 +358,143 @@ namespace MedLinkPortal.Areas.Admin.Controllers
             ViewBag.TotalAccessLogs = totalLogs;
 
             return View(accessLogs);
+        }
+
+        // ── Live Presence Dashboard ──────────────────────────────────────────
+
+        [HttpGet]
+        public IActionResult LivePresence()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLivePresenceData()
+        {
+            var fifteenMinAgo = DateTime.UtcNow.AddMinutes(-15);
+            var today = DateTime.UtcNow.Date;
+
+            // ── Doctors ──────────────────────────────────────────────────────
+            var doctors = await _context.Doctors
+                .AsNoTracking()
+                .Include(d => d.User)
+                .Where(d => !d.IsSuspended)
+                .ToListAsync();
+
+            var doctorData = doctors.Select(d =>
+            {
+                // Determine login source: if has active SignalR → portal, else check mobile via JWT session marker
+                var isOnlinePortal = d.User != null && !string.IsNullOrEmpty(d.User.ActiveSignalRConnectionId);
+                var isOnline = d.Online || isOnlinePortal;
+
+                string statusLabel;
+                string statusClass;
+                if (d.IsInConsultation)
+                {
+                    statusLabel = "In Consultation";
+                    statusClass = "consultation";
+                }
+                else if (isOnline)
+                {
+                    statusLabel = isOnlinePortal ? "Online (Portal)" : "Online (App)";
+                    statusClass = "online";
+                }
+                else
+                {
+                    statusLabel = "Offline";
+                    statusClass = "offline";
+                }
+
+                return new
+                {
+                    id = d.Id,
+                    name = d.Name,
+                    specialty = d.Specialty,
+                    image = d.Image,
+                    status = statusLabel,
+                    statusClass,
+                    isInConsultation = d.IsInConsultation,
+                    isOnline,
+                    isOnlinePortal,
+                    todayAppointments = _context.Appointments
+                        .Count(a => a.DoctorId == d.Id && a.AppointmentDate.Date == today),
+                    completedToday = _context.Appointments
+                        .Count(a => a.DoctorId == d.Id && a.AppointmentDate.Date == today && a.Status == "Completed"),
+                };
+            }).OrderByDescending(d => d.isInConsultation)
+              .ThenByDescending(d => d.isOnline)
+              .ToList();
+
+            // ── Patients (active sessions) ─────────────────────────────────
+            var activeSessions = await _context.UserSessions
+                .AsNoTracking()
+                .Where(s => !s.IsRevoked && s.LastSeen >= fifteenMinAgo)
+                .ToListAsync();
+
+            var activeUserIds = activeSessions.Select(s => s.UserId).Distinct().ToList();
+
+            // Exclude doctors and admins — get patients only
+            var doctorUserIds = doctors.Select(d => d.UserId).Where(id => id != null).ToList();
+            var patientUserIds = activeUserIds.Except(doctorUserIds).ToList();
+
+            var patientUsers = await _context.Users
+                .AsNoTracking()
+                .Where(u => patientUserIds.Contains(u.Id))
+                .ToListAsync();
+
+            var patientData = patientUsers.Select(u =>
+            {
+                var session = activeSessions
+                    .Where(s => s.UserId == u.Id)
+                    .OrderByDescending(s => s.LastSeen)
+                    .FirstOrDefault();
+
+                // Check if patient is in active consultation
+                var inConsultation = _context.Appointments
+                    .Any(a => a.UserId == u.Id
+                        && a.AppointmentDate.Date == today
+                        && a.Status == "Confirmed"
+                        && a.AppointmentDate <= DateTime.UtcNow.AddMinutes(30)
+                        && a.AppointmentDate >= DateTime.UtcNow.AddMinutes(-60));
+
+                var lastSeenMinutes = session != null
+                    ? (int)(DateTime.UtcNow - session.LastSeen).TotalMinutes
+                    : 999;
+
+                string statusLabel = inConsultation ? "In Consultation" :
+                                     lastSeenMinutes <= 2 ? "Active Now" :
+                                     lastSeenMinutes <= 15 ? $"Active {lastSeenMinutes}m ago" : "Recently Active";
+
+                return new
+                {
+                    id = u.Id,
+                    name = u.FullName ?? u.Email ?? "Patient",
+                    email = u.Email,
+                    image = u.ProfileImage,
+                    deviceName = session?.DeviceName ?? "Unknown",
+                    lastSeen = session?.LastSeen,
+                    lastSeenMinutes,
+                    inConsultation,
+                    status = statusLabel,
+                    statusClass = inConsultation ? "consultation" :
+                                  lastSeenMinutes <= 5 ? "online" : "recent",
+                };
+            }).OrderByDescending(p => p.inConsultation)
+              .ThenBy(p => p.lastSeenMinutes)
+              .ToList();
+
+            // ── Summary Stats ──────────────────────────────────────────────
+            var stats = new
+            {
+                totalOnlineDoctors = doctorData.Count(d => d.isOnline),
+                inConsultationDoctors = doctorData.Count(d => d.isInConsultation),
+                freeDoctors = doctorData.Count(d => d.isOnline && !d.isInConsultation),
+                offlineDoctors = doctorData.Count(d => !d.isOnline),
+                activePatients = patientData.Count,
+                patientsInConsultation = patientData.Count(p => p.inConsultation),
+            };
+
+            return Json(new { doctors = doctorData, patients = patientData, stats });
         }
     }
 }

@@ -140,7 +140,11 @@ namespace MedLinkPortal.Controllers
                     rating = doctor.Rating,
                     hospitalAffiliations = doctor.HospitalAffiliations,
                     clinicName = doctor.ClinicName,
-                    availability = doctor.Availability
+                    availability = doctor.Availability,
+                    online = doctor.Online,
+                    isInConsultation = doctor.IsInConsultation,
+                    isInstantAvailable = doctor.Online && !doctor.IsInConsultation,
+                    consultationFee = doctor.User != null ? doctor.User.ConsultationFee : 2000
                 })
             });
         }
@@ -1015,6 +1019,31 @@ namespace MedLinkPortal.Controllers
             }
             
             ViewBag.NextAvailableSlot = nextSlot;
+
+            // Pass appointment info for clinic details gate
+            var userId = _userManager.GetUserId(User);
+            var hasAppointmentWithDoctor = await _context.Appointments
+                .AnyAsync(a => a.UserId == userId
+                    && a.DoctorId == doctor.Id
+                    && a.Status != "Cancelled"
+                    && a.Status != "Rejected");
+
+            var latestApptWithDoctor = hasAppointmentWithDoctor
+                ? await _context.Appointments
+                    .Where(a => a.UserId == userId && a.DoctorId == doctor.Id
+                        && a.Status != "Cancelled" && a.Status != "Rejected")
+                    .OrderByDescending(a => a.AppointmentDate)
+                    .FirstOrDefaultAsync()
+                : null;
+
+            ViewBag.HasAppointmentWithDoctor = hasAppointmentWithDoctor;
+            ViewBag.LatestAppointmentId = latestApptWithDoctor?.Id ?? 0;
+
+            // Show toast if redirected here due to denied clinic access
+            if (TempData["ClinicAccessDenied"] != null)
+            {
+                ViewBag.ClinicAccessDeniedFor = TempData["ClinicAccessDenied"]?.ToString();
+            }
             
             return View(model);
         }
@@ -1550,21 +1579,27 @@ namespace MedLinkPortal.Controllers
                     };
                     _context.AdminBillings.Add(billing);
 
-                    // --- Credit Doctor Wallet ---
+                    // --- Credit Doctor Wallet (after platform commission) ---
                     if (appointment.Doctor != null && !string.IsNullOrEmpty(appointment.Doctor.UserId))
                     {
                         var doctorUser = await _userManager.FindByIdAsync(appointment.Doctor.UserId);
                         if (doctorUser != null)
                         {
-                            var amountTotal = (session.AmountTotal ?? 0) / 100m;
-                            doctorUser.WalletBalance += amountTotal;
+                            var grossAmount = (session.AmountTotal ?? 0) / 100m;
+                            var commissionPct = _configuration.GetValue<decimal>("Platform:CommissionPercent", 15m);
+                            var platformFee = Math.Round(grossAmount * commissionPct / 100m, 2);
+                            var netAmount = grossAmount - platformFee;
+
+                            doctorUser.WalletBalance += netAmount;
                             
                             var walletTx = new WalletTransaction
                             {
                                 DoctorId = appointment.Doctor.UserId,
-                                Amount = amountTotal,
+                                Amount = grossAmount,
+                                PlatformFee = platformFee,
+                                NetAmount = netAmount,
                                 TransactionType = "EARNING",
-                                Description = $"Consultation Earning from {appointment.PatientName}",
+                                Description = $"Consultation Earning from {appointment.PatientName} (Platform fee: PKR {platformFee:N2} @ {commissionPct}%)",
                                 Status = "Completed",
                                 TransactionDate = DateTime.Now,
                                 AppointmentId = appointment.Id
@@ -1638,6 +1673,19 @@ namespace MedLinkPortal.Controllers
                 .FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
 
             if (appointment == null) return RedirectToAction("Consultations");
+
+            // Guard: clinic details only accessible if patient has a booked appointment
+            var hasActiveAppointment = await _context.Appointments
+                .AnyAsync(a => a.UserId == userId
+                    && a.DoctorId == appointment.DoctorId
+                    && a.Status != "Cancelled"
+                    && a.Status != "Rejected");
+
+            if (!hasActiveAppointment)
+            {
+                TempData["ClinicAccessDenied"] = appointment.Doctor?.Name ?? "this doctor";
+                return RedirectToAction("DoctorProfile", new { id = appointment.DoctorId });
+            }
 
             var model = await GetBaseModelAsync();
             model.SelectedDoctor = appointment.Doctor;

@@ -1,0 +1,103 @@
+@model IEnumerable<MedLinkPortal.Models.VisaApplication>
+@using MedLinkPortal.Models
+@{
+    ViewData["Title"] = "Visa Applications";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6 max-w-[1600px] mx-auto space-y-6 animate-in fade-in duration-700">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+                <i data-lucide="file-text" class="w-7 h-7 text-indigo-600"></i>
+                Visa Applications
+            </h1>
+            <p class="text-sm text-gray-400 font-medium mt-1">Manage inbound patient medical visa requests</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-700 uppercase tracking-widest">
+                @ViewBag.PendingCount Pending
+            </div>
+            <div class="px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-700 uppercase tracking-widest">
+                @ViewBag.ApprovedCount Approved
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="bg-white rounded-[2rem] p-20 text-center border border-gray-100">
+            <div class="w-16 h-16 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-4 text-gray-300">
+                <i data-lucide="file-x" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900">No Visa Applications Yet</h3>
+            <p class="text-gray-400 text-sm mt-2">Applications submitted by patients will appear here</p>
+        </div>
+    }
+    else
+    {
+        <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="text-left px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Reference</th>
+                        <th class="text-left px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Applicant</th>
+                        <th class="text-left px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Treatment</th>
+                        <th class="text-left px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Nationality</th>
+                        <th class="text-left px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
+                        <th class="text-left px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Date</th>
+                        <th class="text-right px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @foreach (var app in Model)
+                    {
+                        var (statusBg, statusText) = app.Status switch
+                        {
+                            VisaStatus.Submitted => ("bg-amber-50 text-amber-700 border-amber-200", "Submitted"),
+                            VisaStatus.DocumentsUnderReview => ("bg-blue-50 text-blue-700 border-blue-200", "Under Review"),
+                            VisaStatus.InvitationIssued => ("bg-indigo-50 text-indigo-700 border-indigo-200", "Invitation Issued"),
+                            VisaStatus.EmbassySubmitted => ("bg-purple-50 text-purple-700 border-purple-200", "Embassy Submitted"),
+                            VisaStatus.VisaApproved => ("bg-emerald-50 text-emerald-700 border-emerald-200", "Approved ✓"),
+                            VisaStatus.VisaRejected => ("bg-red-50 text-red-700 border-red-200", "Rejected"),
+                            _ => ("bg-gray-50 text-gray-600 border-gray-200", app.Status.ToString())
+                        };
+                        <tr class="hover:bg-gray-50/50 transition-all group">
+                            <td class="px-6 py-4">
+                                <span class="text-xs font-black text-indigo-600 font-mono">@app.ReferenceId</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="text-sm font-bold text-gray-900">@app.FullName</p>
+                                <p class="text-[10px] text-gray-400">Passport: @app.PassportNumber</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="text-sm font-medium text-gray-700">@app.TreatmentType</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm font-medium text-gray-600">@app.Nationality</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border @statusBg">@statusText</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="text-xs text-gray-500 font-medium">@app.CreatedAt.ToString("MMM dd, yyyy")</p>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="@Url.Action("Details", "Visa", new { area = "Admin", id = app.Id })"
+                                   class="px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-600 transition-all">
+                                    Review
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>lucide.createIcons();</script>
+}

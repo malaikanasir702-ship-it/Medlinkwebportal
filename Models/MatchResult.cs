@@ -16,6 +16,8 @@ namespace MedLinkPortal.Models
         public int ReviewsCount { get; set; }
         public decimal ConsultationFee { get; set; }
         public bool IsAvailable { get; set; }
+        public bool IsInConsultation { get; set; }
+        public bool IsInstantAvailable { get; set; }
         public List<string> MatchingHighlights { get; set; } = new List<string>();
     }
 

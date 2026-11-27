@@ -350,6 +350,32 @@
                                 <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
                             }
                         </a>
+
+                        <!-- Live Presence Link -->
+                        <a href="@Url.Action("LivePresence", "Admin")"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Action"]?.ToString() == "LivePresence" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-broadcast-tower w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Action"]?.ToString() != "LivePresence" ? "group-hover:text-emerald-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap flex items-center gap-2">
+                                Live Presence
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                            </span>
+                            @if (ViewContext.RouteData.Values["Action"]?.ToString() == "LivePresence") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
+
+                        <!-- Visa Applications Link -->
+                        <a href="@Url.Action("Index", "Visa", new { area = "Admin" })"
+                           class="nav-link group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative overflow-hidden @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Visa" ? "bg-blue-600 text-white shadow-xl shadow-blue-900/40" : "text-slate-400 hover:text-white hover:bg-white/5")">
+                            <i class="fas fa-passport w-5 h-5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 @(ViewContext.RouteData.Values["Controller"]?.ToString() != "Visa" ? "group-hover:text-indigo-400" : "")"></i>
+                            <span class="font-semibold text-sm tracking-tight text-nowrap">Visa Applications</span>
+                            @if (ViewContext.RouteData.Values["Controller"]?.ToString() == "Visa") {
+                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                            }
+                        </a>
                     </nav>
 
                     <!-- ── AI INTELLIGENCE SECTION ────────────────────────────── -->

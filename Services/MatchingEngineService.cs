@@ -67,14 +67,25 @@ namespace MedLinkPortal.Services
                 else { score += 10.0; }
 
                 // 3. Availability score (0-15)
-                if (doc.Online || (doc.Availability != null && doc.Availability.Contains("Today", StringComparison.OrdinalIgnoreCase)))
+                bool isFreeNow = doc.Online && !doc.IsInConsultation;
+                if (isFreeNow)
                 {
                     score += 15.0;
-                    highlights.Add("Available for Immediate Consultation");
+                    highlights.Add("Free Right Now for Instant Consultation");
+                }
+                else if (doc.Online)
+                {
+                    score += 11.0;
+                    highlights.Add("Online Now (In Consultation)");
+                }
+                else if (doc.Availability != null && doc.Availability.Contains("Today", StringComparison.OrdinalIgnoreCase))
+                {
+                    score += 8.0;
+                    highlights.Add("Available Today");
                 }
                 else
                 {
-                    score += 8.0;
+                    score += 5.0;
                 }
 
                 // 4. Rating score (0-10)
@@ -85,7 +96,8 @@ namespace MedLinkPortal.Services
                 // 5. Urgency weighting adjustments (0-10)
                 if (urgency.Equals("Emergency", StringComparison.OrdinalIgnoreCase) || urgency.Equals("Urgent", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (doc.Online) score += 10.0;
+                    if (isFreeNow) score += 10.0;
+                    else if (doc.Online) score += 6.0;
                 }
                 else
                 {
@@ -111,6 +123,8 @@ namespace MedLinkPortal.Services
                     ReviewsCount = doc.Reviews,
                     ConsultationFee = 1500,
                     IsAvailable = doc.Online,
+                    IsInConsultation = doc.IsInConsultation,
+                    IsInstantAvailable = isFreeNow,
                     MatchingHighlights = highlights
                 });
             }

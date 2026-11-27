@@ -72,6 +72,115 @@ namespace MedLinkPortal.Controllers
             return View(model);
         }
 
+        // ── Visa Application Submit ─────────────────────────────────────────
+        [HttpGet]
+        public IActionResult ApplyVisa(int? tourismRequestId)
+        {
+            var model = GetBaseModel();
+            model.ActiveTab = "medical-tourism";
+            ViewBag.TourismRequestId = tourismRequestId;
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApplyVisa(VisaApplication application)
+        {
+            var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId ?? "");
+
+            application.UserId = userId ?? "";
+            application.Status = VisaStatus.Submitted;
+            application.CreatedAt = DateTime.UtcNow;
+
+            // Generate unique reference ID: MLVISA-YYYY-NNNNN
+            var count = await _context.VisaApplications.CountAsync() + 1;
+            application.ReferenceId = $"MLVISA-{DateTime.UtcNow.Year}-{count:D5}";
+
+            // Nullify empty strings
+            application.MedicalReportsUrl ??= "";
+            application.BankStatementUrl ??= "";
+            application.PassportCopyUrl ??= "";
+            application.AdditionalNotes ??= "";
+            application.HospitalName ??= "";
+
+            _context.VisaApplications.Add(application);
+            await _context.SaveChangesAsync();
+
+            // Notify admin
+            var adminUser = await _context.Users
+                .FirstOrDefaultAsync(u => _context.UserRoles
+                    .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, r.Name })
+                    .Any(x => x.UserId == u.Id && x.Name == "Admin"));
+
+            if (adminUser != null)
+            {
+                var notifService = HttpContext.RequestServices.GetService(typeof(Services.INotificationService)) as Services.INotificationService;
+                await notifService!.CreateAndSendNotificationAsync(
+                    adminUser.Id,
+                    "New Visa Application",
+                    $"Ref: {application.ReferenceId} — {application.FullName} ({application.Nationality}) needs visa support for {application.TreatmentType}.",
+                    "passport",
+                    "indigo"
+                );
+            }
+
+            TempData["VisaRef"] = application.ReferenceId;
+            return RedirectToAction("VisaSupport");
+        }
+
+        // ── Visa Tracking (by reference ID) ────────────────────────────────
+        [HttpPost]
+        public async Task<IActionResult> TrackVisa(string referenceId)
+        {
+            var app = await _context.VisaApplications
+                .FirstOrDefaultAsync(v => v.ReferenceId == referenceId);
+
+            if (app == null)
+                return Json(new { success = false, message = "Reference ID not found." });
+
+            var statusSteps = new[]
+            {
+                new { key = "Submitted", label = "Application Submitted", done = (int)app.Status >= 0 },
+                new { key = "DocumentsUnderReview", label = "Documents Under Review", done = (int)app.Status >= 1 },
+                new { key = "InvitationIssued", label = "Invitation Letter Issued", done = (int)app.Status >= 2 },
+                new { key = "EmbassySubmitted", label = "Embassy Submission", done = (int)app.Status >= 3 },
+                new { key = "VisaApproved", label = "Visa Approved", done = (int)app.Status >= 4 },
+            };
+
+            return Json(new
+            {
+                success = true,
+                referenceId = app.ReferenceId,
+                fullName = app.FullName,
+                treatmentType = app.TreatmentType,
+                status = app.Status.ToString(),
+                statusInt = (int)app.Status,
+                adminNotes = app.AdminNotes,
+                invitationLetterUrl = app.InvitationLetterUrl,
+                createdAt = app.CreatedAt.ToString("MMM dd, yyyy"),
+                updatedAt = app.UpdatedAt?.ToString("MMM dd, yyyy"),
+                isRejected = app.Status == VisaStatus.VisaRejected,
+                isCancelled = app.Status == VisaStatus.Cancelled,
+                steps = statusSteps
+            });
+        }
+
+        // ── My Visa Applications ────────────────────────────────────────────
+        public async Task<IActionResult> MyVisaApplications()
+        {
+            var userId = _userManager.GetUserId(User);
+            var applications = await _context.VisaApplications
+                .Where(v => v.UserId == userId)
+                .OrderByDescending(v => v.CreatedAt)
+                .ToListAsync();
+
+            var model = GetBaseModel();
+            model.ActiveTab = "medical-tourism";
+            ViewBag.Applications = applications;
+            return View(model);
+        }
+
         [HttpGet]
         public IActionResult RequestInbound()
         {
@@ -158,9 +267,17 @@ namespace MedLinkPortal.Controllers
             
             if (package == null) return NotFound();
 
+            // Load associated tourism request (to get pre-arrival appointment)
+            var userId = _userManager.GetUserId(User);
+            var tourismRequest = await _context.MedicalTourismRequests
+                .Include(r => r.PreArrivalAppointment)
+                    .ThenInclude(a => a.Doctor)
+                .FirstOrDefaultAsync(r => r.AssignedPackageId == id && r.UserId == userId);
+
             var model = GetBaseModel();
             model.ActiveTab = "medical-tourism";
             ViewBag.Package = package;
+            ViewBag.TourismRequest = tourismRequest;
             return View(model);
         }
 

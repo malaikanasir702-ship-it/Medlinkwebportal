@@ -155,6 +155,111 @@
                 </div>
             </div>
 
+            <!-- Section 4: Hotel Add-On -->
+            <div class="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-slate-200/50" x-data="{ wantsHotel: false }">
+                <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                            <i data-lucide="hotel" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Hotel Accommodation</h3>
+                            <p class="text-sm text-slate-400 font-medium">Add hotel to your medical package</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="WantsHotel" value="true" x-model="wantsHotel" class="sr-only peer" />
+                        <div class="w-14 h-7 bg-slate-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-amber-300/30
+                                    after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all
+                                    peer-checked:after:translate-x-full peer-checked:bg-amber-500"></div>
+                    </label>
+                </div>
+
+                <div x-show="wantsHotel" x-transition class="space-y-5">
+                    <div class="grid grid-cols-3 gap-3">
+                        @foreach (var (tier, desc, emoji) in new[] {
+                            ("Budget", "Comfortable & affordable", "🏨"),
+                            ("Standard", "Mid-range with amenities", "🏩"),
+                            ("Premium", "Luxury 4–5 star hotel", "⭐")
+                        })
+                        {
+                            <label class="cursor-pointer">
+                                <input type="radio" name="HotelPreference" value="@tier" class="peer sr-only" />
+                                <div class="p-4 rounded-2xl border-2 border-slate-100 text-center transition-all
+                                            peer-checked:border-amber-500 peer-checked:bg-amber-50 hover:border-amber-200">
+                                    <div class="text-2xl mb-2">@emoji</div>
+                                    <div class="font-bold text-slate-800 text-sm">@tier</div>
+                                    <div class="text-[11px] text-slate-400 mt-1">@desc</div>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Estimated Nights</label>
+                        <div class="relative">
+                            <i data-lucide="moon" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input type="number" name="HotelNights" min="1" max="90" placeholder="e.g. 7"
+                                   class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-transparent
+                                          focus:bg-white focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10
+                                          transition-all font-bold text-slate-900 placeholder:font-medium placeholder:text-slate-400" />
+                        </div>
+                    </div>
+                </div>
+
+                <p x-show="!wantsHotel" class="text-center text-slate-400 text-sm font-medium py-4">
+                    Toggle on if you need hotel accommodation — we'll include it in your package proposal.
+                </p>
+            </div>
+
+            <!-- Section 5: Transport / Airport Pickup Add-On -->
+            <div class="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-slate-200/50" x-data="{ wantsPickup: false }">
+                <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                            <i data-lucide="car" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Airport Pickup & Transport</h3>
+                            <p class="text-sm text-slate-400 font-medium">We arrange all your transfers in Pakistan</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="WantsAirportPickup" value="true" x-model="wantsPickup" class="sr-only peer" />
+                        <div class="w-14 h-7 bg-slate-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-emerald-300/30
+                                    after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all
+                                    peer-checked:after:translate-x-full peer-checked:bg-emerald-500"></div>
+                    </label>
+                </div>
+
+                <div x-show="wantsPickup" x-transition>
+                    <div class="grid grid-cols-2 gap-3">
+                        @foreach (var (tier, desc, icon) in new[] {
+                            ("Standard", "Comfortable sedan, meet & greet at airport", "car"),
+                            ("VIP", "Premium vehicle with concierge service", "crown")
+                        })
+                        {
+                            <label class="cursor-pointer">
+                                <input type="radio" name="TransportPreference" value="@tier" class="peer sr-only" />
+                                <div class="p-5 rounded-2xl border-2 border-slate-100 transition-all
+                                            peer-checked:border-emerald-500 peer-checked:bg-emerald-50 hover:border-emerald-200">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-400">
+                                            <i data-lucide="@icon" class="w-4 h-4"></i>
+                                        </div>
+                                        <span class="font-bold text-slate-800">@tier</span>
+                                    </div>
+                                    <p class="text-[12px] text-slate-400 leading-relaxed">@desc</p>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <p x-show="!wantsPickup" class="text-center text-slate-400 text-sm font-medium py-4">
+                    Toggle on if you need airport pickup and transfers during your stay in Pakistan.
+                </p>
+            </div>
+
             <!-- Submit Button -->
             <button type="submit" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-lg uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl hover:shadow-2xl hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3">
                 <span>Submit Request</span>

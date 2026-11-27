@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
 using MedLinkPortal.Models;
-using Microsoft.AspNetCore.Authorization; // Added this using directive
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace MedLinkPortal.Hubs
 {
@@ -21,6 +23,24 @@ namespace MedLinkPortal.Hubs
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
             await Clients.OthersInGroup(roomId).SendAsync("UserJoined", Context.ConnectionId);
+
+            try
+            {
+                var userId = Context.UserIdentifier ?? Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
+                    if (doctor != null && !doctor.IsInConsultation)
+                    {
+                        doctor.IsInConsultation = true;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ConsultationHub] JoinRoom status update error: {ex.Message}");
+            }
         }
 
         public async Task SendMessage(string roomId, string user, string message, string type = "text", string attachmentUrl = "", string attachmentName = "", string senderId = "", string receiverId = "")
@@ -102,6 +122,47 @@ namespace MedLinkPortal.Hubs
         public async Task EndCall(string roomId)
         {
             await Clients.Group(roomId).SendAsync("CallEnded", Context.ConnectionId);
+
+            try
+            {
+                var userId = Context.UserIdentifier ?? Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
+                    if (doctor != null && doctor.IsInConsultation)
+                    {
+                        doctor.IsInConsultation = false;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ConsultationHub] EndCall status update error: {ex.Message}");
+            }
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            try
+            {
+                var userId = Context.UserIdentifier ?? Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
+                    if (doctor != null && doctor.IsInConsultation)
+                    {
+                        doctor.IsInConsultation = false;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ConsultationHub] OnDisconnected error: {ex.Message}");
+            }
+
+            await base.OnDisconnectedAsync(exception);
         }
 
         public async Task AnnouncePresence(string roomId)

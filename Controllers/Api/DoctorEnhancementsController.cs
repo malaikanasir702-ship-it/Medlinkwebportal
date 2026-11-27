@@ -21,6 +21,7 @@ public record StaffAddRequest(string Name, string Email, string Phone, string Ro
 public record ReviewReplyRequest(int ReviewId, string ReplyText);
 public record WaitRoomCallRequest(int EntryId);
 public record PatientReportRequest(string PatientId);
+public record JoinWaitingRoomRequest(int AppointmentId);
 
 namespace MedLinkPortal.Controllers.Api
 {
@@ -262,17 +263,22 @@ namespace MedLinkPortal.Controllers.Api
         }
 
         [HttpPost("waiting-room/join")]
-        public async Task<IActionResult> JoinWaitingRoom([FromBody] dynamic body)
+        public async Task<IActionResult> JoinWaitingRoom([FromBody] JoinWaitingRoomRequest req)
         {
             // Called by patient side — doctor's frontend shows them in queue
-            var patientId     = (string)body.patientId;
-            var appointmentId = (int)body.appointmentId;
+            var patientId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(patientId)) return Unauthorized();
+
+            if (req == null || req.AppointmentId <= 0)
+                return BadRequest(new { success = false, message = "Invalid appointment ID" });
+
+            var appointmentId = req.AppointmentId;
 
             var appointment = await _db.Appointments.FindAsync(appointmentId);
-            if (appointment == null) return NotFound();
+            if (appointment == null) return NotFound(new { success = false, message = "Appointment not found" });
 
             var doctor = await _db.Doctors.FirstOrDefaultAsync(d => d.Id == appointment.DoctorId);
-            if (doctor == null) return NotFound();
+            if (doctor == null) return NotFound(new { success = false, message = "Doctor not found" });
 
             // Remove any stale entry for same patient+doctor today
             var stale = await _db.WaitingRoomEntries

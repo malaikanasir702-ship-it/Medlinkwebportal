@@ -167,6 +167,12 @@
                                 <p class="text-base font-semibold @(tx.TransactionType == "EARNING" ? "text-emerald-600" : "text-rose-600")">
                                     @(tx.TransactionType == "EARNING" ? "+" : "-") PKR @tx.Amount.ToString("N2")
                                 </p>
+                                @if (tx.TransactionType == "EARNING" && tx.PlatformFee > 0)
+                                {
+                                    <p class="text-[9px] text-gray-400 font-medium mt-0.5">
+                                        Net: PKR @tx.NetAmount.ToString("N2") <span class="text-rose-400">(Fee: @tx.PlatformFee.ToString("N2"))</span>
+                                    </p>
+                                }
                             </td>
                             <td class="px-8 py-6 text-center">
                                 <span class="px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-widest border @(tx.Status == "Approved" || tx.Status == "Completed" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : tx.Status == "Pending" ? "bg-amber-50 text-amber-600 border-amber-100" : "bg-rose-50 text-rose-600 border-rose-100")">
@@ -221,7 +227,7 @@
                 <div class="flex gap-3">
                     <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0"></i>
                     <p class="text-[10px] text-blue-700 font-bold leading-relaxed">
-                        Withdrawals are typically processed within 24-48 business hours to your registered bank account. A 2% platform fee will be deducted.
+                        Withdrawals are typically processed within 24-48 business hours to your registered bank account. A 2% withdrawal processing fee will be deducted. Note: A 15% platform commission is already deducted when earnings are credited to your wallet.
                     </p>
                 </div>
             </div>

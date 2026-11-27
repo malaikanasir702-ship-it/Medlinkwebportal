@@ -171,11 +171,49 @@ STRICT RULES FOR BREVITY & CONVERSATION:
                     (aiReply.Contains(spec, StringComparison.OrdinalIgnoreCase) && aiReply.Contains("specialist", StringComparison.OrdinalIgnoreCase)))
                 {
                     response.IsComplete = true;
-                    response.SuggestedDoctors = await _db.Doctors
-                        .Where(d => d.Specialty.ToLower().Contains(spec.ToLower()) || spec.ToLower().Contains(d.Specialty.ToLower()))
+
+                    // 1. Primary Filter: Online & Free right now (NotInConsultation)
+                    var freeDoctors = await _db.Doctors
+                        .Where(d => (d.Specialty.ToLower().Contains(spec.ToLower()) || spec.ToLower().Contains(d.Specialty.ToLower()))
+                                    && d.Online == true
+                                    && d.IsInConsultation == false
+                                    && d.IsSuspended == false)
                         .OrderByDescending(d => d.Rating)
                         .Take(5)
                         .ToListAsync();
+
+                    if (freeDoctors.Any())
+                    {
+                        response.SuggestedDoctors = freeDoctors;
+                    }
+                    else
+                    {
+                        // 2. Fallback: Online doctors who might currently be in consultation
+                        var onlineDoctors = await _db.Doctors
+                            .Where(d => (d.Specialty.ToLower().Contains(spec.ToLower()) || spec.ToLower().Contains(d.Specialty.ToLower()))
+                                        && d.Online == true
+                                        && d.IsSuspended == false)
+                            .OrderByDescending(d => d.Rating)
+                            .Take(5)
+                            .ToListAsync();
+
+                        if (onlineDoctors.Any())
+                        {
+                            response.SuggestedDoctors = onlineDoctors;
+                            aiReply += "\n\n(Note: Abhi is specialty ke direct free doctor available nahi hain, lekin ye doctors online hain. Aap booking kar sakte hain, thodi der mein turn aa jayegi.)";
+                            response.Reply = aiReply;
+                        }
+                        else
+                        {
+                            // 3. General Fallback
+                            response.SuggestedDoctors = await _db.Doctors
+                                .Where(d => (d.Specialty.ToLower().Contains(spec.ToLower()) || spec.ToLower().Contains(d.Specialty.ToLower()))
+                                            && d.IsSuspended == false)
+                                .OrderByDescending(d => d.Rating)
+                                .Take(5)
+                                .ToListAsync();
+                        }
+                    }
                     break;
                 }
             }

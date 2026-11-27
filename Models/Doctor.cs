@@ -30,6 +30,7 @@ namespace MedLinkPortal.Models
         public string Availability { get; set; }
 
         public bool Online { get; set; }
+        public bool IsInConsultation { get; set; } = false;
 
         [StringLength(1000)]
         public string Description { get; set; }

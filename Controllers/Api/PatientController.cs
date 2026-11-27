@@ -420,6 +420,110 @@ namespace MedLinkPortal.Controllers.Api
             }
         }
 
+        [HttpGet("free-doctors-now")]
+        public async Task<IActionResult> GetFreeDoctorsNow(
+            [FromQuery] string? specialty = null,
+            [FromQuery] bool nearMe = false)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                var request = HttpContext.Request;
+                var host = request.Headers["X-Forwarded-Host"].FirstOrDefault() ?? request.Host.ToUriComponent();
+                var scheme = request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? request.Scheme;
+                var baseUrl = $"{scheme}://{host}";
+
+                var currentUser = !string.IsNullOrEmpty(userId) ? await _userManager.FindByIdAsync(userId) : null;
+
+                var query = _context.Doctors
+                    .Include(d => d.User)
+                    .Where(d => d.Online && !d.IsInConsultation && !d.IsSuspended);
+
+                if (!string.IsNullOrWhiteSpace(specialty))
+                {
+                    var specLower = specialty.Trim().ToLower();
+                    query = query.Where(d => d.Specialty.ToLower().Contains(specLower) || specLower.Contains(d.Specialty.ToLower()));
+                }
+
+                if (nearMe && currentUser != null && !string.IsNullOrEmpty(currentUser.City))
+                {
+                    query = query.Where(d => d.UserId == null || (d.User != null && d.User.City == currentUser.City));
+                }
+
+                var freeDoctorsRaw = await query
+                    .OrderByDescending(d => d.Rating)
+                    .Take(10)
+                    .ToListAsync();
+
+                var profiles = await _context.PhysicianCredentialProfiles.ToDictionaryAsync(p => p.DoctorUserId, p => p);
+
+                var results = freeDoctorsRaw.Select(d => {
+                    var cred = d.UserId != null && profiles.ContainsKey(d.UserId) ? profiles[d.UserId] : null;
+                    return new {
+                        Id = d.Id,
+                        UserId = d.UserId,
+                        Name = d.Name,
+                        Image = GetAbsoluteUrl(d.Image, baseUrl) ?? $"https://ui-avatars.com/api/?name={d.Name}&background=random",
+                        Specialty = d.Specialty,
+                        Rating = d.Rating > 0 ? d.Rating : 4.9,
+                        Reviews = d.Reviews > 0 ? d.Reviews : 15,
+                        Experience = d.Experience ?? "Specialist",
+                        Availability = "Available Now",
+                        ConsultationFee = d.User != null ? d.User.ConsultationFee : 2000,
+                        Online = true,
+                        IsInConsultation = false,
+                        IsInstantAvailable = true,
+                        EstimatedWait = 0,
+                        EstimatedWaitMinutes = 0,
+                        CredentialScore = cred?.CredentialScore ?? 85.0,
+                        TierLevel = cred?.TierLevel ?? "Senior"
+                    };
+                }).ToList();
+
+                // If no doctor is completely free right now for the requested specialty,
+                // fallback to online doctors with estimated wait time so the patient is never left stranded
+                if (!results.Any() && !string.IsNullOrWhiteSpace(specialty))
+                {
+                    var specLower = specialty.Trim().ToLower();
+                    var busyDoctorsRaw = await _context.Doctors
+                        .Include(d => d.User)
+                        .Where(d => d.Online && !d.IsSuspended && (d.Specialty.ToLower().Contains(specLower) || specLower.Contains(d.Specialty.ToLower())))
+                        .OrderByDescending(d => d.Rating)
+                        .Take(5)
+                        .ToListAsync();
+
+                    results = busyDoctorsRaw.Select(d => {
+                        var cred = d.UserId != null && profiles.ContainsKey(d.UserId) ? profiles[d.UserId] : null;
+                        return new {
+                            Id = d.Id,
+                            UserId = d.UserId,
+                            Name = d.Name,
+                            Image = GetAbsoluteUrl(d.Image, baseUrl) ?? $"https://ui-avatars.com/api/?name={d.Name}&background=random",
+                            Specialty = d.Specialty,
+                            Rating = d.Rating > 0 ? d.Rating : 4.8,
+                            Reviews = d.Reviews > 0 ? d.Reviews : 12,
+                            Experience = d.Experience ?? "Specialist",
+                            Availability = "In Consultation (Short Wait)",
+                            ConsultationFee = d.User != null ? d.User.ConsultationFee : 2000,
+                            Online = true,
+                            IsInConsultation = d.IsInConsultation,
+                            IsInstantAvailable = false,
+                            EstimatedWait = 10,
+                            EstimatedWaitMinutes = 10,
+                            CredentialScore = cred?.CredentialScore ?? 80.0,
+                            TierLevel = cred?.TierLevel ?? "Senior"
+                        };
+                    }).ToList();
+                }
+
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Failed to load free doctors right now." });
+            }
+        }
+
         [HttpGet("doctors/{id}")]
         public async Task<IActionResult> GetDoctorProfile(int id)
         {
@@ -602,21 +706,41 @@ namespace MedLinkPortal.Controllers.Api
             var doctorUser = await _userManager.FindByIdAsync(doctor.UserId ?? "");
             var fee = (long)((doctorUser?.ConsultationFee ?? 2000) * 100); // Stripe expects cents
 
-            // Validate that the slot is not already booked
-            var normalizedSlotSession = NormalizeTimeSlot(request.TimeSlot);
-            var cutoffSession = DateTime.Now.AddMinutes(-30);
-            var existingSessionBookings = await _context.Appointments
-                .Where(a => a.DoctorId == doctor.Id &&
-                            a.AppointmentDate.Date == request.Date.Date &&
-                            a.Status != "Cancelled" && a.Status != "Rejected")
-                .ToListAsync();
-
-            if (existingSessionBookings.Any(a =>
-                (a.Status == "Confirmed" || a.Status == "Scheduled" || a.Status == "Paid" || a.Status == "Completed" ||
-                 ((a.Status == "Pending" || a.Status == "PendingPayment" || a.Status == "Pending Payment") && a.CreatedAt >= cutoffSession)) &&
-                NormalizeTimeSlot(a.TimeSlot) == normalizedSlotSession))
+            if (request.InstantBooking)
             {
-                return BadRequest(new { success = false, message = "This time slot is already booked by another patient. Please select another slot." });
+                if (!doctor.Online)
+                {
+                    return BadRequest(new { success = false, message = "Doctor is currently offline. Please choose another doctor." });
+                }
+                if (doctor.IsInConsultation)
+                {
+                    return BadRequest(new { success = false, message = "Doctor is currently in another consultation. Please wait a moment or select another doctor." });
+                }
+
+                request.Date = DateTime.Today;
+                if (string.IsNullOrWhiteSpace(request.TimeSlot) || request.TimeSlot.Equals("Instant", StringComparison.OrdinalIgnoreCase) || request.TimeSlot.Equals("NOW", StringComparison.OrdinalIgnoreCase))
+                {
+                    request.TimeSlot = DateTime.Now.ToString("hh:mm tt");
+                }
+            }
+            else
+            {
+                // Validate that the slot is not already booked
+                var normalizedSlotSession = NormalizeTimeSlot(request.TimeSlot);
+                var cutoffSession = DateTime.Now.AddMinutes(-30);
+                var existingSessionBookings = await _context.Appointments
+                    .Where(a => a.DoctorId == doctor.Id &&
+                                a.AppointmentDate.Date == request.Date.Date &&
+                                a.Status != "Cancelled" && a.Status != "Rejected")
+                    .ToListAsync();
+
+                if (existingSessionBookings.Any(a =>
+                    (a.Status == "Confirmed" || a.Status == "Scheduled" || a.Status == "Paid" || a.Status == "Completed" ||
+                     ((a.Status == "Pending" || a.Status == "PendingPayment" || a.Status == "Pending Payment") && a.CreatedAt >= cutoffSession)) &&
+                    NormalizeTimeSlot(a.TimeSlot) == normalizedSlotSession))
+                {
+                    return BadRequest(new { success = false, message = "This time slot is already booked by another patient. Please select another slot." });
+                }
             }
 
             // Create temporary appointment
@@ -700,21 +824,41 @@ namespace MedLinkPortal.Controllers.Api
             var doctorUser = await _userManager.FindByIdAsync(doctor.UserId ?? "");
             var fee = (long)((doctorUser?.ConsultationFee ?? 2000) * 100);
 
-            // Validate that the slot is not already booked
-            var normalizedSlotIntent = NormalizeTimeSlot(request.TimeSlot);
-            var cutoffIntent = DateTime.Now.AddMinutes(-30);
-            var existingIntentBookings = await _context.Appointments
-                .Where(a => a.DoctorId == doctor.Id &&
-                            a.AppointmentDate.Date == request.Date.Date &&
-                            a.Status != "Cancelled" && a.Status != "Rejected")
-                .ToListAsync();
-
-            if (existingIntentBookings.Any(a =>
-                (a.Status == "Confirmed" || a.Status == "Scheduled" || a.Status == "Paid" || a.Status == "Completed" ||
-                 ((a.Status == "Pending" || a.Status == "PendingPayment" || a.Status == "Pending Payment") && a.CreatedAt >= cutoffIntent)) &&
-                NormalizeTimeSlot(a.TimeSlot) == normalizedSlotIntent))
+            if (request.InstantBooking)
             {
-                return BadRequest(new { success = false, message = "This time slot is already booked by another patient. Please select another slot." });
+                if (!doctor.Online)
+                {
+                    return BadRequest(new { success = false, message = "Doctor is currently offline. Please choose another doctor." });
+                }
+                if (doctor.IsInConsultation)
+                {
+                    return BadRequest(new { success = false, message = "Doctor is currently in another consultation. Please wait a moment or select another doctor." });
+                }
+
+                request.Date = DateTime.Today;
+                if (string.IsNullOrWhiteSpace(request.TimeSlot) || request.TimeSlot.Equals("Instant", StringComparison.OrdinalIgnoreCase) || request.TimeSlot.Equals("NOW", StringComparison.OrdinalIgnoreCase))
+                {
+                    request.TimeSlot = DateTime.Now.ToString("hh:mm tt");
+                }
+            }
+            else
+            {
+                // Validate that the slot is not already booked
+                var normalizedSlotIntent = NormalizeTimeSlot(request.TimeSlot);
+                var cutoffIntent = DateTime.Now.AddMinutes(-30);
+                var existingIntentBookings = await _context.Appointments
+                    .Where(a => a.DoctorId == doctor.Id &&
+                                a.AppointmentDate.Date == request.Date.Date &&
+                                a.Status != "Cancelled" && a.Status != "Rejected")
+                    .ToListAsync();
+
+                if (existingIntentBookings.Any(a =>
+                    (a.Status == "Confirmed" || a.Status == "Scheduled" || a.Status == "Paid" || a.Status == "Completed" ||
+                     ((a.Status == "Pending" || a.Status == "PendingPayment" || a.Status == "Pending Payment") && a.CreatedAt >= cutoffIntent)) &&
+                    NormalizeTimeSlot(a.TimeSlot) == normalizedSlotIntent))
+                {
+                    return BadRequest(new { success = false, message = "This time slot is already booked by another patient. Please select another slot." });
+                }
             }
 
             var appointment = new Appointment
@@ -810,14 +954,20 @@ namespace MedLinkPortal.Controllers.Api
                             var doctorUser = await _userManager.FindByIdAsync(appointment.Doctor.UserId);
                             if (doctorUser != null)
                             {
-                                var amountTotal = intent.Amount / 100m;
-                                doctorUser.WalletBalance += amountTotal;
+                                var grossAmount = intent.Amount / 100m;
+                                var commissionPct = _configuration.GetValue<decimal>("Platform:CommissionPercent", 15m);
+                                var platformFee = Math.Round(grossAmount * commissionPct / 100m, 2);
+                                var netAmount = grossAmount - platformFee;
+
+                                doctorUser.WalletBalance += netAmount;
                                 _context.WalletTransactions.Add(new WalletTransaction
                                 {
                                     DoctorId = appointment.Doctor.UserId,
-                                    Amount = amountTotal,
+                                    Amount = grossAmount,
+                                    PlatformFee = platformFee,
+                                    NetAmount = netAmount,
                                     TransactionType = "EARNING",
-                                    Description = $"Consultation from {appointment.PatientName}",
+                                    Description = $"Consultation from {appointment.PatientName} (Platform fee: PKR {platformFee:N2} @ {commissionPct}%)",
                                     Status = "Completed",
                                     TransactionDate = DateTime.Now,
                                     AppointmentId = appointment.Id
@@ -917,15 +1067,21 @@ namespace MedLinkPortal.Controllers.Api
                         var doctorUser = await _userManager.FindByIdAsync(appointment.Doctor.UserId);
                         if (doctorUser != null)
                         {
-                            var amountTotal = (session.AmountTotal ?? 0) / 100m;
-                            doctorUser.WalletBalance += amountTotal;
+                            var grossAmount = (session.AmountTotal ?? 0) / 100m;
+                            var commissionPct = _configuration.GetValue<decimal>("Platform:CommissionPercent", 15m);
+                            var platformFee = Math.Round(grossAmount * commissionPct / 100m, 2);
+                            var netAmount = grossAmount - platformFee;
+
+                            doctorUser.WalletBalance += netAmount;
 
                             var walletTx = new WalletTransaction
                             {
                                 DoctorId = appointment.Doctor.UserId,
-                                Amount = amountTotal,
+                                Amount = grossAmount,
+                                PlatformFee = platformFee,
+                                NetAmount = netAmount,
                                 TransactionType = "EARNING",
-                                Description = $"Consultation from {appointment.PatientName}",
+                                Description = $"Consultation from {appointment.PatientName} (Platform fee: PKR {platformFee:N2} @ {commissionPct}%)",
                                 Status = "Completed",
                                 TransactionDate = DateTime.Now,
                                 AppointmentId = appointment.Id
@@ -1441,10 +1597,75 @@ namespace MedLinkPortal.Controllers.Api
                         .ThenInclude(p => p.Hospital)
                     .Include(r => r.AssignedPackage)
                         .ThenInclude(p => p.Doctor)
+                    .Include(r => r.PreArrivalAppointment)
+                        .ThenInclude(a => a.Doctor)
                     .Where(r => r.UserId == userId)
                     .OrderByDescending(r => r.CreatedAt)
                     .ToListAsync();
-                return Ok(requests);
+
+                // Project to avoid circular reference issues and include pre-arrival info
+                var result = requests.Select(r => new
+                {
+                    r.Id,
+                    r.UserId,
+                    r.RequestType,
+                    r.SourceCountry,
+                    r.PreferredCountry,
+                    r.PreferredCity,
+                    r.TreatmentType,
+                    r.BudgetRange,
+                    r.TravelWithFamily,
+                    r.PassportAvailable,
+                    r.InterestedTourLocations,
+                    r.WantsHotel,
+                    r.HotelPreference,
+                    r.HotelNights,
+                    r.WantsAirportPickup,
+                    r.TransportPreference,
+                    r.Status,
+                    r.CreatedAt,
+                    r.UpdatedAt,
+                    r.AssignedPackageId,
+                    r.PreArrivalAppointmentId,
+                    PreArrivalAppointment = r.PreArrivalAppointment == null ? null : new
+                    {
+                        r.PreArrivalAppointment.Id,
+                        r.PreArrivalAppointment.AppointmentDate,
+                        r.PreArrivalAppointment.TimeSlot,
+                        r.PreArrivalAppointment.Notes,
+                        r.PreArrivalAppointment.Status,
+                        DoctorName = r.PreArrivalAppointment.Doctor?.Name,
+                        DoctorImage = r.PreArrivalAppointment.Doctor?.Image,
+                    },
+                    AssignedPackage = r.AssignedPackage == null ? null : new
+                    {
+                        r.AssignedPackage.Id,
+                        r.AssignedPackage.Country,
+                        r.AssignedPackage.TreatmentDuration,
+                        r.AssignedPackage.RecoveryDays,
+                        r.AssignedPackage.TourPlanDetails,
+                        r.AssignedPackage.HotelDetails,
+                        r.AssignedPackage.AirportPickup,
+                        r.AssignedPackage.TotalPrice,
+                        r.AssignedPackage.IsAcceptedByUser,
+                        Hospital = r.AssignedPackage.Hospital == null ? null : new
+                        {
+                            r.AssignedPackage.Hospital.Id,
+                            r.AssignedPackage.Hospital.Name,
+                            r.AssignedPackage.Hospital.City,
+                            r.AssignedPackage.Hospital.Country,
+                            r.AssignedPackage.Hospital.ImageUrl,
+                        },
+                        Doctor = r.AssignedPackage.Doctor == null ? null : new
+                        {
+                            r.AssignedPackage.Doctor.Id,
+                            r.AssignedPackage.Doctor.Name,
+                            r.AssignedPackage.Doctor.Image,
+                        }
+                    }
+                });
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -2962,6 +3183,7 @@ namespace MedLinkPortal.Controllers.Api
         public string? ConsultationType { get; set; }
         public string? Notes { get; set; }
         public string? RedirectUrl { get; set; }
+        public bool InstantBooking { get; set; } = false;
     }
 
     public class ShareRecordRequest

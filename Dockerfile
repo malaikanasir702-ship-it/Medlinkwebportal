@@ -16,9 +16,16 @@ RUN dotnet publish MedLinkPortal.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/publish .
+
+# Ensure writable directories for logs/uploads and run as non-root user
+RUN mkdir -p /app/wwwroot/logs /app/wwwroot/uploads \
+    && chown -R $APP_UID:$APP_UID /app
+USER $APP_UID
 
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DOTNET_RUNNING_IN_CONTAINER=true
@@ -26,5 +33,8 @@ ENV DOTNET_RUNNING_IN_CONTAINER=true
 ENV ASPNETCORE_HTTP_PORTS=""
 
 EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-8080}/health || exit 1
 
 ENTRYPOINT ["dotnet", "MedLinkPortal.dll"]

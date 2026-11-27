@@ -22,244 +22,306 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@@latest/dist/umd/lucide.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
-        .bento-item { border-radius: 1.5rem; border: 1px solid #e2e8f0; background: #fff; }
-        @@keyframes pulse-ring {
-            0% { transform: scale(0.9); opacity: 0.8; }
-            70% { transform: scale(1.1); opacity: 0; }
-            100% { transform: scale(1.1); opacity: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px;
         }
-        .pulse-ring::before {
-            content: '';
-            position: absolute;
-            inset: -8px;
+        .page-wrap { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 10px; }
+
+        /* Card base */
+        .card {
+            background: #ffffff;
+            border: 1px solid #dce4ef;
+            border-radius: 10px;
+            padding: 22px 24px;
+        }
+        .card-blue {
+            background: #2563eb;
+            border: 1px solid #2563eb;
+            border-radius: 10px;
+            padding: 22px 24px;
+        }
+        .card-blue-light {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 22px 24px;
+        }
+
+        /* Two-column grid */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* Typography */
+        .label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+        .label-white { color: rgba(255,255,255,0.65); }
+        .label-blue { color: #2563eb; }
+        .value { font-size: 15px; font-weight: 700; color: #0f172a; }
+        .value-lg { font-size: 21px; font-weight: 800; color: #0f172a; }
+        .value-white { color: #ffffff; }
+        .value-xl { font-size: 28px; font-weight: 800; }
+
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+        .badge-dot {
+            width: 6px; height: 6px;
+            background: #2563eb;
             border-radius: 50%;
-            background: rgba(16,185,129,0.2);
-            animation: pulse-ring 2s ease-out infinite;
+            display: inline-block;
         }
-        @@keyframes float {
-            0%,100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+        .badge-white {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
         }
-        .float { animation: float 3s ease-in-out infinite; }
-        .card-chip {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            border-radius: 4px;
-            width: 28px; height: 20px;
+        .badge-white .badge-dot { background: #fff; }
+
+        /* Divider */
+        .divider { border: none; border-top: 1px solid #e8edf3; margin: 14px 0; }
+
+        /* Icon box */
+        .icon-box {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .icon-box-white {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            padding: 12px 20px;
+            background: #2563eb;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 13px; font-weight: 700;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary {
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            padding: 12px 20px;
+            background: #fff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            font-size: 13px; font-weight: 700;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+        .btn-secondary:hover { background: #eff6ff; }
+
+        /* Item row */
+        .item-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border: 1px solid #e8edf3;
+            border-radius: 8px;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
+<body>
+<div class="page-wrap">
 
-    <div class="w-full max-w-2xl">
-
-        <!-- Bento Grid -->
-        <div class="grid grid-cols-2 gap-4 auto-rows-auto">
-
-            <!-- [1,1] Hero Success Cell — spans 2 cols -->
-            <div class="bento-item col-span-2 p-8 relative overflow-hidden"
-                 style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);">
-                <!-- Background decorations -->
-                <div class="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10"
-                     style="background: radial-gradient(circle, #10b981, transparent); transform: translate(30%, -30%);"></div>
-                <div class="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-10"
-                     style="background: radial-gradient(circle, #3b82f6, transparent); transform: translate(-30%, 30%);"></div>
-
-                <div class="relative z-10 flex items-center gap-6">
-                    <!-- Animated check icon -->
-                    <div class="relative float shrink-0">
-                        <div class="pulse-ring relative w-20 h-20 rounded-full flex items-center justify-center"
-                             style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 0 40px rgba(16,185,129,0.4);">
-                            <i data-lucide="check" class="w-10 h-10 text-white" style="stroke-width: 3;"></i>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">MedLink Pharmacy</span>
-                            <span class="w-1 h-1 rounded-full bg-emerald-400"></span>
-                            <span class="text-xs font-bold text-white/40 uppercase tracking-widest">Confirmed</span>
-                        </div>
-                        <h1 class="text-3xl font-black text-white leading-tight">
-                            @(isOnline ? "Payment Successful!" : "Order Confirmed!")
-                            <span class="ml-2">@(isOnline ? "🎉" : "✅")</span>
-                        </h1>
-                        <p class="text-white/60 text-sm mt-1 font-medium">
-                            @(isOnline ? "Processed securely via Stripe · Medicines being prepared" : "Cash on delivery · Medicines being prepared")
-                        </p>
-                    </div>
+    <!-- ── Header: Success Banner ── -->
+    <div class="card-blue">
+        <div style="display:flex; align-items:center; gap:14px;">
+            <div class="icon-box icon-box-white" style="width:44px;height:44px;border-radius:10px;">
+                <i data-lucide="check" style="width:22px;height:22px;color:#fff;stroke-width:3;"></i>
+            </div>
+            <div>
+                <div class="label label-white" style="margin-bottom:3px;">MedLink Pharmacy</div>
+                <div class="value-xl value-white">
+                    @(isOnline ? "Payment Successful" : "Order Confirmed")
+                </div>
+                <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:3px;font-weight:500;">
+                    @(isOnline ? "Processed securely via Stripe" : "Cash on delivery · Medicines being prepared")
                 </div>
             </div>
-
-            <!-- [2,1] Order ID Cell -->
-            <div class="bento-item p-6 flex flex-col justify-between"
-                 style="background: linear-gradient(135deg, #f0fdf4, #dcfce7);">
-                <div class="w-10 h-10 bg-emerald-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-200">
-                    <i data-lucide="hash" class="w-5 h-5 text-white"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1">Order ID</p>
-                    <p class="text-2xl font-black text-slate-900">#ORD-@Model.Id.ToString("D5")</p>
+            <div style="margin-left:auto;">
+                <div class="badge badge-white">
+                    <span class="badge-dot"></span>
+                    @(isOnline ? "Paid" : "Confirmed")
                 </div>
             </div>
-
-            <!-- [2,2] Delivery Cell -->
-            <div class="bento-item p-6 flex flex-col justify-between"
-                 style="background: linear-gradient(135deg, #eff6ff, #dbeafe);">
-                <div class="w-10 h-10 bg-blue-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-200">
-                    <i data-lucide="truck" class="w-5 h-5 text-white"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1">Estimated Delivery</p>
-                    <p class="text-xl font-black text-slate-900">1–3 Business Days</p>
-                    <p class="text-xs text-slate-500 font-medium mt-1">Door-to-door delivery</p>
-                </div>
-            </div>
-
-            @if (isOnline && Model.TotalAmount > 0)
-            {
-                <!-- [3,1] Amount Cell — large -->
-                <div class="bento-item p-6" style="background: linear-gradient(135deg, #0f172a, #1e293b);">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center">
-                            <i data-lucide="banknote" class="w-4 h-4 text-white"></i>
-                        </div>
-                        <span class="text-xs font-bold text-white/40 uppercase tracking-widest">Amount Paid</span>
-                    </div>
-                    <p class="text-4xl font-black text-white mb-1">PKR @Model.TotalAmount.ToString("N0")</p>
-                    <div class="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-500/20 rounded-full mt-2">
-                        <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
-                        <span class="text-xs font-bold text-emerald-400">Payment Confirmed</span>
-                    </div>
-                </div>
-
-                <!-- [3,2] Card Cell — visual card design -->
-                <div class="bento-item p-6 relative overflow-hidden"
-                     style="background: linear-gradient(135deg, #7c3aed, #4f46e5);">
-                    <div class="absolute top-0 right-0 w-40 h-40 rounded-full opacity-20"
-                         style="background: radial-gradient(circle, #a78bfa, transparent); transform: translate(20%, -20%);"></div>
-
-                    <div class="relative z-10">
-                        <div class="flex justify-between items-start mb-6">
-                            <span class="text-xs font-bold text-white/50 uppercase tracking-widest">Payment Card</span>
-                            <i data-lucide="credit-card" class="w-5 h-5 text-white/60"></i>
-                        </div>
-
-                        @if (!string.IsNullOrEmpty(cardLast4))
-                        {
-                            <div class="card-chip mb-4"></div>
-                            <p class="text-white font-mono text-lg font-bold tracking-widest mb-1">
-                                •••• •••• •••• @cardLast4
-                            </p>
-                            <p class="text-white/60 text-xs font-bold uppercase tracking-widest">
-                                @(cardBrand?.ToUpper() ?? "CARD")
-                            </p>
-                        }
-                        else
-                        {
-                            <p class="text-white/70 text-sm font-medium mt-4">Card details unavailable</p>
-                        }
-                    </div>
-                </div>
-
-                @if (paidAt.HasValue)
-                {
-                    <!-- [4,1] DateTime Cell -->
-                    <div class="bento-item p-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <div class="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center">
-                                <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
-                            </div>
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Date & Time</span>
-                        </div>
-                        <p class="text-xl font-black text-slate-900">@paidAt.Value.ToString("MMM dd, yyyy")</p>
-                        <p class="text-slate-500 font-semibold">@paidAt.Value.ToString("HH:mm")</p>
-                    </div>
-
-                    <!-- [4,2] Status Cell -->
-                    <div class="bento-item p-6" style="background: linear-gradient(135deg, #f0fdf4, #dcfce7);">
-                        <div class="flex items-center gap-2 mb-3">
-                            <div class="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-                            </div>
-                            <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Status</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                            <p class="text-xl font-black text-slate-900">Paid</p>
-                        </div>
-                        <p class="text-emerald-700 text-xs font-bold mt-1">Secured by Stripe</p>
-                    </div>
-                }
-
-                @if (!string.IsNullOrEmpty(intentId))
-                {
-                    <!-- Transaction ID — full width -->
-                    <div class="bento-item col-span-2 p-5" style="background: #f8fafc;">
-                        <div class="flex items-center gap-2 mb-2">
-                            <i data-lucide="fingerprint" class="w-4 h-4 text-slate-400"></i>
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Transaction ID</span>
-                        </div>
-                        <p class="font-mono text-xs text-slate-600 break-all leading-relaxed">@intentId</p>
-                    </div>
-                }
-            }
-
-            @if (Model.OrderItems != null && Model.OrderItems.Any())
-            {
-                <!-- Ordered Items — full width -->
-                <div class="bento-item col-span-2 p-6">
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center">
-                            <i data-lucide="pill" class="w-4 h-4 text-slate-600"></i>
-                        </div>
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Ordered Items</span>
-                        <span class="ml-auto text-xs font-bold text-slate-400">@Model.OrderItems.Count item(s)</span>
-                    </div>
-                    <div class="grid grid-cols-1 gap-2">
-                        @foreach (var item in Model.OrderItems)
-                        {
-                            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-colors">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 bg-white rounded-xl flex items-center justify-center border border-slate-100 shadow-sm">
-                                        <i data-lucide="pill" class="w-4 h-4 text-slate-400"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-slate-900 text-sm">@(item.Medicine?.Name ?? "Medicine")</p>
-                                        <p class="text-xs text-slate-400 font-semibold">Qty: @item.Quantity · PKR @item.UnitPrice.ToString("N0") each</p>
-                                    </div>
-                                </div>
-                                <p class="font-black text-slate-900 text-sm">PKR @((item.UnitPrice * item.Quantity).ToString("N0"))</p>
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-
-            <!-- CTA Buttons — full width -->
-            <div class="col-span-2 grid grid-cols-2 gap-4">
-                <a href="/Pharmacy/Store"
-                   class="flex items-center justify-center gap-2 py-4 px-6 rounded-2xl font-bold text-sm transition-all shadow-lg active:scale-95"
-                   style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; box-shadow: 0 8px 24px rgba(15,23,42,0.2);">
-                    <i data-lucide="store" class="w-4 h-4"></i>
-                    Continue Shopping
-                </a>
-                <a href="/Pharmacy/MyOrders"
-                   class="flex items-center justify-center gap-2 py-4 px-6 bg-white rounded-2xl font-bold text-sm text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all active:scale-95">
-                    <i data-lucide="package" class="w-4 h-4"></i>
-                    My Orders
-                </a>
-            </div>
-
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.lucide) lucide.createIcons();
-        });
-    </script>
+    <!-- ── Row 1: Order ID + Delivery ── -->
+    <div class="grid-2">
+        <div class="card">
+            <div class="label label-blue">Order ID</div>
+            <div class="value-lg">#ORD-@Model.Id.ToString("D5")</div>
+        </div>
+        <div class="card">
+            <div class="label">Estimated Delivery</div>
+            <div class="value" style="font-size:16px;font-weight:800;">1–3 Business Days</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:3px;font-weight:500;">Door-to-door delivery</div>
+        </div>
+    </div>
+
+    @if (isOnline && Model.TotalAmount > 0)
+    {
+        <!-- ── Row 2: Amount + Card ── -->
+        <div class="grid-2">
+            <!-- Amount — blue card -->
+            <div class="card-blue">
+                <div class="label label-white">Amount Paid</div>
+                <div style="font-size:30px;font-weight:800;color:#fff;margin:6px 0 10px;">PKR @Model.TotalAmount.ToString("N0")</div>
+                <div class="badge badge-white">
+                    <span class="badge-dot"></span>
+                    Payment Confirmed
+                </div>
+            </div>
+
+            <!-- Card details — light blue -->
+            <div class="card-blue-light">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                    <div class="label label-blue">Payment Card</div>
+                    <i data-lucide="credit-card" style="width:14px;height:14px;color:#2563eb;"></i>
+                </div>
+                @if (!string.IsNullOrEmpty(cardLast4))
+                {
+                    <div style="width:28px;height:18px;background:#2563eb;border-radius:3px;margin-bottom:12px;"></div>
+                    <div style="font-family:monospace;font-size:13px;font-weight:700;color:#1e3a5f;letter-spacing:0.08em;">
+                        •••• •••• •••• @cardLast4
+                    </div>
+                    <div class="label" style="margin-top:5px;margin-bottom:0;">@(cardBrand?.ToUpper() ?? "CARD")</div>
+                }
+                else
+                {
+                    <div style="font-size:13px;color:#64748b;">Card details unavailable</div>
+                }
+            </div>
+        </div>
+
+        @if (paidAt.HasValue)
+        {
+            <!-- ── Row 3: Date + Status ── -->
+            <div class="grid-2">
+                <div class="card">
+                    <div class="label">Date &amp; Time</div>
+                    <div class="value">@paidAt.Value.ToString("MMM dd, yyyy")</div>
+                    <div style="font-size:13px;color:#64748b;font-weight:600;margin-top:2px;">@paidAt.Value.ToString("HH:mm")</div>
+                </div>
+                <div class="card-blue-light">
+                    <div class="label label-blue">Status</div>
+                    <div style="display:flex;align-items:center;gap:7px;margin-top:4px;">
+                        <span style="width:8px;height:8px;background:#2563eb;border-radius:50%;display:inline-block;"></span>
+                        <span class="value" style="color:#1e40af;">Paid</span>
+                    </div>
+                    <div style="font-size:11px;color:#3b82f6;margin-top:4px;font-weight:600;">Secured by Stripe</div>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(intentId))
+        {
+            <!-- Transaction ID -->
+            <div class="card" style="background:#f8fafc;padding:14px 18px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+                    <i data-lucide="fingerprint" style="width:13px;height:13px;color:#94a3b8;"></i>
+                    <span class="label" style="margin-bottom:0;">Transaction Reference</span>
+                </div>
+                <div style="font-family:monospace;font-size:11px;color:#475569;word-break:break-all;line-height:1.6;">@intentId</div>
+            </div>
+        }
+    }
+
+    @if (Model.OrderItems != null && Model.OrderItems.Any())
+    {
+        <!-- ── Ordered Items ── -->
+        <div class="card" style="padding:20px 22px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="icon-box">
+                        <i data-lucide="package" style="width:16px;height:16px;color:#2563eb;"></i>
+                    </div>
+                    <span style="font-size:13px;font-weight:700;color:#0f172a;">Ordered Items</span>
+                </div>
+                <span style="font-size:12px;color:#94a3b8;font-weight:600;">@Model.OrderItems.Count item(s)</span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                @foreach (var item in Model.OrderItems)
+                {
+                    <div class="item-row">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div class="icon-box" style="background:#fff;width:32px;height:32px;">
+                                <i data-lucide="pill" style="width:13px;height:13px;color:#3b82f6;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size:13px;font-weight:700;color:#0f172a;">@(item.Medicine?.Name ?? "Medicine")</div>
+                                <div style="font-size:11px;color:#94a3b8;font-weight:600;margin-top:1px;">Qty: @item.Quantity &middot; PKR @item.UnitPrice.ToString("N0") each</div>
+                            </div>
+                        </div>
+                        <div style="font-size:13px;font-weight:800;color:#1e40af;">PKR @((item.UnitPrice * item.Quantity).ToString("N0"))</div>
+                    </div>
+                }
+            </div>
+
+            @if (Model.TotalAmount > 0)
+            {
+                <hr class="divider" />
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0 2px;">
+                    <span style="font-size:13px;font-weight:600;color:#64748b;">Total</span>
+                    <span style="font-size:16px;font-weight:800;color:#1e40af;">PKR @Model.TotalAmount.ToString("N0")</span>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- ── CTA Buttons ── -->
+    <div class="grid-2">
+        <a href="/Pharmacy/Store" class="btn-primary">
+            <i data-lucide="store" style="width:15px;height:15px;"></i>
+            Continue Shopping
+        </a>
+        <a href="/Pharmacy/MyOrders" class="btn-secondary">
+            <i data-lucide="package" style="width:15px;height:15px;"></i>
+            My Orders
+        </a>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.lucide) lucide.createIcons();
+    });
+</script>
 </body>
 </html>

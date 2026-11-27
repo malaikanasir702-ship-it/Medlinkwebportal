@@ -33,11 +33,13 @@ bld/
 # Node modules
 node_modules/
 
-# Secret files
+# Secret files — firebase key must never be committed
 firebase-service-account.json
 
-# Environment / local settings if any
-*.user
-# Secret files
-firebase-service-account.json
-appsettings.json
+# Local developer overrides — these contain real credentials and must NOT be committed.
+# appsettings.json (the base file) IS tracked and contains only YOUR_X_KEY placeholders.
+# Put real secrets in appsettings.Development.json locally, or use Railway env vars in production.
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.Local.json

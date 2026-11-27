@@ -500,9 +500,46 @@
                         </div>
 
                          <div class="space-y-3">
+                            <label asp-for="BankName" class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Bank Name</label>
+                            <div class="relative">
+                                <select asp-for="BankName" class="premium-input w-full pl-12 pr-6 appearance-none">
+                                    <option value="">-- Select Bank --</option>
+                                    <option>HBL (Habib Bank)</option>
+                                    <option>UBL (United Bank)</option>
+                                    <option>MCB Bank</option>
+                                    <option>Allied Bank</option>
+                                    <option>Meezan Bank</option>
+                                    <option>Bank Alfalah</option>
+                                    <option>Standard Chartered</option>
+                                    <option>Askari Bank</option>
+                                    <option>Faysal Bank</option>
+                                    <option>Habib Metropolitan</option>
+                                    <option>JazzCash</option>
+                                    <option>EasyPaisa</option>
+                                    <option>SadaPay</option>
+                                    <option>Nayapay</option>
+                                    <option>Other</option>
+                                </select>
+                                <i class="fas fa-university absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
+                            </div>
+                            <span asp-validation-for="BankName" class="text-red-500 text-[10px] font-semibold uppercase ml-1"></span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-3">
+                            <label asp-for="BankAccountTitle" class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Account Title (as on bank record)</label>
+                            <div class="relative">
+                                <input asp-for="BankAccountTitle" class="premium-input w-full pl-12 pr-6" placeholder="e.g. Dr. Ahmed Khan" />
+                                <i class="fas fa-user-tie absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            </div>
+                            <span asp-validation-for="BankAccountTitle" class="text-red-500 text-[10px] font-semibold uppercase ml-1"></span>
+                        </div>
+
+                        <div class="space-y-3">
                             <label asp-for="BankAccountNumber" class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Bank Account / IBAN</label>
                             <div class="relative">
-                                <input asp-for="BankAccountNumber" class="premium-input w-full pl-12 pr-6" placeholder="PK..." />
+                                <input asp-for="BankAccountNumber" class="premium-input w-full pl-12 pr-6" placeholder="PK76HABB0000000000000000" />
                                 <i class="fas fa-building-columns absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                             </div>
                             <span asp-validation-for="BankAccountNumber" class="text-red-500 text-[10px] font-semibold uppercase ml-1"></span>

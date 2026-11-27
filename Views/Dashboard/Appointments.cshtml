@@ -101,7 +101,7 @@
                                     if (isFinished || isPast) clickHandler = $"showRestrictedModal('completed', '{consult.Doctor}')";
                                     else if (isFuture) clickHandler = $"showRestrictedModal('upcoming', '{consult.Doctor}', '{consult.RawDate?.ToString("MMM dd")}')";
                                     else if (consult.Type == "Physical") clickHandler = $"showRestrictedModal('physical', '{consult.Doctor}')";
-                                    else clickHandler = $"window.location.href='{Url.Action("ConsultationRoom", "Dashboard", new { id = consult.Id })}'";
+                                    else clickHandler = $"joinWaitingRoom({consult.Id}, '{consult.Doctor}', '{Url.Action("ConsultationRoom", "Dashboard", new { id = consult.Id })}')";
                                 }
                                 <div class="flex items-center gap-2 relative" @@click.away="open = false">
                                     <button onclick="@clickHandler" class="p-2.5 md:p-3 @(canJoin ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700" : "bg-gray-100 text-gray-400") rounded-xl transition-all">
@@ -332,6 +332,40 @@
     </div>
 </div>
 
+<!-- Waiting Room Modal -->
+<div id="waitingRoomModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md animate-in fade-in duration-300">
+    <div class="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl relative animate-in zoom-in slide-in-from-bottom-4 duration-500">
+        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-blue-600 to-indigo-700 opacity-5"></div>
+        <div class="relative p-10 text-center">
+            <div class="w-24 h-24 mx-auto mb-8 rounded-[2rem] bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner relative group">
+                <div class="absolute inset-0 bg-blue-400 rounded-[2rem] animate-ping opacity-20"></div>
+                <i data-lucide="users" class="w-10 h-10 relative z-10"></i>
+            </div>
+            <h3 class="text-2xl font-semibold text-gray-900 tracking-tight mb-3">You're in the Queue</h3>
+            <p class="text-sm text-gray-500 font-medium leading-relaxed mb-8 px-4">
+                <span class="font-bold text-gray-900" id="wrDoctor">Doctor</span> will be with you shortly.
+            </p>
+            <div class="flex items-center justify-center gap-8 mb-10">
+                <div class="text-center">
+                    <div class="text-3xl font-black text-blue-600" id="wrPosition">#1</div>
+                    <div class="text-[9px] font-semibold text-gray-400 uppercase tracking-[0.2em] mt-1">Position</div>
+                </div>
+                <div class="w-px h-12 bg-gray-100"></div>
+                <div class="text-center">
+                    <div class="text-3xl font-black text-gray-900" id="wrWait">0 min</div>
+                    <div class="text-[9px] font-semibold text-gray-400 uppercase tracking-[0.2em] mt-1">Est. Wait</div>
+                </div>
+            </div>
+            <button onclick="closeWaitingRoomModal()" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-semibold text-[11px] uppercase tracking-widest shadow-xl shadow-gray-900/20 hover:bg-gray-800 transition-all active:scale-95">
+                Enter Consultation Room
+            </button>
+            <p class="text-[9px] font-semibold text-gray-300 uppercase tracking-[0.2em] mt-4">Redirecting automatically...</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
 <script>
     function showRestrictedModal(type, doctor, date = '') {
         const modal = document.getElementById('restrictedModal');
@@ -371,5 +405,51 @@
             modal.classList.add('hidden');
             modal.classList.remove('opacity-0', 'scale-95');
         }, 300);
+    }
+
+    // ── Waiting Room Join ────────────────────────────────────────────────
+    async function joinWaitingRoom(appointmentId, doctorName, redirectUrl) {
+        try {
+            const res = await fetch('/api/doctor/waiting-room/join', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ appointmentId })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                showWaitingRoomModal(data.position, data.estimatedWaitMinutes, doctorName, redirectUrl);
+            } else {
+                // Fallback — go directly to consultation room
+                window.location.href = redirectUrl;
+            }
+        } catch (e) {
+            console.error('Waiting room join failed:', e);
+            window.location.href = redirectUrl;
+        }
+    }
+
+    function showWaitingRoomModal(position, waitMinutes, doctorName, redirectUrl) {
+        const modal = document.getElementById('waitingRoomModal');
+        const posEl = document.getElementById('wrPosition');
+        const waitEl = document.getElementById('wrWait');
+        const docEl = document.getElementById('wrDoctor');
+
+        if (posEl) posEl.textContent = '#' + position;
+        if (waitEl) waitEl.textContent = waitMinutes + ' min';
+        if (docEl) docEl.textContent = doctorName;
+
+        modal?.classList.remove('hidden');
+
+        // Auto-redirect after 3 seconds
+        setTimeout(() => {
+            window.location.href = redirectUrl;
+        }, 3000);
+    }
+
+    function closeWaitingRoomModal(redirectUrl) {
+        document.getElementById('waitingRoomModal')?.classList.add('hidden');
+        if (redirectUrl) window.location.href = redirectUrl;
     }
 </script>

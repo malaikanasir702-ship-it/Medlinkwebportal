@@ -49,6 +49,22 @@ namespace MedLinkPortal.Models
         public bool TravelWithFamily { get; set; }
         public string? InterestedTourLocations { get; set; } // JSON or Comma Separated
 
+        // Patient Add-On Preferences (Inbound)
+        /// <summary>Does patient want hotel accommodation included?</summary>
+        public bool WantsHotel { get; set; } = false;
+
+        /// <summary>Preferred hotel tier: Budget | Standard | Premium | Not Required</summary>
+        public string? HotelPreference { get; set; } = "Not Required";
+
+        /// <summary>Does patient want airport pickup/transport included?</summary>
+        public bool WantsAirportPickup { get; set; } = false;
+
+        /// <summary>Preferred transport tier: Standard | VIP | Not Required</summary>
+        public string? TransportPreference { get; set; } = "Not Required";
+
+        /// <summary>Number of nights hotel stay needed</summary>
+        public int? HotelNights { get; set; }
+
         // Outbound Specific
         public bool PassportAvailable { get; set; }
 
@@ -66,5 +82,10 @@ namespace MedLinkPortal.Models
         public int? AssignedPackageId { get; set; }
         [ForeignKey("AssignedPackageId")]
         public virtual MedicalTourismPackage? AssignedPackage { get; set; }
+
+        // Pre-Arrival Online Consultation (auto-created when package is assigned)
+        public int? PreArrivalAppointmentId { get; set; }
+        [ForeignKey("PreArrivalAppointmentId")]
+        public virtual Appointment? PreArrivalAppointment { get; set; }
     }
 }

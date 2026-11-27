@@ -102,7 +102,9 @@ namespace MedLinkPortal.Controllers.Api
 
                 if (walletTx.Doctor != null)
                 {
-                    walletTx.Doctor.TotalWithdrawn += walletTx.Amount;
+                    // WalletBalance already deducted at withdrawal request time by DoctorController
+                    // Only update TotalWithdrawn using net amount (after platform fee)
+                    walletTx.Doctor.TotalWithdrawn += walletTx.NetAmount > 0 ? walletTx.NetAmount : walletTx.Amount;
                 }
 
                 await _context.SaveChangesAsync();

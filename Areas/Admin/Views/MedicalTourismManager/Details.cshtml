@@ -127,6 +127,48 @@
                                 <p class="text-lg font-bold text-slate-900">@(Model.TravelWithFamily ? "Family Group" : "Solo Traveler")</p>
                             </div>
                         </div>
+                        <!-- Patient Add-On Preferences -->
+                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <!-- Hotel -->
+                            <div class="flex gap-4 p-4 rounded-2xl border @(Model.WantsHotel ? "border-amber-200 bg-amber-50/40" : "border-slate-100 bg-slate-50/50")">
+                                <div class="w-10 h-10 rounded-xl @(Model.WantsHotel ? "bg-amber-100 text-amber-600" : "bg-slate-100 text-slate-400") flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="hotel" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Hotel Accommodation</p>
+                                    @if (Model.WantsHotel)
+                                    {
+                                        <p class="text-base font-bold text-slate-900">@Model.HotelPreference</p>
+                                        @if (Model.HotelNights.HasValue)
+                                        {
+                                            <p class="text-xs text-amber-600 font-semibold mt-0.5">@Model.HotelNights nights requested</p>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p class="text-base font-bold text-slate-400 italic">Not Required</p>
+                                    }
+                                </div>
+                            </div>
+                            <!-- Transport -->
+                            <div class="flex gap-4 p-4 rounded-2xl border @(Model.WantsAirportPickup ? "border-emerald-200 bg-emerald-50/40" : "border-slate-100 bg-slate-50/50")">
+                                <div class="w-10 h-10 rounded-xl @(Model.WantsAirportPickup ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-400") flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="car" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Airport Pickup & Transport</p>
+                                    @if (Model.WantsAirportPickup)
+                                    {
+                                        <p class="text-base font-bold text-slate-900">@Model.TransportPreference Service</p>
+                                        <p class="text-xs text-emerald-600 font-semibold mt-0.5">Transfer included in package</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-base font-bold text-slate-400 italic">Not Required</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
                         <div class="md:col-span-2 bg-slate-50 p-6 rounded-3xl mt-2">
                             <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                                 <i data-lucide="palmtree" class="w-3.5 h-3.5"></i>

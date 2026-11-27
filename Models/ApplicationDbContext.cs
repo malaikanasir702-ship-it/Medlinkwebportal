@@ -57,6 +57,7 @@ namespace MedLinkPortal.Models
         public DbSet<Hospital> Hospitals { get; set; }
         public DbSet<MedicalTourismRequest> MedicalTourismRequests { get; set; }
         public DbSet<MedicalTourismPackage> MedicalTourismPackages { get; set; }
+        public DbSet<VisaApplication> VisaApplications { get; set; }
 
         // --- Lab & Diagnostics Entities ---
         public DbSet<City> Cities { get; set; }

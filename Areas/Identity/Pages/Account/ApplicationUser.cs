@@ -99,6 +99,14 @@ namespace MedLinkPortal.Areas.Identity.Pages.Account
         [PersonalData]
         [Encrypted]
         public string? BankAccountNumber { get; set; }
+
+        [PersonalData]
+        [Encrypted]
+        public string? BankAccountTitle { get; set; }   // Account holder name as on bank record
+
+        [PersonalData]
+        public string? BankName { get; set; }           // e.g. HBL, UBL, Meezan, JazzCash
+
         [PersonalData]
         public bool TermsConsent { get; set; }
 

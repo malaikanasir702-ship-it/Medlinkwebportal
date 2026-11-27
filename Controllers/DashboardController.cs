@@ -849,7 +849,7 @@ namespace MedLinkPortal.Controllers
             var todayScans = await _context.AIAnalyses
                 .CountAsync(a => a.UserId == userId && a.CreatedAt >= today && a.CreatedAt < today.AddDays(1));
 
-            var renewsAt = today.AddDays(1); // midnight UTC
+            var renewsAt = today.AddDays(1);
             var timeLeft = renewsAt - DateTime.UtcNow;
 
             return Json(new

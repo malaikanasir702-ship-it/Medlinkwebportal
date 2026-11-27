@@ -841,11 +841,56 @@ namespace MedLinkPortal.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetScanUsage()
+        {
+            var userId = _userManager.GetUserId(User);
+            var today = DateTime.UtcNow.Date;
+            var todayScans = await _context.AIAnalyses
+                .CountAsync(a => a.UserId == userId && a.CreatedAt >= today && a.CreatedAt < today.AddDays(1));
+
+            var renewsAt = today.AddDays(1); // midnight UTC
+            var timeLeft = renewsAt - DateTime.UtcNow;
+
+            return Json(new
+            {
+                scansUsed = todayScans,
+                scansRemaining = Math.Max(0, 3 - todayScans),
+                dailyLimit = 3,
+                renewsAt = renewsAt.ToString("o"),
+                renewsInHours = (int)timeLeft.TotalHours,
+                renewsInMinutes = (int)timeLeft.TotalMinutes % 60,
+                limitReached = todayScans >= 3
+            });
+        }
+
         [HttpPost]
         public async Task<IActionResult> AnalyzeFile(IFormFile file)
         {
             var userId = _userManager.GetUserId(User);
             if (file == null || file.Length == 0) return Json(new { success = false, message = "No file uploaded." });
+
+            // ── Daily Scan Limit: 3 scans per user per UTC day ──
+            var today = DateTime.UtcNow.Date;
+            var todayScans = await _context.AIAnalyses
+                .CountAsync(a => a.UserId == userId && a.CreatedAt >= today && a.CreatedAt < today.AddDays(1));
+
+            if (todayScans >= 3)
+            {
+                var renewsAt = today.AddDays(1);
+                var timeLeft = renewsAt - DateTime.UtcNow;
+                return Json(new
+                {
+                    success = false,
+                    limitReached = true,
+                    message = "Daily scan limit reached (3/3). Your limit resets at midnight.",
+                    renewsAt = renewsAt.ToString("o"),
+                    renewsInHours = (int)timeLeft.TotalHours,
+                    renewsInMinutes = (int)timeLeft.TotalMinutes % 60,
+                    scansUsed = todayScans,
+                    dailyLimit = 3
+                });
+            }
 
             try 
             {
@@ -894,7 +939,23 @@ namespace MedLinkPortal.Controllers
                     $"Your file '{file.FileName}' has been analyzed with status: {status}.", 
                     "brain", status == "Critical" ? "rose" : "emerald");
 
-                return Json(new { success = true, analysis = analysis });
+                // Return updated scan count along with result
+                var newScansUsed = todayScans + 1;
+                var renewsAtSuccess = today.AddDays(1);
+                var timeLeftSuccess = renewsAtSuccess - DateTime.UtcNow;
+
+                return Json(new
+                {
+                    success = true,
+                    analysis = analysis,
+                    scansUsed = newScansUsed,
+                    scansRemaining = Math.Max(0, 3 - newScansUsed),
+                    dailyLimit = 3,
+                    renewsAt = renewsAtSuccess.ToString("o"),
+                    renewsInHours = (int)timeLeftSuccess.TotalHours,
+                    renewsInMinutes = (int)timeLeftSuccess.TotalMinutes % 60,
+                    limitReached = newScansUsed >= 3
+                });
             }
             catch (Exception ex)
             {

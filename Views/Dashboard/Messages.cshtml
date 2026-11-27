@@ -1,11 +1,11 @@
-@model MedLinkPortal.Models.PatientDashboardModel
+﻿@model MedLinkPortal.Models.PatientDashboardModel
 @{
     Layout = "_DashboardLayout";
     ViewData["Title"] = "Messages";
 }
 
 <!-- Main Container -->
-<div class="min-h-0 flex-1 flex flex-col lg:flex-row bg-white/50 backdrop-blur-xl rounded-none lg:rounded-[2.5rem] lg:border border-gray-100 shadow-sm overflow-hidden" x-data="chatApp()" x-cloak>
+<div class="min-h-0 flex-1 flex flex-col lg:flex-row bg-white/50  rounded-none lg:rounded-[2.5rem] lg:border border-gray-100 shadow-sm overflow-hidden" x-data="chatApp()" x-cloak>
     
     <!-- Sidebar: Doctor List -->
     <aside class="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-gray-100 flex flex-col bg-white/30" 
@@ -27,7 +27,7 @@
                     </div>
                     <p class="text-xs font-bold text-gray-700">No Appointed Doctors</p>
                     <p class="text-[11px] text-gray-400 mt-1 leading-relaxed">Messaging is only available with doctors you have an appointment with.</p>
-                    <a href="/Dashboard/Doctors" class="inline-flex items-center gap-1.5 mt-4 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-all">
+                    <a href="/Dashboard/Doctors" class="inline-flex items-center gap-1.5 mt-4 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md  transition-all">
                         <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                         <span>Book Appointment</span>
                     </a>
@@ -36,7 +36,7 @@
             <template x-for="doctor in filteredDoctors" :key="doctor.id">
                 <button type="button" @@click="selectDoctor(doctor)" 
                         class="w-full p-3 lg:p-4 rounded-2xl flex items-center gap-3 lg:gap-4 transition-all duration-300 group"
-                        :class="activeDoctorId === doctor.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'hover:bg-gray-50 text-gray-900'">
+                        :class="activeDoctorId === doctor.id ? 'bg-blue-600 text-white shadow-lg ' : 'hover:bg-gray-50 text-gray-900'">
                     <div class="relative shrink-0">
                         <img :src="doctor.image" class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl object-cover border-2 shadow-sm"
                              :class="activeDoctorId === doctor.id ? 'border-blue-400' : 'border-white'">
@@ -95,7 +95,7 @@
         <template x-if="activeDoctorId">
             <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
                 <!-- Chat Header -->
-                <header class="p-3 lg:p-6 border-b border-gray-100 flex items-center justify-between bg-white/70 backdrop-blur-md shrink-0 sticky top-0 z-40">
+                <header class="p-3 lg:p-6 border-b border-gray-100 flex items-center justify-between bg-white/70  shrink-0 sticky top-0 z-40">
                     <div class="flex items-center gap-2 lg:gap-3 min-w-0">
                         <button type="button" @@click="activeDoctorId = null" class="lg:hidden p-2 -ml-2 text-gray-400 hover:text-gray-900 shrink-0">
                             <i data-lucide="chevron-left" class="w-6 h-6"></i>
@@ -239,7 +239,7 @@
                      </div>
                 </div>
                 <!-- Input Area - Fixed at Bottom with Safe Area -->
-                <footer class="p-2 md:p-4 lg:p-6 bg-white border-t border-gray-100 shrink-0 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]" style="padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 10px));">
+                <footer class="p-2 md:p-4 lg:p-6 bg-white border-t border-gray-100 shrink-0 z-50 " style="padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 10px));">
                     <!-- Lock Banner when not appointment day -->
                     <div x-show="!activeDoctor.canChatToday" class="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-amber-900 text-xs animate-fade-in-up">
                         <div class="flex items-center gap-2.5">
@@ -303,7 +303,7 @@
                                      rows="1"></textarea>
                             <div class="pb-0.5">
                                 <button type="button" @@click="sendMessage" :disabled="!activeDoctor.canChatToday || (!newMessage.trim() && !pendingFile)"
-                                        class="p-2 md:p-2 lg:p-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-blue-500/30">
+                                        class="p-2 md:p-2 lg:p-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md ">
                                     <i data-lucide="send" class="w-4 h-4"></i>
                                 </button>
                             </div>

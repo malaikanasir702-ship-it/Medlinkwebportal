@@ -1,4 +1,4 @@
-@model MedLinkPortal.Models.PatientDashboardModel
+﻿@model MedLinkPortal.Models.PatientDashboardModel
 @{
     Layout = "_DashboardLayout";
     ViewData["Title"] = "Find Doctors";
@@ -9,7 +9,7 @@
 
 <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
     <!-- Premium Search & Filter Header -->
-    <div class="relative z-40 bg-white/40 backdrop-blur-xl border border-white rounded-3xl lg:rounded-[2.5rem] p-4 md:p-5 lg:p-4 shadow-2xl shadow-blue-900/5">
+    <div class="relative z-40 bg-white/40  border border-white rounded-3xl lg:rounded-[2.5rem] p-4 md:p-5 lg:p-4 shadow-2xl ">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 md:gap-4">
             <!-- Search Interaction -->
             <div class="relative group flex-1 w-full">
@@ -92,9 +92,9 @@
                  data-docid="@doctor.Id"
                  data-userid="@(doctor.UserId ?? "")">
                 
-                <div class="h-full bg-white rounded-[2.5rem] p-6 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-2 transition-all duration-500 overflow-hidden relative">
+                <div class="h-full bg-white rounded-[2.5rem] p-6 border border-gray-100 shadow-sm hover:shadow-2xl hover: hover:-translate-y-2 transition-all duration-500 overflow-hidden relative">
                     <!-- Background Accent -->
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50/30 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-blue-100/50 transition-colors"></div>
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50/30 rounded-full -mr-16 -mt-16 group-hover:bg-blue-100/50 transition-colors"></div>
                     
                     <!-- Online Pulse Indicator -->
                     @if(doctor.Online) {
@@ -109,7 +109,7 @@
 
                     <div class="flex flex-col items-center text-center mb-6">
                         <div class="relative mb-4">
-                            <div class="absolute inset-0 bg-blue-600/10 rounded-[2rem] scale-110 blur-xl group-hover:scale-125 transition-transform"></div>
+                            <div class="absolute inset-0 bg-blue-600/10 rounded-[2rem] scale-110 group-hover:scale-125 transition-transform"></div>
                             @{
                                 var imageUrl = !string.IsNullOrEmpty(doctor.Image) 
                                     ? doctor.Image 
@@ -168,7 +168,7 @@
                             </button>
                             }
                             <a href="@Url.Action("BookAppointment", "Dashboard", new { doctorId = doctor.Id })" 
-                               class="py-3 rounded-2xl bg-gray-900 text-white hover:bg-blue-600 transition-all flex items-center justify-center font-semibold text-[10px] uppercase tracking-widest shadow-lg shadow-gray-200 group-hover:scale-105 active:scale-95">
+                               class="py-3 rounded-2xl bg-gray-900 text-white hover:bg-blue-600 transition-all flex items-center justify-center font-semibold text-[10px] uppercase tracking-widest shadow-lg  group-hover:scale-105 active:scale-95">
                                 Book
                             </a>
                         </div>
@@ -270,7 +270,7 @@
                                 let badge = card.querySelector('.near-me-badge');
                                 if (!badge) {
                                     badge = document.createElement('div');
-                                    badge.className = 'near-me-badge absolute top-6 left-6 bg-emerald-500/90 backdrop-blur-md text-white px-2 py-0.5 rounded-full text-[9px] font-semibold flex items-center gap-1';
+                                    badge.className = 'near-me-badge absolute top-6 left-6 bg-emerald-500/90  text-white px-2 py-0.5 rounded-full text-[9px] font-semibold flex items-center gap-1';
                                     card.querySelector('.h-full')?.appendChild(badge);
                                 }
                                 badge.innerHTML = `<i data-lucide="map-pin" style="width:10px;height:10px"></i> ${d.distanceKm.toFixed(1)} km`;

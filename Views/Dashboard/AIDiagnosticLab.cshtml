@@ -1,4 +1,4 @@
-@model MedLinkPortal.Models.PatientDashboardModel
+﻿@model MedLinkPortal.Models.PatientDashboardModel
 @{
     Layout = "_DashboardLayout";
     ViewData["Title"] = "AI Diagnostic Lab";
@@ -37,16 +37,49 @@
 }">
     <!-- Main Analysis Area -->
     <div class="col-span-12 lg:col-span-8">
-        <div id="dropZone" class="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] rounded-3xl p-8 relative overflow-hidden text-white shadow-2xl min-h-[500px] flex flex-col items-center justify-center border border-white/5 transition-all duration-500">
+
+        <!-- Daily Scan Usage Banner -->
+        <div id="scanUsageBanner" class="mb-4 rounded-2xl px-5 py-3.5 border flex items-center justify-between gap-4 transition-all duration-300 hidden">
+            <div class="flex items-center gap-3">
+                <div id="scanUsageIcon" class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+                    <i data-lucide="scan-line" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <p id="scanUsageText" class="text-xs font-semibold"></p>
+                    <p id="scanRenewText" class="text-[10px] font-medium mt-0.5 hidden"></p>
+                </div>
+            </div>
+            <!-- Dot indicators -->
+            <div class="flex items-center gap-1.5 shrink-0">
+                <div id="dot1" class="w-2.5 h-2.5 rounded-full border-2 transition-all duration-300"></div>
+                <div id="dot2" class="w-2.5 h-2.5 rounded-full border-2 transition-all duration-300"></div>
+                <div id="dot3" class="w-2.5 h-2.5 rounded-full border-2 transition-all duration-300"></div>
+            </div>
+        </div>
+
+        <!-- Limit Reached Banner -->
+        <div id="limitBanner" class="mb-4 rounded-2xl px-5 py-4 bg-rose-50 border border-rose-200 hidden">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <i data-lucide="shield-off" class="w-4 h-4 text-rose-600"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-rose-800">Daily scan limit reached (3/3)</p>
+                    <p class="text-xs text-rose-600 mt-0.5">Your quota renews at midnight UTC. Come back in <span id="renewCountdown" class="font-bold"></span>.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="dropZone" class="  rounded-3xl p-8 relative overflow-hidden text-white shadow-2xl min-h-[500px] flex flex-col items-center justify-center border border-white/5 transition-all duration-500">
             <!-- Background effects -->
             <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.1] mix-blend-overlay"></div>
-            <div class="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-indigo-600 rounded-full blur-[100px] opacity-20 animate-pulse-slow"></div>
-            <div class="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-600 rounded-full blur-[100px] opacity-20 animate-pulse-slow"></div>
+            <div class="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-indigo-600 rounded-full  opacity-20 animate-pulse-slow"></div>
+            <div class="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-600 rounded-full  opacity-20 animate-pulse-slow"></div>
             
             <div id="uploadContent" class="relative z-10 text-center max-w-md mx-auto transform transition-all duration-500 scale-100">
                 <div class="mb-8 relative inline-block">
-                    <div class="absolute inset-0 bg-blue-500 blur-2xl opacity-30 animate-pulse"></div>
-                    <div class="w-24 h-24 bg-white/5 backdrop-blur-2xl rounded-2xl flex items-center justify-center border border-white/10 relative group shadow-xl">
+                    <div class="absolute inset-0 bg-blue-500 opacity-30 animate-pulse"></div>
+                    <div class="w-24 h-24 bg-white/5  rounded-2xl flex items-center justify-center border border-white/10 relative group shadow-xl">
                         <i data-lucide="microscope" class="w-12 h-12 text-blue-400 group-hover:scale-110 transition-transform duration-500"></i>
                     </div>
                 </div>
@@ -68,20 +101,20 @@
             <div id="processingState" class="hidden relative z-10 text-center max-w-sm mx-auto">
                 <div class="relative w-32 h-32 mx-auto mb-8">
                     <div class="absolute inset-0 border-[4px] border-blue-500/10 border-t-blue-500 rounded-full animate-spin"></div>
-                    <div class="absolute inset-4 bg-white/5 backdrop-blur-2xl rounded-full flex items-center justify-center">
+                    <div class="absolute inset-4 bg-white/5  rounded-full flex items-center justify-center">
                         <i data-lucide="scan" class="w-10 h-10 text-blue-400 animate-pulse"></i>
                     </div>
-                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-scan"></div>
+                    <div class="absolute top-0 left-0 w-full h-1  animate-scan"></div>
                 </div>
                 <h3 class="text-2xl font-semibold mb-2">AI Processing...</h3>
                 <p class="text-blue-200/50 text-sm font-medium">Analyzing diagnostic markers.</p>
             </div>
 
             <!-- Result State -->
-            <div id="resultState" class="hidden relative z-10 w-full max-w-3xl bg-white/5 backdrop-blur-2xl p-8 rounded-3xl border border-white/10 shadow-2xl">
+            <div id="resultState" class="hidden relative z-10 w-full max-w-3xl bg-white/5  p-8 rounded-3xl border border-white/10 shadow-2xl">
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        <div class="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg ">
                             <i data-lucide="zap" class="w-6 h-6"></i>
                         </div>
                         <div>
@@ -189,7 +222,7 @@
     </div>
 
     <!-- Share Selection Modal -->
-    <div x-show="showShareModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#0f172a]/80 backdrop-blur-md animate-in fade-in duration-300">
+    <div x-show="showShareModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#0f172a]/80  animate-in fade-in duration-300">
         <div x-on:click.outside="showShareModal = false" class="bg-white rounded-[2.5rem] p-8 max-w-xl w-full shadow-2xl relative overflow-hidden transform transition-all scale-100">
             <div class="absolute top-0 left-0 w-full h-2.5 bg-indigo-600"></div>
             
@@ -228,7 +261,7 @@
                 <button 
                     x-on:click="shareWithSelectedDoctor()" 
                     x-bind:disabled="!selectedDoctorId || isSharing"
-                    x-bind:class="!selectedDoctorId ? 'opacity-50 cursor-not-allowed bg-gray-300' : 'bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200'"
+                    x-bind:class="!selectedDoctorId ? 'opacity-50 cursor-not-allowed bg-gray-300' : 'bg-indigo-600 hover:bg-indigo-700 shadow-lg '"
                     class="flex-[2] py-4 text-white rounded-2xl font-semibold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2">
                     <i data-lucide="send" class="w-4 h-4" x-show="!isSharing"></i>
                     <i data-lucide="loader-2" class="w-4 h-4 animate-spin" x-show="isSharing"></i>
@@ -291,7 +324,98 @@
         let currentAnalysis = null;
         let allAnalyses = @Html.Raw(Json.Serialize(Model.AIAnalyses));
 
+        // ── Scan Usage State ──
+        let scanUsageState = { scansUsed: 0, scansRemaining: 3, dailyLimit: 3, limitReached: false, renewsInHours: 0, renewsInMinutes: 0 };
+
+        // ── Load scan usage on page load ──
+        async function loadScanUsage() {
+            try {
+                const res = await fetch('/Dashboard/GetScanUsage');
+                const data = await res.json();
+                updateScanUsageUI(data);
+            } catch (e) { console.warn('Could not load scan usage', e); }
+        }
+
+        function updateScanUsageUI(data) {
+            scanUsageState = data;
+            const banner = document.getElementById('scanUsageBanner');
+            const limitBanner = document.getElementById('limitBanner');
+            const usageText = document.getElementById('scanUsageText');
+            const renewText = document.getElementById('scanRenewText');
+            const uploadContent = document.getElementById('uploadContent');
+            const fileInput = document.getElementById('fileInput');
+
+            const dots = [document.getElementById('dot1'), document.getElementById('dot2'), document.getElementById('dot3')];
+
+            if (data.limitReached) {
+                // Show hard limit banner, hide upload
+                limitBanner.classList.remove('hidden');
+                banner.classList.add('hidden');
+                if (uploadContent) uploadContent.classList.add('opacity-50', 'pointer-events-none');
+                if (fileInput) fileInput.disabled = true;
+                updateRenewCountdown(data.renewsInHours, data.renewsInMinutes);
+            } else {
+                limitBanner.classList.add('hidden');
+                banner.classList.remove('hidden');
+                if (uploadContent) uploadContent.classList.remove('opacity-50', 'pointer-events-none');
+                if (fileInput) fileInput.disabled = false;
+
+                const used = data.scansUsed;
+                const remaining = data.scansRemaining;
+
+                // Color theme based on usage
+                let colorClass, iconColor, borderColor, bgColor;
+                if (used === 0) {
+                    colorClass = 'text-emerald-700'; iconColor = 'text-emerald-600 bg-emerald-50'; borderColor = 'border-emerald-100'; bgColor = 'bg-emerald-50/60';
+                } else if (used === 1) {
+                    colorClass = 'text-blue-700'; iconColor = 'text-blue-600 bg-blue-50'; borderColor = 'border-blue-100'; bgColor = 'bg-blue-50/60';
+                } else {
+                    colorClass = 'text-amber-700'; iconColor = 'text-amber-600 bg-amber-50'; borderColor = 'border-amber-100'; bgColor = 'bg-amber-50/60';
+                }
+
+                banner.className = `mb-4 rounded-2xl px-5 py-3.5 border flex items-center justify-between gap-4 transition-all duration-300 ${bgColor} ${borderColor}`;
+                document.getElementById('scanUsageIcon').className = `w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${iconColor}`;
+                usageText.className = `text-xs font-semibold ${colorClass}`;
+                usageText.textContent = `${used}/3 daily scans used — ${remaining} remaining`;
+
+                if (used > 0) {
+                    renewText.classList.remove('hidden');
+                    renewText.className = `text-[10px] font-medium mt-0.5 ${colorClass} opacity-70`;
+                    renewText.textContent = `Resets in ${data.renewsInHours}h ${data.renewsInMinutes}m`;
+                } else {
+                    renewText.classList.add('hidden');
+                }
+
+                // Update dots
+                const dotColors = [
+                    ['bg-emerald-500', 'border-emerald-500'],
+                    ['bg-blue-500', 'border-blue-500'],
+                    ['bg-amber-500', 'border-amber-500']
+                ];
+                dots.forEach((dot, i) => {
+                    if (i < used) {
+                        dot.className = `w-2.5 h-2.5 rounded-full border-2 transition-all duration-300 ${dotColors[i]?.[0] ?? 'bg-gray-400'} ${dotColors[i]?.[1] ?? 'border-gray-400'}`;
+                    } else {
+                        dot.className = `w-2.5 h-2.5 rounded-full border-2 transition-all duration-300 bg-transparent border-gray-300`;
+                    }
+                });
+            }
+        }
+
+        function updateRenewCountdown(hours, minutes) {
+            const el = document.getElementById('renewCountdown');
+            if (el) el.textContent = `${hours}h ${minutes}m`;
+        }
+
+        loadScanUsage();
+
         async function handleUpload(file) {
+            // Block upload if limit already reached
+            if (scanUsageState.limitReached) {
+                await PremiumModal.error('You have used all 3 daily scans. Your quota resets at midnight.', 'Daily Limit Reached');
+                return;
+            }
+
             uploadContent.classList.add('hidden');
             resultState.classList.add('hidden');
             processingState.classList.remove('hidden');
@@ -302,11 +426,29 @@
             try {
                 const response = await fetch('/Dashboard/AnalyzeFile', { method: 'POST', body: formData });
                 const data = await response.json();
+
+                if (data.limitReached) {
+                    // Server confirmed limit — update UI immediately
+                    updateScanUsageUI(data);
+                    processingState.classList.add('hidden');
+                    uploadContent.classList.remove('hidden');
+                    await PremiumModal.error(`Daily scan limit reached (${data.scansUsed}/${data.dailyLimit}). Resets in ${data.renewsInHours}h ${data.renewsInMinutes}m.`, 'Scan Quota Exhausted');
+                    return;
+                }
+
                 if (data.success) {
                     currentAnalysis = data.analysis;
                     showResult(data.analysis);
-                    // Ultra-fast history update without reload
                     prependToHistory(data.analysis);
+                    // Update scan usage counter from server response
+                    updateScanUsageUI({
+                        scansUsed: data.scansUsed,
+                        scansRemaining: data.scansRemaining,
+                        dailyLimit: data.dailyLimit,
+                        limitReached: data.limitReached,
+                        renewsInHours: data.renewsInHours,
+                        renewsInMinutes: data.renewsInMinutes
+                    });
                 } else {
                     await PremiumModal.error('Diagnostic analysis failed: ' + data.message, 'Core Rejection');
                     resetLab();

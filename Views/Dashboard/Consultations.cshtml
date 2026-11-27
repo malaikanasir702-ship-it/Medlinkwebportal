@@ -1,4 +1,4 @@
-@model MedLinkPortal.Models.PatientDashboardModel
+﻿@model MedLinkPortal.Models.PatientDashboardModel
 @{
     Layout = "_DashboardLayout";
     ViewData["Title"] = "Consultation History";
@@ -13,7 +13,7 @@
 <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
     <!-- Premium Stats Header -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="relative overflow-hidden bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500">
+        <div class="relative overflow-hidden bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:shadow-2xl hover: transition-all duration-500">
             <div class="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
                 <i data-lucide="layers" class="w-24 h-24 text-blue-600"></i>
             </div>
@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <div class="relative overflow-hidden bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-500">
+        <div class="relative overflow-hidden bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:shadow-2xl hover: transition-all duration-500">
             <div class="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
                 <i data-lucide="check-circle" class="w-24 h-24 text-emerald-600"></i>
             </div>
@@ -43,7 +43,7 @@
             </div>
         </div>
 
-        <div class="relative overflow-hidden bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:shadow-2xl hover:shadow-amber-900/5 transition-all duration-500">
+        <div class="relative overflow-hidden bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:shadow-2xl hover: transition-all duration-500">
             <div class="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
                 <i data-lucide="clock" class="w-24 h-24 text-amber-500"></i>
             </div>
@@ -61,7 +61,7 @@
 
     <!-- Enhanced History Section -->
     <div class="bg-white rounded-[3rem] border border-gray-100 shadow-sm border-b-4 border-b-gray-50 mb-10" x-data="{ filter: 'all' }">
-        <div class="p-10 border-b border-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-gradient-to-b from-gray-50/30 to-transparent">
+        <div class="p-10 border-b border-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-6 
             <div>
                 <div class="flex items-center gap-3">
                     <div class="w-2 h-8 bg-blue-600 rounded-full"></div>
@@ -71,10 +71,10 @@
             </div>
             <div class="flex items-center gap-2 bg-gray-50/80 p-1.5 rounded-2xl border border-gray-100 inline-flex self-start sm:self-center">
                  <button @@click="filter = 'all'" 
-                         :class="filter === 'all' ? 'bg-white shadow-xl shadow-blue-900/5 text-blue-600' : 'text-gray-400 hover:text-blue-600'"
+                         :class="filter === 'all' ? 'bg-white shadow-xl  text-blue-600' : 'text-gray-400 hover:text-blue-600'"
                          class="px-6 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest border border-transparent transition-all">All History</button>
                  <button @@click="filter = 'past'" 
-                         :class="filter === 'past' ? 'bg-white shadow-xl shadow-blue-900/5 text-blue-600' : 'text-gray-400 hover:text-blue-600'"
+                         :class="filter === 'past' ? 'bg-white shadow-xl  text-blue-600' : 'text-gray-400 hover:text-blue-600'"
                          class="px-6 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest border border-transparent transition-all">Past Only</button>
             </div>
         </div>
@@ -95,7 +95,7 @@
                         <h4 class="text-xl font-semibold text-gray-900 tracking-tight">Vault is Empty</h4>
                         <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mt-2 max-w-[280px] leading-relaxed">Your digital health interactions will appear here once archived.</p>
                     </div>
-                    <a href="@Url.Action("Doctors", "Dashboard")" class="mt-6 px-10 py-4 bg-gray-900 text-white font-semibold rounded-[2rem] text-[11px] uppercase tracking-widest shadow-2xl shadow-gray-900/20 hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all">Initialize Booking</a>
+                    <a href="@Url.Action("Doctors", "Dashboard")" class="mt-6 px-10 py-4 bg-gray-900 text-white font-semibold rounded-[2rem] text-[11px] uppercase tracking-widest shadow-2xl  hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all">Initialize Booking</a>
                 </div>
             }
             else
@@ -173,7 +173,7 @@
                                      else
                                      {
                                          <a href="javascript:void(0)" onclick="joinWaitingRoomConsult(@consult.Id, '@consult.Doctor', '@Url.Action("ConsultationRoom", "Dashboard", new { id = consult.Id })')" 
-                                            class="group/btn px-10 py-4 bg-blue-600 text-white rounded-[1.5rem] text-[11px] font-semibold uppercase tracking-[0.15em] hover:bg-blue-700 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl shadow-blue-500/20 flex items-center gap-3">
+                                            class="group/btn px-10 py-4 bg-blue-600 text-white rounded-[1.5rem] text-[11px] font-semibold uppercase tracking-[0.15em] hover:bg-blue-700 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl  flex items-center gap-3">
                                              <span>Join Room</span>
                                              <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>
                                          </a>
@@ -188,7 +188,7 @@
                                  }
                                  else if (isFinished || isPast)
                                  {
-                                     <div onclick="showRestrictedModal('completed', '@consult.Doctor')" class="px-10 py-4 bg-emerald-50 text-emerald-600 rounded-[1.5rem] text-[11px] font-semibold uppercase tracking-[0.15em] border border-emerald-100 flex items-center gap-3 shadow-sm shadow-emerald-900/5 cursor-pointer hover:bg-emerald-600 hover:text-white transition-all">
+                                     <div onclick="showRestrictedModal('completed', '@consult.Doctor')" class="px-10 py-4 bg-emerald-50 text-emerald-600 rounded-[1.5rem] text-[11px] font-semibold uppercase tracking-[0.15em] border border-emerald-100 flex items-center gap-3 shadow-sm  cursor-pointer hover:bg-emerald-600 hover:text-white transition-all">
                                          <i data-lucide="check-circle-2" class="w-4 h-4"></i>
                                          <span>Completed</span>
                                      </div>
@@ -221,7 +221,7 @@
                                       x-transition:enter="transition ease-out duration-300"
                                       x-transition:enter-start="transform opacity-0 translate-y-4 scale-95"
                                       x-transition:enter-end="transform opacity-100 translate-y-0 scale-100"
-                                      class="absolute right-0 top-full mt-4 w-72 bg-white border border-gray-100 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] z-[100] overflow-hidden py-3 divide-y divide-gray-50 origin-top-right backdrop-blur-xl bg-white/95">
+                                      class="absolute right-0 top-full mt-4 w-72 bg-white border border-gray-100 rounded-[2.5rem]  z-[100] overflow-hidden py-3 divide-y divide-gray-50 origin-top-right  bg-white/95">
                                      
                                      <a href="@Url.Action("DownloadInvoice", "Dashboard", new { id = consult.Id })" target="_blank" class="flex items-center justify-between px-6 py-4 hover:bg-blue-50/50 group/item transition-all">
                                          <div class="flex items-center gap-4">
@@ -275,9 +275,9 @@
 </div>
 
 <!-- Waiting Room Modal -->
-<div id="waitingRoomModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md animate-in fade-in duration-300">
+<div id="waitingRoomModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-gray-900/60  animate-in fade-in duration-300">
     <div class="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl relative animate-in zoom-in slide-in-from-bottom-4 duration-500">
-        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-blue-600 to-indigo-700 opacity-5"></div>
+        <div class="absolute top-0 left-0 w-full h-32  opacity-5"></div>
         <div class="relative p-10 text-center">
             <div class="w-24 h-24 mx-auto mb-8 rounded-[2rem] bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner relative group">
                 <div class="absolute inset-0 bg-blue-400 rounded-[2rem] animate-ping opacity-20"></div>
@@ -298,7 +298,7 @@
                     <div class="text-[9px] font-semibold text-gray-400 uppercase tracking-[0.2em] mt-1">Est. Wait</div>
                 </div>
             </div>
-            <button onclick="document.getElementById('waitingRoomModal').classList.add('hidden'); window.location.href=arguments[0]" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-semibold text-[11px] uppercase tracking-widest shadow-xl shadow-gray-900/20 hover:bg-gray-800 transition-all active:scale-95">
+            <button onclick="document.getElementById('waitingRoomModal').classList.add('hidden'); window.location.href=arguments[0]" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-semibold text-[11px] uppercase tracking-widest shadow-xl  hover:bg-gray-800 transition-all active:scale-95">
                 Enter Now
             </button>
             <p class="text-[9px] font-semibold text-gray-300 uppercase tracking-[0.2em] mt-4">Redirecting automatically...</p>
@@ -307,10 +307,10 @@
 </div>
 
 <!-- Restricted Access Modal -->
-<div id="restrictedModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md animate-in fade-in duration-300">
+<div id="restrictedModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-gray-900/60  animate-in fade-in duration-300">
     <div class="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl relative animate-in zoom-in slide-in-from-bottom-4 duration-500">
         <!-- Header Pattern -->
-        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-blue-600 to-indigo-700 opacity-5"></div>
+        <div class="absolute top-0 left-0 w-full h-32  opacity-5"></div>
         <div class="absolute top-0 right-0 p-8 opacity-[0.03]">
             <i data-lucide="shield-alert" class="w-32 h-32 text-blue-600"></i>
         </div>
@@ -330,7 +330,7 @@
 
             <!-- Buttons -->
             <div class="space-y-3">
-                <button onclick="closeRestrictedModal()" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-semibold text-[11px] uppercase tracking-widest shadow-xl shadow-gray-900/20 hover:bg-gray-800 transition-all active:scale-95">
+                <button onclick="closeRestrictedModal()" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-semibold text-[11px] uppercase tracking-widest shadow-xl  hover:bg-gray-800 transition-all active:scale-95">
                     Acknowledge Protocol
                 </button>
             </div>

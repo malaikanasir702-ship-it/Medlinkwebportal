@@ -10,19 +10,18 @@ namespace MedLinkPortal.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Add BankAccountTitle (stored encrypted)
-            migrationBuilder.AddColumn<string>(
-                name: "BankAccountTitle",
-                table: "AspNetUsers",
-                type: "text",
-                nullable: true);
-
-            // Add BankName (plain text)
-            migrationBuilder.AddColumn<string>(
-                name: "BankName",
-                table: "AspNetUsers",
-                type: "text",
-                nullable: true);
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='AspNetUsers' AND column_name='BankAccountTitle') THEN
+                        ALTER TABLE ""AspNetUsers"" ADD ""BankAccountTitle"" text;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='AspNetUsers' AND column_name='BankName') THEN
+                        ALTER TABLE ""AspNetUsers"" ADD ""BankName"" text;
+                    END IF;
+                END
+                $$;
+            ");
         }
 
         /// <inheritdoc />

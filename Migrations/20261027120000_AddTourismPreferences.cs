@@ -10,58 +10,40 @@ namespace MedLinkPortal.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "WantsHotel",
-                table: "MedicalTourismRequests",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='MedicalTourismRequests' AND column_name='WantsHotel') THEN
+                        ALTER TABLE ""MedicalTourismRequests"" ADD ""WantsHotel"" boolean NOT NULL DEFAULT false;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='MedicalTourismRequests' AND column_name='HotelPreference') THEN
+                        ALTER TABLE ""MedicalTourismRequests"" ADD ""HotelPreference"" text DEFAULT 'Not Required';
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='MedicalTourismRequests' AND column_name='HotelNights') THEN
+                        ALTER TABLE ""MedicalTourismRequests"" ADD ""HotelNights"" integer;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='MedicalTourismRequests' AND column_name='WantsAirportPickup') THEN
+                        ALTER TABLE ""MedicalTourismRequests"" ADD ""WantsAirportPickup"" boolean NOT NULL DEFAULT false;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='MedicalTourismRequests' AND column_name='TransportPreference') THEN
+                        ALTER TABLE ""MedicalTourismRequests"" ADD ""TransportPreference"" text DEFAULT 'Not Required';
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='MedicalTourismRequests' AND column_name='PreArrivalAppointmentId') THEN
+                        ALTER TABLE ""MedicalTourismRequests"" ADD ""PreArrivalAppointmentId"" integer;
+                    END IF;
+                END
+                $$;
 
-            migrationBuilder.AddColumn<string>(
-                name: "HotelPreference",
-                table: "MedicalTourismRequests",
-                type: "text",
-                nullable: true,
-                defaultValue: "Not Required");
+                CREATE INDEX IF NOT EXISTS ""IX_MedicalTourismRequests_PreArrivalAppointmentId"" ON ""MedicalTourismRequests"" (""PreArrivalAppointmentId"");
 
-            migrationBuilder.AddColumn<int>(
-                name: "HotelNights",
-                table: "MedicalTourismRequests",
-                type: "integer",
-                nullable: true);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "WantsAirportPickup",
-                table: "MedicalTourismRequests",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<string>(
-                name: "TransportPreference",
-                table: "MedicalTourismRequests",
-                type: "text",
-                nullable: true,
-                defaultValue: "Not Required");
-
-            migrationBuilder.AddColumn<int>(
-                name: "PreArrivalAppointmentId",
-                table: "MedicalTourismRequests",
-                type: "integer",
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MedicalTourismRequests_PreArrivalAppointmentId",
-                table: "MedicalTourismRequests",
-                column: "PreArrivalAppointmentId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_MedicalTourismRequests_Appointments_PreArrivalAppointmentId",
-                table: "MedicalTourismRequests",
-                column: "PreArrivalAppointmentId",
-                principalTable: "Appointments",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'FK_MedicalTourismRequests_Appointments_PreArrivalAppointmentId') THEN
+                        ALTER TABLE ""MedicalTourismRequests"" ADD CONSTRAINT ""FK_MedicalTourismRequests_Appointments_PreArrivalAppointmentId"" FOREIGN KEY (""PreArrivalAppointmentId"") REFERENCES ""Appointments"" (""Id"") ON DELETE SET NULL;
+                    END IF;
+                END
+                $$;
+            ");
         }
 
         /// <inheritdoc />

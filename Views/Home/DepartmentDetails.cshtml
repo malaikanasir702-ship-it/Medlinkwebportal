@@ -8,39 +8,39 @@
 <div class="min-h-screen bg-white">
 
     <!-- Header / Hero -->
-    <header class="pt-28 md:pt-36 pb-20 px-6 bg-white border-b border-gray-100">
+    <header class="pt-28 md:pt-40 pb-24 px-6 bg-white border-b border-gray-100">
         <div class="max-w-7xl mx-auto">
 
             <!-- Breadcrumb -->
-            <nav class="mb-12">
+            <nav class="mb-14">
                 <a href="/" class="inline-flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-gray-700 transition-colors group">
                     <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-0.5"></i>
                     Back to Specialties
                 </a>
             </nav>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
 
                 <!-- Left: Dept Info -->
                 <div>
                     <!-- Icon -->
-                    <div class="w-14 h-14 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-8">
+                    <div class="w-14 h-14 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-10">
                         <i data-lucide="@dept.Icon.ToLower()" class="w-7 h-7 text-blue-600"></i>
                     </div>
 
-                    <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Medical Department</p>
+                    <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-4">Medical Department</p>
 
-                    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-tight mb-2">
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-tight mb-3">
                         @dept.Title
                     </h1>
-                    <p class="text-2xl font-semibold text-gray-300 mb-7">Department</p>
+                    <p class="text-2xl font-semibold text-gray-300 mb-8">Department</p>
 
-                    <p class="text-base text-gray-500 leading-relaxed mb-10 max-w-lg">
+                    <p class="text-base text-gray-500 leading-relaxed mb-12 max-w-lg">
                         @dept.Description
                     </p>
 
                     <button onclick="toggleModal('bookingModal')"
-                            class="inline-flex items-center gap-2 px-7 py-3.5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
+                            class="inline-flex items-center gap-2 px-8 py-3.5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
                         <i data-lucide="calendar-plus" class="w-4 h-4"></i>
                         Book Department Consultation
                     </button>
@@ -50,15 +50,15 @@
                 <div>
                     @if (dept.Services != null && dept.Services.Any())
                     {
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">Services Offered</p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-6">Services Offered</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             @foreach (var service in dept.Services)
                             {
-                                <div class="bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 transition-colors">
-                                    <div class="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center mb-4">
+                                <div class="bg-white border border-gray-200 rounded-xl p-6 hover:border-gray-300 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center mb-5">
                                         <i data-lucide="check-circle" class="w-4 h-4 text-blue-600"></i>
                                     </div>
-                                    <h4 class="font-semibold text-gray-900 mb-1">@service</h4>
+                                    <h4 class="font-semibold text-gray-900 mb-2">@service</h4>
                                     <p class="text-xs text-gray-400 leading-relaxed">Specialized procedural care and diagnostics.</p>
                                 </div>
                             }
@@ -70,13 +70,13 @@
     </header>
 
     <!-- Specialists Section -->
-    <section class="py-24 px-6">
+    <section class="py-28 px-6">
         <div class="max-w-7xl mx-auto">
 
             <!-- Section Header -->
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                 <div>
-                    <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Board-Certified Experts</p>
+                    <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-4">Board-Certified Experts</p>
                     <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Meet our @dept.Title Specialists</h2>
                 </div>
                 <p class="text-sm text-gray-400 max-w-xs leading-relaxed">
@@ -99,17 +99,17 @@
                             </div>
 
                             <!-- Doctor Info -->
-                            <div class="p-5">
-                                <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">@doc.Specialty</p>
-                                <h4 class="font-semibold text-gray-900 mb-1">@doc.Name</h4>
-                                <div class="flex items-center gap-1 mb-4">
+                            <div class="p-6">
+                                <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1.5">@doc.Specialty</p>
+                                <h4 class="font-semibold text-gray-900 mb-2">@doc.Name</h4>
+                                <div class="flex items-center gap-1 mb-5">
                                     <i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i>
                                     <span class="text-xs text-gray-500 font-medium">@doc.Rating</span>
                                 </div>
 
                                 <div class="flex items-center justify-between pt-4 border-t border-gray-100">
                                     <div>
-                                        <p class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Availability</p>
+                                        <p class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-0.5">Availability</p>
                                         <p class="text-xs font-semibold text-green-600">@doc.Availability</p>
                                     </div>
                                     <button onclick="toggleModal('bookingModal')"
@@ -123,11 +123,11 @@
                 }
                 else
                 {
-                    <div class="col-span-full py-20 text-center border border-dashed border-gray-200 rounded-xl bg-gray-50">
-                        <div class="w-14 h-14 bg-white border border-gray-200 rounded-xl flex items-center justify-center mx-auto mb-5">
+                    <div class="col-span-full py-24 text-center border border-dashed border-gray-200 rounded-xl bg-gray-50">
+                        <div class="w-14 h-14 bg-white border border-gray-200 rounded-xl flex items-center justify-center mx-auto mb-6">
                             <i data-lucide="user-plus" class="w-6 h-6 text-gray-400"></i>
                         </div>
-                        <h4 class="font-semibold text-gray-900 mb-1">Recruiting More Specialists</h4>
+                        <h4 class="font-semibold text-gray-900 mb-2">Recruiting More Specialists</h4>
                         <p class="text-sm text-gray-400">We are currently onboarding more @dept.Title experts.</p>
                     </div>
                 }
@@ -136,19 +136,19 @@
     </section>
 
     <!-- Why Choose Section -->
-    <section class="py-20 px-6 bg-gray-50 border-t border-b border-gray-100">
+    <section class="py-24 px-6 bg-gray-50 border-t border-b border-gray-100">
         <div class="max-w-7xl mx-auto">
 
             <!-- Header -->
-            <div class="mb-16">
-                <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Precision Care</p>
+            <div class="mb-14">
+                <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-4">Precision Care</p>
                 <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Why our @dept.Title unit?</h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                 <div class="bg-white border border-gray-200 rounded-xl p-8">
-                    <div class="w-11 h-11 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center mb-6">
+                    <div class="w-11 h-11 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center mb-7">
                         <i data-lucide="activity" class="w-5 h-5 text-blue-600"></i>
                     </div>
                     <h3 class="font-semibold text-gray-900 mb-3">Real-time Monitoring</h3>
@@ -156,7 +156,7 @@
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-8">
-                    <div class="w-11 h-11 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center mb-6">
+                    <div class="w-11 h-11 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center mb-7">
                         <i data-lucide="cpu" class="w-5 h-5 text-gray-600"></i>
                     </div>
                     <h3 class="font-semibold text-gray-900 mb-3">AI Diagnostic Aid</h3>
@@ -164,7 +164,7 @@
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-8">
-                    <div class="w-11 h-11 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center mb-6">
+                    <div class="w-11 h-11 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center mb-7">
                         <i data-lucide="globe" class="w-5 h-5 text-gray-600"></i>
                     </div>
                     <h3 class="font-semibold text-gray-900 mb-3">Global Specialist Network</h3>
@@ -179,11 +179,11 @@
     <section class="py-16 px-6 bg-white border-b border-gray-100">
         <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
             <div>
-                <h3 class="text-xl font-bold text-gray-900 mb-1">Ready to book a @dept.Title consultation?</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Ready to book a @dept.Title consultation?</h3>
                 <p class="text-sm text-gray-500">Connect with a specialist today. Available 7 days a week.</p>
             </div>
             <button onclick="toggleModal('bookingModal')"
-                    class="flex-shrink-0 inline-flex items-center gap-2 px-7 py-3.5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
+                    class="flex-shrink-0 inline-flex items-center gap-2 px-8 py-3.5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
                 <i data-lucide="calendar-plus" class="w-4 h-4"></i>
                 Book Consultation
             </button>

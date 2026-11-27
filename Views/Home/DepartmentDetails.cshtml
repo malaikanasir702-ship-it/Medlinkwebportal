@@ -5,55 +5,64 @@
     ViewData["Title"] = $"{dept.Title} Department | MedLink";
 }
 
-<div class="min-h-screen bg-gray-50 font-inter">
-    <!-- Header/Hero -->
-    <header class="relative pt-32 pb-20 px-6 overflow-hidden bg-white border-b border-gray-100">
-        <!-- Background Accents -->
-        <div class="absolute top-0 right-0 w-[50%] h-full @dept.Color opacity-[0.03] rounded-bl-[10rem] -z-0"></div>
-        
-        <div class="max-w-7xl mx-auto relative z-10">
-            <nav class="mb-12 mt-3">
-                <a href="/" class="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-blue-600 transition-colors group">
-                    <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
+<div class="min-h-screen bg-white">
+
+    <!-- Header / Hero -->
+    <header class="pt-28 md:pt-36 pb-20 px-6 bg-white border-b border-gray-100">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Breadcrumb -->
+            <nav class="mb-12">
+                <a href="/" class="inline-flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-gray-700 transition-colors group">
+                    <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-0.5"></i>
                     Back to Specialties
                 </a>
             </nav>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+
+                <!-- Left: Dept Info -->
                 <div>
-                    <div class="w-20 h-20 rounded-3xl @dept.Color text-white flex items-center justify-center mb-8 shadow-2xl scale-110">
-                        <i data-lucide="@dept.Icon.ToLower()" class="w-10 h-10"></i>
+                    <!-- Icon -->
+                    <div class="w-14 h-14 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-8">
+                        <i data-lucide="@dept.Icon.ToLower()" class="w-7 h-7 text-blue-600"></i>
                     </div>
-                    
-                    <h1 class="text-5xl md:text-6xl font-black text-gray-900 tracking-tight leading-tight mb-6">
-                        @dept.Title <br />
-                        <span class="text-gray-400">Department</span>
+
+                    <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Medical Department</p>
+
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-tight mb-2">
+                        @dept.Title
                     </h1>
-                    
-                    <p class="text-xl text-gray-600 leading-relaxed mb-10 max-w-xl">
+                    <p class="text-2xl font-semibold text-gray-300 mb-7">Department</p>
+
+                    <p class="text-base text-gray-500 leading-relaxed mb-10 max-w-lg">
                         @dept.Description
                     </p>
 
-                    <div class="flex flex-wrap gap-4">
-                        <button onclick="toggleModal('bookingModal')" class="bg-blue-600 text-white px-10 py-5 rounded-full font-bold hover:bg-blue-700 transition-all shadow-xl hover:shadow-blue-200 active:scale-95">
-                            Book Department Consultation
-                        </button>
-                    </div>
+                    <button onclick="toggleModal('bookingModal')"
+                            class="inline-flex items-center gap-2 px-7 py-3.5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
+                        <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+                        Book Department Consultation
+                    </button>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    @if (dept.Services != null)
+                <!-- Right: Services Grid -->
+                <div>
+                    @if (dept.Services != null && dept.Services.Any())
                     {
-                        foreach (var service in dept.Services)
-                        {
-                            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-                                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">Services Offered</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            @foreach (var service in dept.Services)
+                            {
+                                <div class="bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center mb-4">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-blue-600"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">@service</h4>
+                                    <p class="text-xs text-gray-400 leading-relaxed">Specialized procedural care and diagnostics.</p>
                                 </div>
-                                <h4 class="font-bold text-gray-900">@service</h4>
-                                <p class="text-xs text-gray-500 mt-2">Specialized procedural care and diagnostics.</p>
-                            </div>
-                        }
+                            }
+                        </div>
                     }
                 </div>
             </div>
@@ -61,104 +70,127 @@
     </header>
 
     <!-- Specialists Section -->
-    <section class="py-24 px-6 max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
-            <div>
-                <h2 class="text-sm font-black text-blue-600 uppercase tracking-[0.3em] mb-4">Board-Certified Experts</h2>
-                <h3 class="text-4xl font-bold text-gray-900 tracking-tight">Meet our @dept.Title Specialists</h3>
-            </div>
-            <p class="text-gray-500 max-w-sm">
-                Our team consists of world-class doctors with average 15+ years of clinical experience.
-            </p>
-        </div>
+    <section class="py-24 px-6">
+        <div class="max-w-7xl mx-auto">
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            @if (specialists != null && specialists.Any())
-            {
-                foreach (var doc in specialists)
+            <!-- Section Header -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
+                <div>
+                    <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Board-Certified Experts</p>
+                    <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Meet our @dept.Title Specialists</h2>
+                </div>
+                <p class="text-sm text-gray-400 max-w-xs leading-relaxed">
+                    Our team consists of world-class doctors with average 15+ years of clinical experience.
+                </p>
+            </div>
+
+            <!-- Doctors Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                @if (specialists != null && specialists.Any())
                 {
-                    <div class="group bg-white rounded-[2.5rem] p-6 border border-gray-100 hover:shadow-2xl transition-all duration-500">
-                        <div class="relative mb-6 overflow-hidden rounded-[2rem] aspect-[4/5]">
-                            <img src="@doc.Image" alt="@doc.Name" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700">
-                            <div class="absolute bottom-4 left-4 right-4 bg-white/80 backdrop-blur-md rounded-2xl p-4 border border-white/50 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                <div class="flex items-center justify-between mb-1">
-                                    <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest">@doc.Specialty</span>
-                                    <div class="flex items-center gap-1 text-yellow-500">
-                                        <i data-lucide="star" class="w-3 h-3 fill-current"></i>
-                                        <span class="text-[10px] font-bold">@doc.Rating</span>
-                                    </div>
+                    foreach (var doc in specialists)
+                    {
+                        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors group">
+                            <!-- Doctor Photo -->
+                            <div class="relative aspect-[4/5] overflow-hidden bg-gray-100">
+                                <img src="@doc.Image"
+                                     alt="@doc.Name"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            </div>
+
+                            <!-- Doctor Info -->
+                            <div class="p-5">
+                                <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">@doc.Specialty</p>
+                                <h4 class="font-semibold text-gray-900 mb-1">@doc.Name</h4>
+                                <div class="flex items-center gap-1 mb-4">
+                                    <i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i>
+                                    <span class="text-xs text-gray-500 font-medium">@doc.Rating</span>
                                 </div>
-                                <h4 class="text-sm font-bold text-gray-900">@doc.Name</h4>
+
+                                <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                    <div>
+                                        <p class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Availability</p>
+                                        <p class="text-xs font-semibold text-green-600">@doc.Availability</p>
+                                    </div>
+                                    <button onclick="toggleModal('bookingModal')"
+                                            class="w-9 h-9 bg-gray-900 text-white rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors">
+                                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="flex items-center justify-between gap-2 px-2">
-                             <div class="flex flex-col">
-                                 <span class="text-[10px] font-bold text-gray-400 uppercase">Availability</span>
-                                 <span class="text-xs font-bold text-emerald-600">@doc.Availability</span>
-                             </div>
-                             <button onclick="toggleModal('bookingModal')" class="bg-gray-900 text-white p-3 rounded-2xl hover:bg-black transition-colors group-hover:bg-blue-600">
-                                 <i data-lucide="calendar" class="w-4 h-4"></i>
-                             </button>
+                    }
+                }
+                else
+                {
+                    <div class="col-span-full py-20 text-center border border-dashed border-gray-200 rounded-xl bg-gray-50">
+                        <div class="w-14 h-14 bg-white border border-gray-200 rounded-xl flex items-center justify-center mx-auto mb-5">
+                            <i data-lucide="user-plus" class="w-6 h-6 text-gray-400"></i>
                         </div>
+                        <h4 class="font-semibold text-gray-900 mb-1">Recruiting More Specialists</h4>
+                        <p class="text-sm text-gray-400">We are currently onboarding more @dept.Title experts.</p>
                     </div>
                 }
-            }
-            else
-            {
-                <div class="col-span-full py-20 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
-                    <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
-                        <i data-lucide="user-plus" class="w-10 h-10"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-gray-900">Recruiting More Specialists</h4>
-                    <p class="text-gray-500 mt-2">We are currently onboarding more @dept.Title experts to our platform.</p>
-                </div>
-            }
+            </div>
         </div>
     </section>
 
     <!-- Why Choose Section -->
-    <section class="py-24 bg-gray-900 text-white rounded-[4rem] mx-4 mb-12 overflow-hidden relative">
-        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-             <div class="absolute top-[10%] left-[5%] w-64 h-64 bg-blue-600 rounded-full blur-[120px]"></div>
-             <div class="absolute bottom-[10%] right-[5%] w-64 h-64 bg-purple-600 rounded-full blur-[120px]"></div>
-        </div>
+    <section class="py-20 px-6 bg-gray-50 border-t border-b border-gray-100">
+        <div class="max-w-7xl mx-auto">
 
-        <div class="max-w-7xl mx-auto px-6 relative z-10">
-            <div class="text-center mb-20">
-                <h2 class="text-sm font-black text-blue-400 uppercase tracking-[0.4em] mb-4">Precision Intelligence</h2>
-                <h3 class="text-4xl md:text-5xl font-bold tracking-tight">Why Our @dept.Title Unit?</h3>
+            <!-- Header -->
+            <div class="mb-16">
+                <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Precision Care</p>
+                <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Why our @dept.Title unit?</h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                <div class="text-center">
-                    <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
-                        <i data-lucide="activity" class="text-blue-400 w-8 h-8"></i>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                <div class="bg-white border border-gray-200 rounded-xl p-8">
+                    <div class="w-11 h-11 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center mb-6">
+                        <i data-lucide="activity" class="w-5 h-5 text-blue-600"></i>
                     </div>
-                    <h4 class="text-xl font-bold mb-4">Real-time Vitals</h4>
-                    <p class="text-gray-400 leading-relaxed text-sm">Continuous monitoring during remote consultations with IoT integration.</p>
+                    <h3 class="font-semibold text-gray-900 mb-3">Real-time Monitoring</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Continuous vitals monitoring during remote consultations with IoT device integration.</p>
                 </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
-                        <i data-lucide="cpu" class="text-blue-400 w-8 h-8"></i>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-8">
+                    <div class="w-11 h-11 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center mb-6">
+                        <i data-lucide="cpu" class="w-5 h-5 text-gray-600"></i>
                     </div>
-                    <h4 class="text-xl font-bold mb-4">AI Diagnostic Aid</h4>
-                    <p class="text-gray-400 leading-relaxed text-sm">Neural networks assist our doctors in identifying patterns for @dept.Title health.</p>
+                    <h3 class="font-semibold text-gray-900 mb-3">AI Diagnostic Aid</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Neural networks assist our doctors in identifying patterns specific to @dept.Title conditions.</p>
                 </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
-                        <i data-lucide="globe" class="text-blue-400 w-8 h-8"></i>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-8">
+                    <div class="w-11 h-11 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center mb-6">
+                        <i data-lucide="globe" class="w-5 h-5 text-gray-600"></i>
                     </div>
-                    <h4 class="text-xl font-bold mb-4">Global Network</h4>
-                    <p class="text-gray-400 leading-relaxed text-sm">Consult with top-tier specialists from any continent within minutes.</p>
+                    <h3 class="font-semibold text-gray-900 mb-3">Global Specialist Network</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Consult with top-tier specialists from any continent within minutes through our platform.</p>
                 </div>
+
             </div>
         </div>
     </section>
 
-    <!-- Footer Partial -->
+    <!-- CTA Strip -->
+    <section class="py-16 px-6 bg-white border-b border-gray-100">
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+            <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-1">Ready to book a @dept.Title consultation?</h3>
+                <p class="text-sm text-gray-500">Connect with a specialist today. Available 7 days a week.</p>
+            </div>
+            <button onclick="toggleModal('bookingModal')"
+                    class="flex-shrink-0 inline-flex items-center gap-2 px-7 py-3.5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
+                <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+                Book Consultation
+            </button>
+        </div>
+    </section>
+
     @await Html.PartialAsync("_Footer")
-    <!-- Booking Modal -->
     @await Html.PartialAsync("_BookingModal")
 </div>
 

@@ -17,7 +17,7 @@
         <!-- Advanced Carousel -->
         <div class="swiper mySwiper w-full h-auto min-h-[300px] md:h-[400px] rounded-[2rem] md:rounded-[2.5rem] shadow-2xl mb-8 md:mb-12 relative overflow-hidden group">
             <div class="swiper-wrapper">
-                <!-- Slide 1 -->
+        <!-- Shop Now now navigates to AllMedicines page -->
                 <div class="swiper-slide relative">
                     <img src="https://images.unsplash.com/photo-1576602976047-174e57a47881?q=80&w=1920&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Pharmacy Banner 1">
                     <div class="relative z-10 bg-gradient-to-r from-slate-900/95 via-slate-900/60 to-transparent flex items-center px-6 py-12 md:px-20 h-full">
@@ -25,9 +25,9 @@
                             <span class="px-3 py-1.5 md:px-4 md:py-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] md:text-xs font-semibold uppercase tracking-[0.2em] backdrop-blur-sm">Premium Healthcare</span>
                             <h2 class="text-3xl md:text-6xl font-semibold text-white leading-tight">Your Health, <br><span class="text-emerald-400">Our Priority</span></h2>
                             <p class="text-slate-300 text-sm md:text-lg font-medium max-w-[280px] md:max-w-md leading-relaxed">Experience next-generation pharmacy services with instant delivery.</p>
-                            <button onclick="document.getElementById('medicineSearch').focus(); document.getElementById('medicineSearch').scrollIntoView({behavior:'smooth'});" class="px-6 py-3 md:px-8 md:py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-900 rounded-xl md:rounded-2xl font-semibold transition-all hover:scale-105 active:scale-95 flex items-center gap-2 md:gap-3 shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] text-sm md:text-base">
+                            <a href="/Pharmacy/AllMedicines" class="inline-flex items-center gap-2 md:gap-3 px-6 py-3 md:px-8 md:py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-900 rounded-xl md:rounded-2xl font-semibold transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] text-sm md:text-base">
                                 Shop Now <i data-lucide="arrow-right" class="w-4 h-4 md:w-5 md:h-5"></i>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -99,56 +99,71 @@
         }
         else
         {
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="medicineGrid">
-                @foreach (var medicine in Model.StoreMedicines)
-                {
-                    <div class="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all group relative overflow-hidden medicine-card" 
-                         data-name="@medicine.Name.ToLower()" data-brand="@medicine.Brand.ToLower()">
-                        
-                        <!-- Stock Badge -->
-                        <div class="absolute top-6 right-6 z-10">
-                            @if((medicine.StockQuantity ?? 0) > 0) {
-                                <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-semibold uppercase tracking-widest rounded-full border border-emerald-100">In Stock</span>
-                            } else {
-                                <span class="px-3 py-1 bg-rose-50 text-rose-600 text-[10px] font-semibold uppercase tracking-widest rounded-full border border-rose-100">Out of Stock</span>
-                            }
-                        </div>
+            @* Show only first 8 medicines on the store homepage *@
+            var previewMedicines = Model.StoreMedicines.Take(8).ToList();
 
-                        <a href="/Pharmacy/Details/@medicine.Id" class="block h-48 w-full bg-slate-50 rounded-[2rem] mb-6 overflow-hidden relative group-hover:shadow-md transition-all">
-                            @if(!string.IsNullOrEmpty(medicine.ImageUrl) && medicine.ImageUrl != "/images/medicines/default.png")
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="medicineGrid">
+                @foreach (var medicine in previewMedicines)
+                {
+                    <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow hover:shadow-md hover:scale-[1.01] transition-all group relative overflow-hidden medicine-card"
+                         data-name="@medicine.Name.ToLower()" data-brand="@(medicine.Brand?.ToLower() ?? "")">
+
+                        <!-- Stock Badge -->
+                        <div class="absolute top-3 right-3 z-10">
+                            @if ((medicine.StockQuantity ?? 0) > 0)
                             {
-                                <img src="@medicine.ImageUrl" alt="@medicine.Name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[9px] font-semibold uppercase tracking-widest rounded-full border border-emerald-100">In Stock</span>
                             }
                             else
                             {
-                                <div class="w-full h-full flex items-center justify-center text-slate-300">
-                                    <i data-lucide="pill" class="w-12 h-12 text-slate-300 opacity-50"></i>
+                                <span class="px-2 py-0.5 bg-rose-50 text-rose-600 text-[9px] font-semibold uppercase tracking-widest rounded-full border border-rose-100">Out of Stock</span>
+                            }
+                        </div>
+
+                        <!-- Image -->
+                        <a href="/Pharmacy/Details/@medicine.Id" class="block h-28 w-full bg-slate-50 rounded-xl mb-3 overflow-hidden relative">
+                            @if (!string.IsNullOrEmpty(medicine.ImageUrl) && medicine.ImageUrl != "/images/medicines/default.png")
+                            {
+                                <img src="@medicine.ImageUrl" alt="@medicine.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i data-lucide="pill" class="w-8 h-8 text-slate-200"></i>
                                 </div>
                             }
                         </a>
 
-                        <a href="/Pharmacy/Details/@medicine.Id" class="block group-hover:text-blue-600 transition-colors">
-                            <h3 class="text-lg font-semibold text-slate-900 mb-1 line-clamp-1">@medicine.Name</h3>
+                        <!-- Info -->
+                        <a href="/Pharmacy/Details/@medicine.Id" class="block hover:text-blue-600 transition-colors">
+                            <h3 class="text-sm font-semibold text-slate-900 line-clamp-1">@medicine.Name</h3>
                         </a>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">@medicine.Brand • @medicine.Category</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 mb-3 line-clamp-1">@medicine.Brand · @medicine.Category</p>
 
-                        <div class="flex items-end justify-between mt-auto pt-4 border-t border-slate-50">
+                        <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-[10px] font-semibold text-slate-300 uppercase tracking-widest mb-1">Price per Unit</p>
-                                 <p class="text-xl font-semibold text-slate-900">PKR @((medicine.Price ?? 0).ToString("N0"))</p>
+                                <p class="text-[9px] font-semibold text-slate-300 uppercase tracking-widest mb-0.5">Price</p>
+                                <p class="text-sm font-bold text-slate-900">PKR @((medicine.Price ?? 0).ToString("N0"))</p>
                             </div>
-                            
-                             @if((medicine.StockQuantity ?? 0) > 0)
+                            @if ((medicine.StockQuantity ?? 0) > 0)
                             {
-                                 <button onclick="addToCart(@medicine.Id, '@medicine.Name', @(medicine.Price ?? 0), '@medicine.Brand', '@medicine.ImageUrl')" 
-                                        class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all shadow-lg active:scale-95 group/btn" title="Add to Cart">
-                                    <i data-lucide="plus" class="w-4 h-4 group-hover/btn:hidden"></i>
-                                    <i data-lucide="shopping-cart" class="w-4 h-4 hidden group-hover/btn:block animate-bounce"></i>
+                                <button onclick="addToCart(@medicine.Id, '@medicine.Name.Replace("'", "\\'")', @(medicine.Price ?? 0), '@(medicine.Brand?.Replace("'", "\\'") ?? "")', '@(medicine.ImageUrl ?? "")')"
+                                        class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center hover:bg-emerald-500 transition-all active:scale-95" title="Add to Cart">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                                 </button>
                             }
                         </div>
                     </div>
                 }
+            </div>
+
+            @* View More button — only shown when there are medicines *@
+            <div class="mt-8 text-center">
+                <a href="/Pharmacy/AllMedicines"
+                   class="inline-flex items-center gap-2 px-8 py-3.5 bg-slate-900 text-white rounded-xl font-semibold text-sm hover:bg-black transition-colors">
+                    View All Medicines
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
             </div>
         }
     </div>

@@ -282,6 +282,45 @@ namespace MedLinkPortal.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> AllMedicines(string? search, string? brand, string? category, string? sort)
+        {
+            var model = await GetPatientDashboardModelAsync();
+            model.ActiveTab = "store";
+
+            var query = _context.Medicines.Where(m => m.IsActive == true).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(m => m.Name.Contains(search) || m.Brand.Contains(search) || m.Category.Contains(search));
+
+            if (!string.IsNullOrWhiteSpace(brand))
+                query = query.Where(m => m.Brand == brand);
+
+            if (!string.IsNullOrWhiteSpace(category))
+                query = query.Where(m => m.Category == category);
+
+            query = sort switch
+            {
+                "price_asc"  => query.OrderBy(m => m.Price),
+                "price_desc" => query.OrderByDescending(m => m.Price),
+                "name_asc"   => query.OrderBy(m => m.Name),
+                "name_desc"  => query.OrderByDescending(m => m.Name),
+                _            => query.OrderBy(m => m.Name),
+            };
+
+            ViewBag.AllMedicines = await query.ToListAsync();
+            ViewBag.Brands = await _context.Medicines.Where(m => m.IsActive == true)
+                .Select(m => m.Brand).Distinct().OrderBy(b => b).ToListAsync();
+            ViewBag.Categories = await _context.Medicines.Where(m => m.IsActive == true)
+                .Select(m => m.Category).Distinct().OrderBy(c => c).ToListAsync();
+            ViewBag.CurrentSearch = search ?? "";
+            ViewBag.CurrentBrand = brand ?? "";
+            ViewBag.CurrentCategory = category ?? "";
+            ViewBag.CurrentSort = sort ?? "";
+
+            return View(model);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Store()
         {
             var model = await GetPatientDashboardModelAsync();

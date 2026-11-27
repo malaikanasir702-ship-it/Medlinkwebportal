@@ -12,49 +12,48 @@ namespace MedLinkPortal.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<DateTime>(
-                name: "PaidAt",
-                table: "PharmacyOrders",
-                type: "timestamp with time zone",
-                nullable: true);
+            // Guard all PharmacyOrders column additions (columns may already exist in DB)
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='PharmacyOrders' AND column_name='PaidAt') THEN
+                        ALTER TABLE ""PharmacyOrders"" ADD ""PaidAt"" timestamp with time zone;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='PharmacyOrders' AND column_name='StripeCardBrand') THEN
+                        ALTER TABLE ""PharmacyOrders"" ADD ""StripeCardBrand"" text;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='PharmacyOrders' AND column_name='StripeCardLast4') THEN
+                        ALTER TABLE ""PharmacyOrders"" ADD ""StripeCardLast4"" text;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='PharmacyOrders' AND column_name='StripeChargeId') THEN
+                        ALTER TABLE ""PharmacyOrders"" ADD ""StripeChargeId"" text;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='PharmacyOrders' AND column_name='StripePaymentIntentId') THEN
+                        ALTER TABLE ""PharmacyOrders"" ADD ""StripePaymentIntentId"" text;
+                    END IF;
+                END
+                $$;
+            ");
 
-            migrationBuilder.AddColumn<string>(
-                name: "StripeCardBrand",
-                table: "PharmacyOrders",
-                type: "text",
-                nullable: true);
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='MedicalTourismPackages' AND column_name='IsCustomProposal') THEN
+                        ALTER TABLE ""MedicalTourismPackages"" ADD ""IsCustomProposal"" boolean NOT NULL DEFAULT false;
+                    END IF;
+                END
+                $$;
+            ");
 
-            migrationBuilder.AddColumn<string>(
-                name: "StripeCardLast4",
-                table: "PharmacyOrders",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "StripeChargeId",
-                table: "PharmacyOrders",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "StripePaymentIntentId",
-                table: "PharmacyOrders",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsCustomProposal",
-                table: "MedicalTourismPackages",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsInConsultation",
-                table: "Doctors",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Doctors' AND column_name='IsInConsultation') THEN
+                        ALTER TABLE ""Doctors"" ADD ""IsInConsultation"" boolean NOT NULL DEFAULT false;
+                    END IF;
+                END
+                $$;
+            ");
 
             migrationBuilder.CreateTable(
                 name: "AnonymizedCaseData",

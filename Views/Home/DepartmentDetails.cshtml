@@ -8,11 +8,11 @@
 <div class="min-h-screen bg-white">
 
     <!-- Header / Hero -->
-    <header class="pt-28 md:pt-40 pb-24 px-6 bg-white border-b border-gray-100">
+    <header class="pt-32 md:pt-44 pb-28 md:pb-32 px-6 bg-white border-b border-gray-100">
         <div class="max-w-7xl mx-auto">
 
             <!-- Breadcrumb -->
-            <nav class="mb-14">
+            <nav class="mb-14 mt-10 md:mt-14">
                 <a href="/" class="inline-flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-gray-700 transition-colors group">
                     <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-0.5"></i>
                     Back to Specialties
@@ -40,7 +40,7 @@
                     </p>
 
                     <button onclick="toggleModal('bookingModal')"
-                            class="inline-flex items-center gap-2 px-8 py-3.5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
+                            class="inline-flex items-center gap-2 px-8 py-3.5 mb-16 md:mb-20 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
                         <i data-lucide="calendar-plus" class="w-4 h-4"></i>
                         Book Department Consultation
                     </button>
@@ -123,11 +123,11 @@
                 }
                 else
                 {
-                    <div class="col-span-full py-24 text-center border border-dashed border-gray-200 rounded-xl bg-gray-50">
-                        <div class="w-14 h-14 bg-white border border-gray-200 rounded-xl flex items-center justify-center mx-auto mb-6">
-                            <i data-lucide="user-plus" class="w-6 h-6 text-gray-400"></i>
+                    <div class="col-span-full py-12 md:py-14 px-6 text-center border border-dashed border-gray-200 rounded-xl bg-gray-50">
+                        <div class="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="user-plus" class="w-5 h-5 text-gray-400"></i>
                         </div>
-                        <h4 class="font-semibold text-gray-900 mb-2">Recruiting More Specialists</h4>
+                        <h4 class="font-semibold text-gray-900 mb-1.5">Recruiting More Specialists</h4>
                         <p class="text-sm text-gray-400">We are currently onboarding more @dept.Title experts.</p>
                     </div>
                 }
@@ -140,7 +140,7 @@
         <div class="max-w-7xl mx-auto">
 
             <!-- Header -->
-            <div class="mb-14">
+            <div class="mb-16 md:mb-20">
                 <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-4">Precision Care</p>
                 <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Why our @dept.Title unit?</h2>
             </div>

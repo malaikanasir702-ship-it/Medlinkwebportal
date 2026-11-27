@@ -2,74 +2,124 @@
     ViewData["Title"] = "Platform Capabilities | MedLink";
 }
 
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden pt-32 pb-20 px-6">
-        <!-- Animated Background Elements -->
-        <div class="absolute top-0 left-0 w-full h-full -z-10">
-            <div class="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-200/30 rounded-full blur-[120px] animate-pulse"></div>
-            <div class="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-200/30 rounded-full blur-[120px] animate-pulse" style="animation-delay: 1s;"></div>
-        </div>
+<div class="min-h-screen bg-white">
 
+    <!-- Hero Section -->
+    <section class="pt-32 pb-24 px-6 border-b border-gray-100">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16 animate-fade-in-up">
-                <div class="inline-flex items-center gap-2 bg-blue-600 text-white rounded-full px-6 py-2 mb-8 shadow-lg shadow-blue-200">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i>
-                    <span class="text-sm font-bold uppercase tracking-wider">What's New</span>
-                    <span class="bg-white/20 px-2 py-0.5 rounded-full text-xs">v1.0</span>
+            <div class="max-w-4xl mx-auto text-center">
+
+                <div class="inline-flex items-center gap-2 border border-gray-200 rounded-full px-5 py-2 mb-10">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-600"></i>
+                    <span class="text-xs font-semibold text-gray-600 uppercase tracking-widest">What's New</span>
+                    <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">v1.0</span>
                 </div>
-                
-                <h1 class="text-5xl md:text-7xl font-black text-gray-900 tracking-tight leading-[1.1] mb-8">
+
+                <h1 class="text-5xl md:text-6xl font-bold text-gray-900 tracking-tight leading-tight mb-6">
                     Healthcare reimagined<br/>
-                    for the <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">digital age.</span>
+                    for the <span class="text-blue-600">digital age.</span>
                 </h1>
-                
-                <p class="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium mb-12">
-                    MedLink isn't just a booking app. It's a comprehensive ecosystem designed to connect patients, providers, and payers in a seamless, secure loop.
+
+                <p class="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed mb-10">
+                    MedLink is a comprehensive ecosystem designed to connect patients, providers, and payers in a seamless, secure loop.
                 </p>
 
-                <div class="flex flex-wrap items-center justify-center gap-4">
-                    <a href="/" class="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 hover:scale-105 transition-all duration-300">
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <a href="/" class="px-7 py-3 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
                         Get Started
                     </a>
-                    <a href="#features" class="px-8 py-4 bg-white text-gray-900 rounded-2xl font-bold text-lg shadow-lg border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all duration-300">
+                    <a href="#features" class="px-7 py-3 bg-white text-gray-700 rounded-lg font-semibold text-sm border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors">
                         Explore Features →
                     </a>
                 </div>
             </div>
 
-            <!-- Hero Image/Visual -->
-            <div class="relative max-w-5xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
-                <div class="relative rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white">
-                    <div class="aspect-video bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                        <div class="text-center text-white p-12">
-                            <i data-lucide="activity" class="w-24 h-24 mx-auto mb-6 opacity-90"></i>
-                            <p class="text-3xl font-bold">Your Health Dashboard</p>
-                            <p class="text-blue-100 mt-2">Intelligent. Secure. Always Available.</p>
+            <!-- Dashboard Preview -->
+            <div class="mt-20 max-w-5xl mx-auto">
+                <div class="rounded-xl overflow-hidden border border-gray-200">
+                    <!-- Browser Chrome -->
+                    <div class="bg-gray-50 border-b border-gray-200 px-5 py-3 flex items-center gap-3">
+                        <div class="flex gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-gray-300"></div>
+                            <div class="w-3 h-3 rounded-full bg-gray-300"></div>
+                            <div class="w-3 h-3 rounded-full bg-gray-300"></div>
+                        </div>
+                        <div class="flex-1 bg-white border border-gray-200 rounded-md px-4 py-1.5 max-w-sm mx-auto">
+                            <span class="text-xs text-gray-400">medlinkportal.app/dashboard</span>
+                        </div>
+                    </div>
+                    <!-- Dashboard Content -->
+                    <div class="bg-gray-50 aspect-video flex items-center justify-center p-10">
+                        <div class="w-full max-w-2xl">
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Appointments</p>
+                                    <p class="text-2xl font-bold text-gray-900">12</p>
+                                    <p class="text-xs text-green-600 font-medium mt-1">↑ 3 this week</p>
+                                </div>
+                                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Prescriptions</p>
+                                    <p class="text-2xl font-bold text-gray-900">5</p>
+                                    <p class="text-xs text-blue-600 font-medium mt-1">2 active</p>
+                                </div>
+                                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Lab Results</p>
+                                    <p class="text-2xl font-bold text-gray-900">8</p>
+                                    <p class="text-xs text-orange-500 font-medium mt-1">1 pending review</p>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg border border-gray-200 p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <p class="text-sm font-semibold text-gray-700">Upcoming Appointments</p>
+                                    <span class="text-xs text-blue-600 font-medium">View all →</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-3 py-2 border-b border-gray-100">
+                                        <div class="w-8 h-8 rounded bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                            <i data-lucide="user" class="w-4 h-4 text-blue-600"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-xs font-semibold text-gray-800">Dr. Sarah Ahmed — Cardiology</p>
+                                            <p class="text-xs text-gray-400">Today, 3:00 PM · Video Call</p>
+                                        </div>
+                                        <span class="text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded">Confirmed</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 py-2">
+                                        <div class="w-8 h-8 rounded bg-purple-50 flex items-center justify-center flex-shrink-0">
+                                            <i data-lucide="user" class="w-4 h-4 text-purple-600"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-xs font-semibold text-gray-800">Dr. Kamran Ali — Neurology</p>
+                                            <p class="text-xs text-gray-400">Nov 29, 11:00 AM · In-Person</p>
+                                        </div>
+                                        <span class="text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded">Scheduled</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <!-- Floating Cards -->
-                <div class="absolute -top-8 -left-8 bg-white rounded-2xl shadow-xl p-4 border border-gray-100 hidden md:block animate-float">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                            <i data-lucide="check-circle" class="w-6 h-6 text-green-600"></i>
-                        </div>
-                        <div>
-                            <p class="font-bold text-gray-900">99.9% Uptime</p>
-                            <p class="text-sm text-gray-500">Always Available</p>
-                        </div>
+
+                <!-- Trust Badges -->
+                <div class="flex flex-wrap items-center justify-center gap-8 mt-8">
+                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                        <span class="font-medium">99.9% Uptime</span>
                     </div>
-                </div>
-                <div class="absolute -bottom-8 -right-8 bg-white rounded-2xl shadow-xl p-4 border border-gray-100 hidden md:block animate-float" style="animation-delay: 0.5s;">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                            <i data-lucide="shield-check" class="w-6 h-6 text-blue-600"></i>
-                        </div>
-                        <div>
-                            <p class="font-bold text-gray-900">HIPAA Compliant</p>
-                            <p class="text-sm text-gray-500">Bank-Grade Security</p>
-                        </div>
+                    <div class="w-px h-4 bg-gray-200"></div>
+                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-blue-600"></i>
+                        <span class="font-medium">HIPAA Compliant</span>
+                    </div>
+                    <div class="w-px h-4 bg-gray-200"></div>
+                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <i data-lucide="lock" class="w-4 h-4 text-gray-500"></i>
+                        <span class="font-medium">AES-256 Encrypted</span>
+                    </div>
+                    <div class="w-px h-4 bg-gray-200"></div>
+                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <i data-lucide="users" class="w-4 h-4 text-gray-500"></i>
+                        <span class="font-medium">2,500+ Patients</span>
                     </div>
                 </div>
             </div>
@@ -77,148 +127,177 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-32 px-6 bg-white">
+    <section id="features" class="py-24 px-6">
         <div class="max-w-7xl mx-auto">
-            
+
+            <!-- Section Header -->
+            <div class="mb-20 max-w-2xl">
+                <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Platform Features</p>
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Everything you need in one platform.</h2>
+                <p class="text-gray-500 leading-relaxed">Built for patients, designed for providers, trusted by healthcare organizations.</p>
+            </div>
+
             <!-- Smart Scheduling -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-32">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start mb-24 pb-24 border-b border-gray-100">
                 <div class="order-2 lg:order-1">
-                    <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-600 rounded-full px-4 py-2 mb-6">
-                        <i data-lucide="zap" class="w-4 h-4"></i>
-                        <span class="text-sm font-bold uppercase tracking-wider">Seamless Access</span>
-                    </div>
-                    <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">
+                    <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-4">Seamless Access</p>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-5 leading-snug">
                         Smart Scheduling
                     </h2>
-                    <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-                        Forget waiting on hold. Our AI-driven scheduling system syncs directly with doctors' real-time calendars.
+                    <p class="text-gray-500 mb-10 leading-relaxed">
+                        Forget waiting on hold. Our AI-driven scheduling system syncs directly with doctors' real-time calendars, so you book in seconds, not days.
                     </p>
-                    
-                    <div class="space-y-6">
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="clock" class="w-6 h-6 text-blue-600"></i>
+
+                    <div class="space-y-7">
+                        <div class="flex gap-5">
+                            <div class="flex-shrink-0 w-10 h-10 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="clock" class="w-5 h-5 text-blue-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-900 text-lg mb-2">Real-time Availability</h3>
-                                <p class="text-gray-600">See exactly when slots open up, instantly. No more phone tag.</p>
+                                <h3 class="font-semibold text-gray-900 mb-1">Real-time Availability</h3>
+                                <p class="text-sm text-gray-500 leading-relaxed">See exactly when slots open up, instantly. No more phone tag or back-and-forth.</p>
                             </div>
                         </div>
-                        
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="brain" class="w-6 h-6 text-purple-600"></i>
+
+                        <div class="flex gap-5">
+                            <div class="flex-shrink-0 w-10 h-10 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                                <i data-lucide="brain" class="w-5 h-5 text-gray-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-900 text-lg mb-2">Smart Matching</h3>
-                                <p class="text-gray-600">Find the right specialist based on your symptoms and insurance.</p>
+                                <h3 class="font-semibold text-gray-900 mb-1">Smart Matching</h3>
+                                <p class="text-sm text-gray-500 leading-relaxed">Find the right specialist based on your symptoms and location.</p>
                             </div>
                         </div>
-                        
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="calendar-check" class="w-6 h-6 text-green-600"></i>
+
+                        <div class="flex gap-5">
+                            <div class="flex-shrink-0 w-10 h-10 bg-green-50 border border-green-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="calendar-check" class="w-5 h-5 text-green-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-900 text-lg mb-2">Calendar Sync</h3>
-                                <p class="text-gray-600">Auto-add to Google Calendar, Outlook, or iCal.</p>
+                                <h3 class="font-semibold text-gray-900 mb-1">Calendar Sync</h3>
+                                <p class="text-sm text-gray-500 leading-relaxed">Auto-add appointments to Google Calendar, Outlook, or iCal.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="order-1 lg:order-2">
-                    <div class="relative">
-                        <div class="bg-gradient-to-br from-blue-600 to-purple-600 rounded-[3rem] p-12 shadow-2xl shadow-blue-200">
-                            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-                                <i data-lucide="calendar-check-2" class="w-16 h-16 text-white mb-6"></i>
-                                <p class="text-3xl font-black text-white mb-3">Book in 3 clicks.</p>
-                                <p class="text-blue-100 text-lg">Average booking time is less than 45 seconds.</p>
-                                
-                                <div class="mt-8 bg-white/20 rounded-xl p-4">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-white font-bold">Success Rate</span>
-                                        <span class="text-white font-bold">99.4%</span>
+                    <div class="rounded-xl border border-gray-200 overflow-hidden">
+                        <!-- Header bar -->
+                        <div class="bg-gray-50 border-b border-gray-200 px-5 py-3 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="calendar-check-2" class="w-4 h-4 text-gray-500"></i>
+                                <span class="text-sm font-semibold text-gray-700">Book Appointment</span>
+                            </div>
+                            <span class="text-xs text-green-600 font-semibold bg-green-50 border border-green-200 px-2 py-0.5 rounded">Live</span>
+                        </div>
+                        <div class="p-6 bg-white">
+                            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-3">Available Slots — Today</p>
+                            <div class="grid grid-cols-3 gap-2 mb-6">
+                                @foreach (var time in new[] { "9:00 AM", "9:30 AM", "10:00 AM", "11:00 AM", "2:00 PM", "3:30 PM" })
+                                {
+                                    <button class="border border-gray-200 rounded-lg py-2 text-xs font-semibold text-gray-700 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-colors">@time</button>
+                                }
+                            </div>
+                            <div class="border-t border-gray-100 pt-5">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="user" class="w-4 h-4 text-gray-500"></i>
                                     </div>
-                                    <div class="h-2 bg-white/20 rounded-full overflow-hidden">
-                                        <div class="h-full bg-white rounded-full w-[99.4%]"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-800">Dr. Sarah Ahmed</p>
+                                        <p class="text-xs text-gray-400">Cardiologist · 4.9 ★</p>
                                     </div>
                                 </div>
+                                <button class="w-full bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition-colors">
+                                    Confirm Booking
+                                </button>
                             </div>
+                        </div>
+                        <div class="border-t border-gray-100 bg-gray-50 px-6 py-3">
+                            <p class="text-xs text-gray-400">Average booking time: <span class="font-semibold text-gray-600">45 seconds</span></p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Health Records -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-32">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start mb-24 pb-24 border-b border-gray-100">
                 <div>
-                    <div class="relative">
-                        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[3rem] p-12 shadow-2xl shadow-emerald-200">
-                            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-                                <i data-lucide="shield-check" class="w-16 h-16 text-white mb-6"></i>
-                                <p class="text-3xl font-black text-white mb-3">All histories. One place.</p>
-                                <p class="text-emerald-100 text-lg">Lab results, prescriptions, and imaging.</p>
-                                
-                                <div class="mt-8 space-y-3">
-                                    <div class="bg-white/20 rounded-lg p-3 flex items-center gap-3">
-                                        <i data-lucide="file-text" class="w-5 h-5 text-white"></i>
-                                        <span class="text-white font-medium">Medical History</span>
-                                    </div>
-                                    <div class="bg-white/20 rounded-lg p-3 flex items-center gap-3">
-                                        <i data-lucide="pill" class="w-5 h-5 text-white"></i>
-                                        <span class="text-white font-medium">Prescriptions</span>
-                                    </div>
-                                    <div class="bg-white/20 rounded-lg p-3 flex items-center gap-3">
-                                        <i data-lucide="scan" class="w-5 h-5 text-white"></i>
-                                        <span class="text-white font-medium">Lab Results</span>
-                                    </div>
-                                </div>
+                    <div class="rounded-xl border border-gray-200 overflow-hidden">
+                        <div class="bg-gray-50 border-b border-gray-200 px-5 py-3 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="folder-open" class="w-4 h-4 text-gray-500"></i>
+                                <span class="text-sm font-semibold text-gray-700">Health Records</span>
                             </div>
+                            <div class="flex items-center gap-1.5 text-xs text-gray-400">
+                                <i data-lucide="lock" class="w-3 h-3"></i>
+                                <span>Encrypted</span>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-gray-100 bg-white">
+                            @foreach (var record in new[] {
+                                new { icon = "file-text", label = "Medical History", meta = "Updated Nov 2026", color = "text-blue-600", bg = "bg-blue-50" },
+                                new { icon = "pill", label = "Prescriptions", meta = "5 active prescriptions", color = "text-purple-600", bg = "bg-purple-50" },
+                                new { icon = "scan", label = "Lab Results", meta = "Last: CBC Panel — Nov 20", color = "text-green-600", bg = "bg-green-50" },
+                                new { icon = "image", label = "Imaging Reports", meta = "Chest X-Ray · MRI Scan", color = "text-orange-500", bg = "bg-orange-50" },
+                            })
+                            {
+                                <div class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors cursor-pointer">
+                                    <div class="w-9 h-9 @record.bg rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="@record.icon" class="w-4 h-4 @record.color"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-semibold text-gray-800">@record.label</p>
+                                        <p class="text-xs text-gray-400">@record.meta</p>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="border-t border-gray-100 bg-gray-50 px-5 py-3">
+                            <p class="text-xs text-gray-400">AES-256 encrypted · <span class="font-semibold text-gray-600">Only you control access</span></p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div>
-                    <div class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-600 rounded-full px-4 py-2 mb-6">
-                        <i data-lucide="lock" class="w-4 h-4"></i>
-                        <span class="text-sm font-bold uppercase tracking-wider">Your Data, Secure</span>
-                    </div>
-                    <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">
+                    <p class="text-xs font-semibold text-green-600 uppercase tracking-widest mb-4">Your Data, Secure</p>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-5 leading-snug">
                         Unified Health Records
                     </h2>
-                    <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-                        A single source of truth for your medical history. Accessible anywhere, secure everywhere.
+                    <p class="text-gray-500 mb-10 leading-relaxed">
+                        A single source of truth for your entire medical history. Accessible anywhere, secure everywhere, always under your control.
                     </p>
-                    
-                    <div class="space-y-6">
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="shield" class="w-6 h-6 text-emerald-600"></i>
+
+                    <div class="space-y-7">
+                        <div class="flex gap-5">
+                            <div class="flex-shrink-0 w-10 h-10 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                                <i data-lucide="shield" class="w-5 h-5 text-gray-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-900 text-lg mb-2">Bank-Grade Encryption</h3>
-                                <p class="text-gray-600">AES-256 encryption ensures only you and your doctor see your data.</p>
+                                <h3 class="font-semibold text-gray-900 mb-1">Bank-Grade Encryption</h3>
+                                <p class="text-sm text-gray-500 leading-relaxed">AES-256 encryption ensures only you and your authorized providers see your data.</p>
                             </div>
                         </div>
-                        
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="file-check" class="w-6 h-6 text-blue-600"></i>
+
+                        <div class="flex gap-5">
+                            <div class="flex-shrink-0 w-10 h-10 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="file-check" class="w-5 h-5 text-blue-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-900 text-lg mb-2">Universal Formats</h3>
-                                <p class="text-gray-600">Compatible with FHIR standards for interoperability.</p>
+                                <h3 class="font-semibold text-gray-900 mb-1">FHIR Compatible</h3>
+                                <p class="text-sm text-gray-500 leading-relaxed">Universal healthcare data standards ensure full interoperability with other systems.</p>
                             </div>
                         </div>
-                        
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="share-2" class="w-6 h-6 text-purple-600"></i>
+
+                        <div class="flex gap-5">
+                            <div class="flex-shrink-0 w-10 h-10 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                                <i data-lucide="share-2" class="w-5 h-5 text-gray-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-900 text-lg mb-2">Consent Control</h3>
-                                <p class="text-gray-600">Share records with a click, revoke access just as easily.</p>
+                                <h3 class="font-semibold text-gray-900 mb-1">Consent Control</h3>
+                                <p class="text-sm text-gray-500 leading-relaxed">Share records with one click. Revoke access at any time, instantly.</p>
                             </div>
                         </div>
                     </div>
@@ -226,108 +305,158 @@
             </div>
 
             <!-- Video Consultation -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
                 <div class="order-2 lg:order-1">
-                    <div class="inline-flex items-center gap-2 bg-purple-50 text-purple-600 rounded-full px-4 py-2 mb-6">
-                        <i data-lucide="video" class="w-4 h-4"></i>
-                        <span class="text-sm font-bold uppercase tracking-wider">Face-to-Face Care</span>
-                    </div>
-                    <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">
+                    <p class="text-xs font-semibold text-purple-600 uppercase tracking-widest mb-4">Face-to-Face Care</p>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-5 leading-snug">
                         HD Video Consultation
                     </h2>
-                    <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-                        Crystal-clear video calls with screen sharing for diagnosis walkthroughs. Feel like you're in the same room.
+                    <p class="text-gray-500 mb-10 leading-relaxed">
+                        Crystal-clear video calls with built-in screen sharing for diagnosis walkthroughs. Full consultation experience without leaving home.
                     </p>
-                    
-                    <div class="space-y-6">
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="monitor" class="w-6 h-6 text-purple-600"></i>
+
+                    <div class="space-y-7">
+                        <div class="flex gap-5">
+                            <div class="flex-shrink-0 w-10 h-10 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                                <i data-lucide="monitor" class="w-5 h-5 text-gray-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-900 text-lg mb-2">Screen Sharing</h3>
-                                <p class="text-gray-600">Review X-rays, lab results, and reports together in real-time.</p>
+                                <h3 class="font-semibold text-gray-900 mb-1">Screen Sharing</h3>
+                                <p class="text-sm text-gray-500 leading-relaxed">Review X-rays, lab results, and reports together in real-time during the call.</p>
                             </div>
                         </div>
-                        
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="mic" class="w-6 h-6 text-red-600"></i>
+
+                        <div class="flex gap-5">
+                            <div class="flex-shrink-0 w-10 h-10 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                                <i data-lucide="mic" class="w-5 h-5 text-gray-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-900 text-lg mb-2">Auto Transcription</h3>
-                                <p class="text-gray-600">Every consultation is transcribed and saved to your records.</p>
+                                <h3 class="font-semibold text-gray-900 mb-1">Auto Transcription</h3>
+                                <p class="text-sm text-gray-500 leading-relaxed">Every consultation is transcribed automatically and saved to your health records.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-5">
+                            <div class="flex-shrink-0 w-10 h-10 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                                <i data-lucide="wifi" class="w-5 h-5 text-gray-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">Low-Bandwidth Mode</h3>
+                                <p class="text-sm text-gray-500 leading-relaxed">Adapts quality dynamically so calls stay stable even on slower connections.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="order-1 lg:order-2">
-                    <div class="relative">
-                        <div class="bg-gradient-to-br from-purple-600 to-pink-600 rounded-[3rem] p-12 shadow-2xl shadow-purple-200">
-                            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-                                <i data-lucide="video" class="w-16 h-16 text-white mb-6"></i>
-                                <p class="text-3xl font-black text-white mb-3">HD Quality. Zero Lag.</p>
-                                <p class="text-purple-100 text-lg">Powered by WebRTC technology.</p>
-                                
-                                <div class="mt-8 grid grid-cols-2 gap-4">
-                                    <div class="bg-white/20 rounded-xl p-4 text-center">
-                                        <p class="text-3xl font-black text-white">1080p</p>
-                                        <p class="text-purple-100 text-sm">Video Quality</p>
+                    <div class="rounded-xl border border-gray-200 overflow-hidden">
+                        <div class="bg-gray-900 aspect-video relative flex flex-col">
+                            <!-- Video feed simulation -->
+                            <div class="flex-1 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 rounded-full bg-gray-700 border-2 border-gray-600 mx-auto mb-3 flex items-center justify-center">
+                                        <i data-lucide="user" class="w-8 h-8 text-gray-400"></i>
                                     </div>
-                                    <div class="bg-white/20 rounded-xl p-4 text-center">
-                                        <p class="text-3xl font-black text-white">< 50ms</p>
-                                        <p class="text-purple-100 text-sm">Latency</p>
-                                    </div>
+                                    <p class="text-sm font-semibold text-gray-300">Dr. Sarah Ahmed</p>
+                                    <p class="text-xs text-gray-500">Cardiologist</p>
+                                </div>
+                            </div>
+                            <!-- Call controls bar -->
+                            <div class="bg-gray-800 border-t border-gray-700 px-5 py-3 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="flex h-2 w-2 rounded-full bg-green-500"></span>
+                                    <span class="text-xs text-gray-400 font-medium">00:12:34</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button class="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors">
+                                        <i data-lucide="mic" class="w-4 h-4 text-white"></i>
+                                    </button>
+                                    <button class="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors">
+                                        <i data-lucide="video" class="w-4 h-4 text-white"></i>
+                                    </button>
+                                    <button class="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors">
+                                        <i data-lucide="monitor" class="w-4 h-4 text-white"></i>
+                                    </button>
+                                    <button class="w-9 h-9 rounded-lg bg-red-600 flex items-center justify-center hover:bg-red-700 transition-colors">
+                                        <i data-lucide="phone-off" class="w-4 h-4 text-white"></i>
+                                    </button>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs text-gray-400">1080p</span>
+                                    <span class="text-gray-600">·</span>
+                                    <span class="text-xs text-gray-400">&lt;50ms</span>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <!-- Stats row -->
+                    <div class="mt-4 grid grid-cols-3 gap-3">
+                        <div class="border border-gray-200 rounded-lg p-3 text-center">
+                            <p class="text-lg font-bold text-gray-900">1080p</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Video Quality</p>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-3 text-center">
+                            <p class="text-lg font-bold text-gray-900">&lt;50ms</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Latency</p>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-3 text-center">
+                            <p class="text-lg font-bold text-gray-900">E2E</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Encrypted</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="py-32 px-6 bg-gradient-to-br from-blue-600 to-purple-600 relative overflow-hidden">
-        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-        <div class="max-w-4xl mx-auto text-center relative z-10">
-            <h2 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
-                Ready to experience the future of healthcare?
-            </h2>
-            <p class="text-xl text-blue-100 mb-12">
-                Join thousands of patients who've already made the switch.
-            </p>
-            <div class="flex flex-wrap items-center justify-center gap-4">
-                <a href="/" class="px-8 py-4 bg-white text-blue-600 rounded-2xl font-bold text-lg shadow-xl hover:scale-105 transition-all duration-300">
-                    Get Started Free
-                </a>
-                <a href="#features" class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-2xl font-bold text-lg border-2 border-white/20 hover:bg-white/20 transition-all duration-300">
-                    Watch Demo
-                </a>
+    <!-- Stats Bar -->
+    <section class="border-t border-b border-gray-100 py-14 px-6 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x divide-gray-200">
+                <div class="text-center md:px-8">
+                    <p class="text-4xl font-bold text-gray-900 mb-1">2,500+</p>
+                    <p class="text-sm text-gray-500">Active Patients</p>
+                </div>
+                <div class="text-center md:px-8">
+                    <p class="text-4xl font-bold text-gray-900 mb-1">99.9%</p>
+                    <p class="text-sm text-gray-500">Platform Uptime</p>
+                </div>
+                <div class="text-center md:px-8">
+                    <p class="text-4xl font-bold text-gray-900 mb-1">45s</p>
+                    <p class="text-sm text-gray-500">Avg. Booking Time</p>
+                </div>
+                <div class="text-center md:px-8">
+                    <p class="text-4xl font-bold text-gray-900 mb-1">4.9/5</p>
+                    <p class="text-sm text-gray-500">Patient Satisfaction</p>
+                </div>
             </div>
         </div>
     </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 px-6 bg-white border-t border-gray-100">
+        <div class="max-w-3xl mx-auto text-center">
+            <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-4">Get Started Today</p>
+            <h2 class="text-4xl font-bold text-gray-900 mb-5 leading-tight">
+                Ready to experience modern healthcare?
+            </h2>
+            <p class="text-gray-500 mb-10 leading-relaxed">
+                Join thousands of patients who have already made the switch to smarter, faster healthcare.
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <a href="/" class="px-8 py-3.5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
+                    Create Free Account
+                </a>
+                <a asp-area="Identity" asp-page="/Account/Login" class="px-8 py-3.5 bg-white text-gray-700 rounded-lg font-semibold text-sm border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors">
+                    Sign In →
+                </a>
+            </div>
+            <p class="text-xs text-gray-400 mt-6">No credit card required · Free to get started</p>
+        </div>
+    </section>
+
 </div>
-
-<style>
-    @@keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(40px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in-up {
-        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @@keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-20px); }
-    }
-    .animate-float {
-        animation: float 3s ease-in-out infinite;
-    }
-</style>
 
 <script>
     lucide.createIcons();

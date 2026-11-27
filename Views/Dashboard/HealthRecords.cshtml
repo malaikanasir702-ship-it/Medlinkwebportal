@@ -1,4 +1,4 @@
-﻿@model MedLinkPortal.Models.PatientDashboardModel
+@model MedLinkPortal.Models.PatientDashboardModel
 @{
     Layout = "_DashboardLayout";
     ViewData["Title"] = "Health Records";
@@ -30,7 +30,7 @@
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"></i>
                 <input type="text" id="searchInput" onkeyup="applyFilters()" placeholder="Search records..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500">
             </div>
-            <button x-on:click="showUploadModal = true" class="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg  hover:bg-blue-700 hover: transition-all flex items-center justify-center gap-2">
+            <button x-on:click="showUploadModal = true" class="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:shadow-blue-600/30 transition-all flex items-center justify-center gap-2">
                 <i data-lucide="upload-cloud" class="w-4 h-4"></i> Upload
             </button>
         </div>
@@ -210,7 +210,7 @@
     </div>
 
     <!-- Upload Modal -->
-    <div x-show="showUploadModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 
+    <div x-show="showUploadModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
         <div x-on:click.outside="showUploadModal = false" class="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-2xl font-semibold text-gray-900">Upload Health Record</h3>
@@ -246,7 +246,7 @@
                     <button type="button" x-on:click="showUploadModal = false" class="flex-1 py-3 border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all">
                         Cancel
                     </button>
-                    <button type="submit" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg ">
+                    <button type="submit" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20">
                         Upload
                     </button>
                 </div>
@@ -255,7 +255,7 @@
     </div>
 
     <!-- Share Modal -->
-    <div x-show="showShareModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 
+    <div x-show="showShareModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
         <div x-on:click.outside="showShareModal = false" class="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-2xl font-semibold text-gray-900">Share with Doctor</h3>
@@ -281,7 +281,7 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/50 
+    <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
         <div x-on:click.outside="showDeleteModal = false" class="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center">
             <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <i data-lucide="alert-triangle" class="w-10 h-10"></i>
@@ -294,7 +294,7 @@
                 <button type="button" x-on:click="showDeleteModal = false" class="flex-1 py-3 border border-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-50 transition-all">
                     Cancel
                 </button>
-                <button type="button" x-on:click="confirmDeletion($data, $event)" class="flex-1 py-3 bg-rose-600 text-white rounded-2xl font-bold hover:bg-rose-700 transition-all shadow-lg ">
+                <button type="button" x-on:click="confirmDeletion($data, $event)" class="flex-1 py-3 bg-rose-600 text-white rounded-2xl font-bold hover:bg-rose-700 transition-all shadow-lg shadow-rose-500/20">
                     Confirm Delete
                 </button>
             </div>

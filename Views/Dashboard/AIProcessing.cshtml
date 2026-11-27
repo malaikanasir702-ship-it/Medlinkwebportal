@@ -1,25 +1,25 @@
-﻿@model MedLinkPortal.Models.PatientDashboardModel
+@model MedLinkPortal.Models.PatientDashboardModel
 @{
     Layout = "_DashboardLayout";
     ViewData["Title"] = "AI Neural Processing";
 }
 
 <div class="min-h-[70vh] flex flex-col items-center justify-center p-4">
-    <div class="max-w-2xl w-full bg-white/60  rounded-[3rem] p-8 md:p-12 border border-white shadow-2xl relative overflow-hidden">
+    <div class="max-w-2xl w-full bg-white/60 backdrop-blur-2xl rounded-[3rem] p-8 md:p-12 border border-white shadow-2xl relative overflow-hidden">
         
         <!-- Animated Background Elements -->
-        <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 rounded-full animate-pulse"></div>
-        <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/10 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
 
         <div class="relative z-10 text-center">
             <!-- Neural Scanner Animation -->
             <div class="mb-12 relative flex justify-center">
                 <div class="w-32 h-32 bg-slate-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl relative group overflow-hidden">
-                    <div class="absolute inset-0  opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-gradient-to-tr from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <i data-lucide="brain" class="w-16 h-16 text-white relative z-10 animate-pulse"></i>
                     
                     <!-- Scanning Bar -->
-                    <div class="absolute top-0 left-0 w-full h-1 bg-blue-400/50  animate-scan"></div>
+                    <div class="absolute top-0 left-0 w-full h-1 bg-blue-400/50 shadow-[0_0_15px_rgba(96,165,250,0.8)] animate-scan"></div>
                 </div>
                 
                 <!-- Orbiting Dots -->

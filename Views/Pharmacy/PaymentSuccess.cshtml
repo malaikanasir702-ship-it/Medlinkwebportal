@@ -1,6 +1,6 @@
 @model MedLinkPortal.Models.PharmacyOrder
 @{
-    ViewData["Title"] = "Payment Successful";
+    ViewData["Title"] = "Order Confirmed | MedLink Pharmacy";
     Layout = null;
     bool isOnline = Model.PaymentMethod == MedLinkPortal.Models.PaymentMethod.OnlinePayment;
 
@@ -18,7 +18,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Payment Successful – MedLink</title>
+    <title>Order Confirmed – MedLink</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@@latest/dist/umd/lucide.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,37 +27,37 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Inter', sans-serif;
-            background: #f0f4f8;
+            background: #f8fafc;
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 32px 16px;
+            padding: 48px 16px 64px;
         }
-        .page-wrap { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 10px; }
+        .page-wrap { width: 100%; max-width: 540px; display: flex; flex-direction: column; gap: 12px; }
 
-        /* Card base */
+        /* Cards */
         .card {
             background: #ffffff;
-            border: 1px solid #dce4ef;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px 24px;
+        }
+        .card-dark {
+            background: #0f172a;
+            border: 1px solid #0f172a;
             border-radius: 10px;
             padding: 22px 24px;
         }
-        .card-blue {
-            background: #2563eb;
-            border: 1px solid #2563eb;
+        .card-muted {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 10px;
-            padding: 22px 24px;
-        }
-        .card-blue-light {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            border-radius: 10px;
-            padding: 22px 24px;
+            padding: 20px 24px;
         }
 
-        /* Two-column grid */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        /* Grid */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
         /* Typography */
         .label {
@@ -65,110 +65,104 @@
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 5px;
+            color: #94a3b8;
+            margin-bottom: 6px;
         }
-        .label-white { color: rgba(255,255,255,0.65); }
         .label-blue { color: #2563eb; }
-        .value { font-size: 15px; font-weight: 700; color: #0f172a; }
-        .value-lg { font-size: 21px; font-weight: 800; color: #0f172a; }
+        .value { font-size: 14px; font-weight: 700; color: #0f172a; }
+        .value-lg { font-size: 20px; font-weight: 800; color: #0f172a; }
         .value-white { color: #ffffff; }
-        .value-xl { font-size: 28px; font-weight: 800; }
 
-        /* Badge */
+        /* Badges */
         .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
+            display: inline-flex; align-items: center; gap: 5px;
             padding: 3px 10px;
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
             border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            color: #2563eb;
+            font-size: 11px; font-weight: 700; color: #15803d;
         }
-        .badge-dot {
-            width: 6px; height: 6px;
-            background: #2563eb;
-            border-radius: 50%;
-            display: inline-block;
-        }
+        .badge-dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block; }
         .badge-white {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: #fff;
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.2);
+            color: #ffffff;
         }
-        .badge-white .badge-dot { background: #fff; }
+        .badge-white .badge-dot { background: #4ade80; }
 
         /* Divider */
-        .divider { border: none; border-top: 1px solid #e8edf3; margin: 14px 0; }
+        .divider { border: none; border-top: 1px solid #f1f5f9; margin: 14px 0; }
 
-        /* Icon box */
+        /* Icon */
         .icon-box {
-            width: 36px; height: 36px;
-            border-radius: 8px;
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-        .icon-box-white {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.25);
+            width: 36px; height: 36px; border-radius: 8px;
+            background: #eff6ff; border: 1px solid #bfdbfe;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
 
         /* Buttons */
         .btn-primary {
             display: flex; align-items: center; justify-content: center; gap: 7px;
             padding: 12px 20px;
-            background: #2563eb;
-            color: #fff;
-            border-radius: 8px;
+            background: #2563eb; color: #fff;
+            border-radius: 8px; border: none;
             font-size: 13px; font-weight: 700;
-            text-decoration: none;
+            text-decoration: none; cursor: pointer;
             transition: background 0.15s;
         }
         .btn-primary:hover { background: #1d4ed8; }
         .btn-secondary {
             display: flex; align-items: center; justify-content: center; gap: 7px;
             padding: 12px 20px;
-            background: #fff;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
-            border-radius: 8px;
+            background: #fff; color: #374151;
+            border: 1px solid #d1d5db; border-radius: 8px;
             font-size: 13px; font-weight: 700;
-            text-decoration: none;
+            text-decoration: none; cursor: pointer;
             transition: background 0.15s;
         }
-        .btn-secondary:hover { background: #eff6ff; }
+        .btn-secondary:hover { background: #f9fafb; }
+        .btn-download {
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            padding: 12px 20px;
+            background: #0f172a; color: #fff;
+            border-radius: 8px; border: none;
+            font-size: 13px; font-weight: 700;
+            text-decoration: none; cursor: pointer;
+            transition: background 0.15s;
+        }
+        .btn-download:hover { background: #1e293b; }
 
         /* Item row */
         .item-row {
             display: flex; align-items: center; justify-content: space-between;
             padding: 10px 12px;
-            background: #f8fafc;
-            border: 1px solid #e8edf3;
-            border-radius: 8px;
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+        }
+
+        /* Print styles */
+        @@media print {
+            body { background: #fff; padding: 0; }
+            .no-print { display: none !important; }
+            .page-wrap { max-width: 100%; gap: 10px; }
         }
     </style>
 </head>
 <body>
 <div class="page-wrap">
 
-    <!-- ── Header: Success Banner ── -->
-    <div class="card-blue">
-        <div style="display:flex; align-items:center; gap:14px;">
-            <div class="icon-box icon-box-white" style="width:44px;height:44px;border-radius:10px;">
-                <i data-lucide="check" style="width:22px;height:22px;color:#fff;stroke-width:3;"></i>
+    <!-- ── Header ── -->
+    <div class="card-dark">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i data-lucide="check" style="width:22px;height:22px;color:#4ade80;stroke-width:3;"></i>
             </div>
             <div>
-                <div class="label label-white" style="margin-bottom:3px;">MedLink Pharmacy</div>
-                <div class="value-xl value-white">
+                <div class="label" style="color:rgba(255,255,255,0.5);margin-bottom:3px;">MedLink Pharmacy</div>
+                <div style="font-size:22px;font-weight:800;color:#fff;">
                     @(isOnline ? "Payment Successful" : "Order Confirmed")
                 </div>
-                <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:3px;font-weight:500;">
-                    @(isOnline ? "Processed securely via Stripe" : "Cash on delivery · Medicines being prepared")
+                <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;font-weight:500;">
+                    @(isOnline ? "Processed securely via Stripe" : "Cash on delivery · Order being prepared")
                 </div>
             </div>
             <div style="margin-left:auto;">
@@ -178,9 +172,19 @@
                 </div>
             </div>
         </div>
+        <!-- Brand line -->
+        <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:14px;display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:22px;height:22px;background:#2563eb;border-radius:5px;display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="heart" style="width:11px;height:11px;color:#fff;stroke-width:2.5;"></i>
+                </div>
+                <span style="font-size:13px;font-weight:800;color:#fff;letter-spacing:-0.01em;">MedLink</span>
+            </div>
+            <span style="font-size:11px;color:rgba(255,255,255,0.3);font-weight:500;">#ORD-@Model.Id.ToString("D5")</span>
+        </div>
     </div>
 
-    <!-- ── Row 1: Order ID + Delivery ── -->
+    <!-- ── Order ID + Delivery ── -->
     <div class="grid-2">
         <div class="card">
             <div class="label label-blue">Order ID</div>
@@ -188,72 +192,67 @@
         </div>
         <div class="card">
             <div class="label">Estimated Delivery</div>
-            <div class="value" style="font-size:16px;font-weight:800;">1–3 Business Days</div>
+            <div class="value" style="font-size:15px;font-weight:800;">1–3 Business Days</div>
             <div style="font-size:12px;color:#94a3b8;margin-top:3px;font-weight:500;">Door-to-door delivery</div>
         </div>
     </div>
 
     @if (isOnline && Model.TotalAmount > 0)
     {
-        <!-- ── Row 2: Amount + Card ── -->
+        <!-- ── Amount + Card ── -->
         <div class="grid-2">
-            <!-- Amount — blue card -->
-            <div class="card-blue">
-                <div class="label label-white">Amount Paid</div>
-                <div style="font-size:30px;font-weight:800;color:#fff;margin:6px 0 10px;">PKR @Model.TotalAmount.ToString("N0")</div>
-                <div class="badge badge-white">
+            <div class="card">
+                <div class="label">Amount Paid</div>
+                <div style="font-size:28px;font-weight:800;color:#0f172a;margin:4px 0 10px;">PKR @Model.TotalAmount.ToString("N0")</div>
+                <div class="badge">
                     <span class="badge-dot"></span>
                     Payment Confirmed
                 </div>
             </div>
-
-            <!-- Card details — light blue -->
-            <div class="card-blue-light">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                    <div class="label label-blue">Payment Card</div>
-                    <i data-lucide="credit-card" style="width:14px;height:14px;color:#2563eb;"></i>
+            <div class="card">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                    <div class="label" style="margin-bottom:0;">Payment Card</div>
+                    <i data-lucide="credit-card" style="width:14px;height:14px;color:#94a3b8;"></i>
                 </div>
                 @if (!string.IsNullOrEmpty(cardLast4))
                 {
-                    <div style="width:28px;height:18px;background:#2563eb;border-radius:3px;margin-bottom:12px;"></div>
-                    <div style="font-family:monospace;font-size:13px;font-weight:700;color:#1e3a5f;letter-spacing:0.08em;">
+                    <div style="width:28px;height:18px;background:#2563eb;border-radius:3px;margin-bottom:10px;"></div>
+                    <div style="font-family:monospace;font-size:12px;font-weight:700;color:#374151;letter-spacing:0.08em;">
                         •••• •••• •••• @cardLast4
                     </div>
                     <div class="label" style="margin-top:5px;margin-bottom:0;">@(cardBrand?.ToUpper() ?? "CARD")</div>
                 }
                 else
                 {
-                    <div style="font-size:13px;color:#64748b;">Card details unavailable</div>
+                    <div style="font-size:13px;color:#94a3b8;">Card details unavailable</div>
                 }
             </div>
         </div>
 
         @if (paidAt.HasValue)
         {
-            <!-- ── Row 3: Date + Status ── -->
             <div class="grid-2">
                 <div class="card">
                     <div class="label">Date &amp; Time</div>
                     <div class="value">@paidAt.Value.ToString("MMM dd, yyyy")</div>
                     <div style="font-size:13px;color:#64748b;font-weight:600;margin-top:2px;">@paidAt.Value.ToString("HH:mm")</div>
                 </div>
-                <div class="card-blue-light">
-                    <div class="label label-blue">Status</div>
+                <div class="card">
+                    <div class="label">Status</div>
                     <div style="display:flex;align-items:center;gap:7px;margin-top:4px;">
-                        <span style="width:8px;height:8px;background:#2563eb;border-radius:50%;display:inline-block;"></span>
-                        <span class="value" style="color:#1e40af;">Paid</span>
+                        <span style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block;"></span>
+                        <span class="value">Paid</span>
                     </div>
-                    <div style="font-size:11px;color:#3b82f6;margin-top:4px;font-weight:600;">Secured by Stripe</div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:4px;font-weight:600;">Secured by Stripe</div>
                 </div>
             </div>
         }
 
         @if (!string.IsNullOrEmpty(intentId))
         {
-            <!-- Transaction ID -->
-            <div class="card" style="background:#f8fafc;padding:14px 18px;">
+            <div class="card-muted" style="padding:14px 18px;">
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
-                    <i data-lucide="fingerprint" style="width:13px;height:13px;color:#94a3b8;"></i>
+                    <i data-lucide="fingerprint" style="width:12px;height:12px;color:#94a3b8;"></i>
                     <span class="label" style="margin-bottom:0;">Transaction Reference</span>
                 </div>
                 <div style="font-family:monospace;font-size:11px;color:#475569;word-break:break-all;line-height:1.6;">@intentId</div>
@@ -263,7 +262,6 @@
 
     @if (Model.OrderItems != null && Model.OrderItems.Any())
     {
-        <!-- ── Ordered Items ── -->
         <div class="card" style="padding:20px 22px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                 <div style="display:flex;align-items:center;gap:8px;">
@@ -281,7 +279,7 @@
                     <div class="item-row">
                         <div style="display:flex;align-items:center;gap:10px;">
                             <div class="icon-box" style="background:#fff;width:32px;height:32px;">
-                                <i data-lucide="pill" style="width:13px;height:13px;color:#3b82f6;"></i>
+                                <i data-lucide="pill" style="width:13px;height:13px;color:#2563eb;"></i>
                             </div>
                             <div>
                                 <div style="font-size:13px;font-weight:700;color:#0f172a;">@(item.Medicine?.Name ?? "Medicine")</div>
@@ -297,15 +295,15 @@
             {
                 <hr class="divider" />
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:0 2px;">
-                    <span style="font-size:13px;font-weight:600;color:#64748b;">Total</span>
-                    <span style="font-size:16px;font-weight:800;color:#1e40af;">PKR @Model.TotalAmount.ToString("N0")</span>
+                    <span style="font-size:13px;font-weight:600;color:#64748b;">Total Amount</span>
+                    <span style="font-size:16px;font-weight:800;color:#0f172a;">PKR @Model.TotalAmount.ToString("N0")</span>
                 </div>
             }
         </div>
     }
 
     <!-- ── CTA Buttons ── -->
-    <div class="grid-2">
+    <div class="grid-2 no-print">
         <a href="/Pharmacy/Store" class="btn-primary">
             <i data-lucide="store" style="width:15px;height:15px;"></i>
             Continue Shopping
@@ -316,12 +314,131 @@
         </a>
     </div>
 
+    <!-- ── Download Slip ── -->
+    <button onclick="downloadSlip()" class="btn-download no-print">
+        <i data-lucide="download" style="width:15px;height:15px;"></i>
+        Download Order Slip
+    </button>
+
+    <!-- ── Printable Slip (hidden, only shown on print) ── -->
+    <div id="printSlip" style="display:none;">
+        <div style="font-family:'Inter',sans-serif;width:100%;max-width:540px;margin:0 auto;">
+
+            <!-- Slip Header -->
+            <div style="background:#0f172a;padding:24px 28px;border-radius:10px 10px 0 0;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="width:28px;height:28px;background:#2563eb;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        </div>
+                        <span style="font-size:18px;font-weight:800;color:#fff;letter-spacing:-0.01em;">MedLink</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;">Order Slip</div>
+                        <div style="font-size:14px;font-weight:800;color:#fff;">#ORD-@Model.Id.ToString("D5")</div>
+                    </div>
+                </div>
+                <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:14px;display:flex;align-items:center;gap:8px;">
+                    <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:#4ade80;">
+                        <span style="width:5px;height:5px;background:#4ade80;border-radius:50%;display:inline-block;"></span>
+                        @(isOnline ? "Paid" : "Confirmed")
+                    </span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:500;">
+                        @(isOnline ? "Processed via Stripe" : "Cash on Delivery")
+                    </span>
+                </div>
+            </div>
+
+            <!-- Slip Body -->
+            <div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:24px 28px;">
+
+                <!-- Info Grid -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;padding-bottom:20px;border-bottom:1px solid #f1f5f9;margin-bottom:20px;">
+                    <div>
+                        <div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Patient</div>
+                        <div style="font-size:14px;font-weight:700;color:#0f172a;">@Model.PatientName</div>
+                    </div>
+                    <div>
+                        <div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Date</div>
+                        <div style="font-size:14px;font-weight:700;color:#0f172a;">@(paidAt?.ToString("MMM dd, yyyy") ?? DateTime.Now.ToString("MMM dd, yyyy"))</div>
+                    </div>
+                    <div>
+                        <div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Payment Method</div>
+                        <div style="font-size:14px;font-weight:700;color:#0f172a;">@(isOnline ? $"Card •••• {cardLast4}" : "Cash on Delivery")</div>
+                    </div>
+                    <div>
+                        <div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Delivery</div>
+                        <div style="font-size:14px;font-weight:700;color:#0f172a;">1–3 Business Days</div>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">Ordered Medicines</div>
+                    @if (Model.OrderItems != null)
+                    {
+                        foreach (var item in Model.OrderItems)
+                        {
+                            <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;margin-bottom:6px;">
+                                <div>
+                                    <div style="font-size:13px;font-weight:700;color:#0f172a;">@(item.Medicine?.Name ?? "Medicine")</div>
+                                    <div style="font-size:11px;color:#94a3b8;margin-top:1px;font-weight:500;">Qty: @item.Quantity &times; PKR @item.UnitPrice.ToString("N0")</div>
+                                </div>
+                                <div style="font-size:13px;font-weight:800;color:#1e40af;">PKR @((item.UnitPrice * item.Quantity).ToString("N0"))</div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <!-- Total -->
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:20px;">
+                    <span style="font-size:13px;font-weight:600;color:#64748b;">Total Amount</span>
+                    <span style="font-size:18px;font-weight:800;color:#0f172a;">PKR @Model.TotalAmount.ToString("N0")</span>
+                </div>
+
+                @if (!string.IsNullOrEmpty(intentId))
+                {
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;margin-bottom:20px;">
+                        <div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Transaction Reference</div>
+                        <div style="font-family:monospace;font-size:10px;color:#475569;word-break:break-all;">@intentId</div>
+                    </div>
+                }
+
+                <!-- Footer -->
+                <div style="text-align:center;border-top:1px solid #f1f5f9;padding-top:16px;">
+                    <div style="font-size:11px;color:#94a3b8;font-weight:500;">Thank you for choosing MedLink Pharmacy</div>
+                    <div style="font-size:10px;color:#cbd5e1;margin-top:3px;">medlinkportal.app &middot; Powered by MedLink Health Systems</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         if (window.lucide) lucide.createIcons();
     });
+
+    function downloadSlip() {
+        // Show the hidden slip, trigger print (Save as PDF), then hide it
+        const slip = document.getElementById('printSlip');
+        const pageWrap = document.querySelector('.page-wrap');
+
+        // Hide the interactive UI for print
+        const noPrintEls = document.querySelectorAll('.no-print');
+        noPrintEls.forEach(el => el.style.display = 'none');
+
+        // Show the slip
+        slip.style.display = 'block';
+
+        // Print
+        window.print();
+
+        // Restore after print dialog closes
+        slip.style.display = 'none';
+        noPrintEls.forEach(el => el.style.display = '');
+    }
 </script>
 </body>
 </html>

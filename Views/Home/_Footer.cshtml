@@ -1,77 +1,105 @@
-<footer class="bg-white pt-16 md:pt-24 pb-8 md:pb-12 px-6 border-t border-gray-100 fade-up" data-animate>
+<footer class="bg-gray-950 pt-16 pb-8 px-6">
     <div class="max-w-7xl mx-auto">
-        <div class="footer-grid grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 md:gap-12 mb-12 md:mb-20 stagger-children" data-animate>
-            <div class="footer-brand col-span-2 lg:col-span-1 fade-up" data-animate>
-                <div class="flex items-center gap-2 mb-4 md:mb-6">
-                    <div class="w-9 h-9 rounded-lg overflow-hidden shadow-lg shadow-blue-500/20 flex-shrink-0">
-                        <img src="/images/medlink-logo.png" alt="MedLink Logo" class="w-full h-full object-cover">
+
+        <!-- Main footer grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-14 pb-14 border-b border-gray-800">
+
+            <!-- Brand column -->
+            <div class="lg:col-span-2">
+                <div class="flex items-center gap-2.5 mb-5">
+                    <div class="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src="/images/medlink-logo.png" alt="MedLink" class="w-full h-full object-cover">
                     </div>
-                    <span class="text-xl font-bold tracking-tight text-gray-900">MedLink</span>
+                    <span class="text-xl font-bold tracking-tight text-white">MedLink</span>
                 </div>
-                <p class="text-gray-500 text-sm leading-relaxed mb-6">
-                    The world's first truly global, secure, and AI-enabled health consultation ecosystem.
+                <p class="text-gray-400 text-sm leading-relaxed mb-6 max-w-xs">
+                    A unified digital health platform connecting patients with verified doctors, pharmacies, diagnostic labs, and global medical care — all in one place.
                 </p>
-                <div class="flex items-center gap-4 text-gray-400">
-                    <i data-lucide="twitter" class="w-4.5 h-4.5 hover:text-blue-400 cursor-pointer transition-colors"></i>
-                    <i data-lucide="linkedin" class="w-4.5 h-4.5 hover:text-blue-700 cursor-pointer transition-colors"></i>
-                    <i data-lucide="github" class="w-4.5 h-4.5 hover:text-gray-900 cursor-pointer transition-colors"></i>
+                <!-- Social icons using inline SVG -->
+                <div class="flex items-center gap-4">
+                    <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center transition-colors" style="background-color:#1f2937;" aria-label="Twitter">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+                    </a>
+                    <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center transition-colors" style="background-color:#1f2937;" aria-label="LinkedIn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                    </a>
+                    <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center transition-colors" style="background-color:#1f2937;" aria-label="Instagram">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    </a>
                 </div>
             </div>
 
-            <div class="fade-up" data-animate>
-                <h4 class="font-bold text-gray-900 mb-4 md:mb-6">Portal Sitemap</h4>
-                <ul class="space-y-3 md:space-y-4 text-sm text-gray-500">
-                    <li><a href="#features" class="hover:text-blue-600 transition-colors">Home Page</a></li>
-                    <li><a href="#specialists" class="hover:text-blue-600 transition-colors">Doctor Directory</a></li>
-                    <li><a href="#health-records" class="hover:text-blue-600 transition-colors">Patient Dashboard</a></li>
-                    <li><a href="#" onclick="toggleModal('bookingModal')" class="hover:text-blue-600 transition-colors">Appointment Booking</a></li>
-                    <li><a href="#health-records" class="hover:text-blue-600 transition-colors">Health Records</a></li>
-                    <li><a href="#" class="hover:text-blue-600 transition-colors">AI Diagnostics</a></li>
+            <!-- Services -->
+            <div>
+                <h4 class="text-white font-semibold text-sm mb-5 uppercase tracking-widest">Services</h4>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li><a href="#specialists" class="hover:text-white transition-colors">Find a Doctor</a></li>
+                    <li><a href="#pharmacy" class="hover:text-white transition-colors">Online Pharmacy</a></li>
+                    <li><a href="#laboratory" class="hover:text-white transition-colors">Lab Tests at Home</a></li>
+                    <li><a href="#medical-tourism" class="hover:text-white transition-colors">Medical Tourism</a></li>
+                    <li><a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a></li>
+                    <li><a href="#features" class="hover:text-white transition-colors">Platform Features</a></li>
                 </ul>
             </div>
 
-            <div class="fade-up" data-animate>
-                <h4 class="font-bold text-gray-900 mb-4 md:mb-6">Provider Tools</h4>
-                <ul class="space-y-3 md:space-y-4 text-sm text-gray-500">
-                    <li><a href="#" class="hover:text-blue-600 transition-colors">Admin Dashboard</a></li>
-                    <li><a href="#" class="hover:text-blue-600 transition-colors">Consultation Manager</a></li>
-                    <li><a href="#" class="hover:text-blue-600 transition-colors">E-Prescription Tool</a></li>
-                    <li><a href="#" class="hover:text-blue-600 transition-colors">Patient Progress Tracking</a></li>
-                    <li><a href="#" class="hover:text-blue-600 transition-colors">Messaging System</a></li>
+            <!-- For Patients -->
+            <div>
+                <h4 class="text-white font-semibold text-sm mb-5 uppercase tracking-widest">For Patients</h4>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li>
+                        <a asp-area="Identity" asp-page="/Account/Register" class="hover:text-white transition-colors">Create Account</a>
+                    </li>
+                    <li>
+                        <a asp-area="Identity" asp-page="/Account/Login" class="hover:text-white transition-colors">Book a Consultation</a>
+                    </li>
+                    <li>
+                        <a asp-area="Identity" asp-page="/Account/Login" class="hover:text-white transition-colors">View Health Records</a>
+                    </li>
+                    <li>
+                        <a asp-area="Identity" asp-page="/Account/Login" class="hover:text-white transition-colors">Order Medicines</a>
+                    </li>
+                    <li>
+                        <a asp-area="Identity" asp-page="/Account/Login" class="hover:text-white transition-colors">Book a Lab Test</a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Terms", "Home")" class="hover:text-white transition-colors">Terms of Service</a>
+                    </li>
                 </ul>
             </div>
 
-            <div class="fade-up" data-animate>
-                <h4 class="font-bold text-gray-900 mb-4 md:mb-6">Company</h4>
-                <ul class="space-y-3 md:space-y-4 text-sm text-gray-500">
-                    <li><a href="#" class="hover:text-blue-600 transition-colors">About Us</a></li>
-                    <li><a href="#security" class="hover:text-blue-600 transition-colors">Security Standards</a></li>
-                    <li><a href="#security" class="hover:text-blue-600 transition-colors">Compliance (HIPAA)</a></li>
-                    <li><a href="#impact" class="hover:text-blue-600 transition-colors">Global Impact</a></li>
-                    <li><a href="#" class="hover:text-blue-600 transition-colors">Contact Support</a></li>
+            <!-- Contact -->
+            <div>
+                <h4 class="text-white font-semibold text-sm mb-5 uppercase tracking-widest">Contact</h4>
+                <ul class="space-y-4 text-sm text-gray-400">
+                    <li class="flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-shrink-0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <span>support@medlink.io</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-shrink-0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.57 3.38 2 2 0 0 1 3.54 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.72a16 16 0 0 0 5.37 5.37l1.58-1.59a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        <span>+92 300 000 0000</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-shrink-0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>Karachi, Pakistan</span>
+                    </li>
                 </ul>
             </div>
 
-            <div class="fade-up" data-animate>
-                <h4 class="font-bold text-gray-900 mb-4 md:mb-6">Get in Touch</h4>
-                <ul class="space-y-3 md:space-y-4 text-sm text-gray-500">
-                    <li class="flex items-center gap-3"><i data-lucide="mail" class="w-4 h-4"></i> global@medlink.io</li>
-                    <li class="flex items-center gap-3"><i data-lucide="phone" class="w-4 h-4"></i> +1 (800) MED-LINK</li>
-                    <li class="flex items-center gap-3"><i data-lucide="map-pin" class="w-4 h-4"></i> Silicon Valley, CA</li>
-                </ul>
-            </div>
         </div>
 
-        <div class="footer-bottom pt-6 md:pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-gray-400 text-xs text-center md:text-left">
-                © @DateTime.Now.Year MedLink Health Systems. All rights reserved.
+        <!-- Bottom bar -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p class="text-gray-500 text-xs">
+                &copy; @DateTime.Now.Year MedLink Health Systems. All rights reserved.
             </p>
-            <div class="footer-legal-links flex items-center gap-4 md:gap-6 text-xs text-gray-400">
-                <a href="/Home/Privacy" class="hover:text-gray-900">Privacy Policy</a>
-                <a href="/Home/Terms" class="hover:text-gray-900">Terms of Service</a>
-                <button onclick="resetCookieConsent()" class="hover:text-gray-900">Cookie Settings</button>
+            <div class="flex items-center gap-6 text-xs text-gray-500">
+                <a href="@Url.Action("Privacy", "Home")" class="hover:text-gray-300 transition-colors">Privacy Policy</a>
+                <a href="@Url.Action("Terms", "Home")" class="hover:text-gray-300 transition-colors">Terms of Service</a>
+                <button onclick="resetCookieConsent()" class="hover:text-gray-300 transition-colors">Cookie Settings</button>
             </div>
         </div>
+
     </div>
 </footer>
 

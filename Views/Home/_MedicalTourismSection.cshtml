@@ -1,6 +1,6 @@
-<section id="medical-tourism" class="py-20 px-6 bg-white">
+<section id="medical-tourism" class="px-6 bg-white" style="padding-top:5rem; padding-bottom:5rem; border-top:1px solid #f0f0f0;">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
             <!-- Left: Content -->
             <div class="fade-up flex flex-col" data-animate>
@@ -12,8 +12,8 @@
                     World-class treatment, <br />
                     <span class="text-gray-400 italic">planned end-to-end.</span>
                 </h2>
-                <p class="text-gray-500 text-base leading-relaxed mb-6 max-w-lg">
-                    Connect with internationally accredited hospitals and specialists across Turkey, Thailand, Germany, and the UAE. MedLink handles everything — from pre-treatment consultations and visa assistance to accommodation and post-care follow-ups.
+                <p class="text-gray-500 text-base leading-relaxed mb-7 max-w-lg">
+                    Connect with internationally accredited hospitals across Turkey, Thailand, Germany, and the UAE. MedLink handles everything — from pre-treatment consultations and visa assistance to accommodation and post-care follow-ups.
                 </p>
 
                 <div class="space-y-3 mb-8">
@@ -44,44 +44,47 @@
 
             <!-- Right: Destination Cards -->
             <div class="fade-up delay-200" data-animate>
-                <div class="bg-gradient-to-br from-violet-50 to-white border border-violet-100 rounded-3xl p-8">
-                    <p class="text-xs font-bold text-violet-600 uppercase tracking-widest mb-4">Top Destinations</p>
-
-                    <div class="space-y-3 mb-6">
+                <div class="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
+                    <!-- Card Header -->
+                    <div class="px-6 pt-6 pb-4 border-b border-gray-100">
+                        <p class="text-xs font-bold text-violet-600 uppercase tracking-widest">Top Destinations</p>
+                    </div>
+                    <!-- Destination List -->
+                    <div class="divide-y divide-gray-50">
                         @foreach (var dest in new[] {
-                            new { country = "Turkey", city = "Istanbul", specialty = "Hair Transplant · Oncology · Dental", saving = "Up to 70% savings", color = "#fef3c7", accent = "#d97706" },
-                            new { country = "Thailand", city = "Bangkok", specialty = "Orthopaedics · Cardiac · Wellness", saving = "Up to 65% savings", color = "#dcfce7", accent = "#16a34a" },
-                            new { country = "Germany", city = "Munich", specialty = "Neurology · Cancer · Rare Diseases", saving = "World-class precision care", color = "#dbeafe", accent = "#2563eb" },
-                            new { country = "UAE", city = "Dubai", specialty = "Fertility · Cardiology · Aesthetics", saving = "Premium concierge care", color = "#ede9fe", accent = "#7c3aed" }
+                            new { country = "Turkey", city = "Istanbul", specialty = "Hair Transplant · Oncology · Dental", saving = "Up to 70% savings", bgColor = "#fef3c7", accent = "#d97706" },
+                            new { country = "Thailand", city = "Bangkok", specialty = "Orthopaedics · Cardiac · Wellness", saving = "Up to 65% savings", bgColor = "#dcfce7", accent = "#16a34a" },
+                            new { country = "Germany", city = "Munich", specialty = "Neurology · Cancer · Rare Diseases", saving = "World-class precision", bgColor = "#dbeafe", accent = "#2563eb" },
+                            new { country = "UAE", city = "Dubai", specialty = "Fertility · Cardiology · Aesthetics", saving = "Premium concierge care", bgColor = "#ede9fe", accent = "#7c3aed" }
                         })
                         {
-                            <div class="flex items-center justify-between rounded-2xl px-4 py-3 border border-gray-100 bg-white hover:shadow-sm transition-shadow">
+                            <div class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center gap-3">
-                                    <div style="background-color:@dest.color; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <div style="background-color:@dest.bgColor; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="@dest.accent" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-bold text-gray-900">@dest.country <span class="text-gray-400 font-normal">· @dest.city</span></p>
-                                        <p class="text-xs text-gray-400">@dest.specialty</p>
+                                        <p class="text-sm font-bold text-gray-900">@dest.country <span class="text-gray-400 font-normal text-xs">· @dest.city</span></p>
+                                        <p class="text-xs text-gray-400 mt-0.5">@dest.specialty</p>
                                     </div>
                                 </div>
-                                <span class="text-xs font-bold whitespace-nowrap ml-2" style="color:@dest.accent;">@dest.saving</span>
+                                <span class="text-xs font-bold whitespace-nowrap ml-3" style="color:@dest.accent;">@dest.saving</span>
                             </div>
                         }
                     </div>
-
-                    <div class="border-t border-violet-100 pt-5 flex items-center justify-between">
+                    <!-- Card Footer Stats -->
+                    <div class="px-6 py-5 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
                         <div>
                             <p class="text-xs text-gray-400 font-medium">Partner hospitals</p>
-                            <p class="text-2xl font-bold text-gray-900">200+</p>
+                            <p class="text-xl font-bold text-gray-900">200+</p>
                         </div>
                         <div class="text-center">
                             <p class="text-xs text-gray-400 font-medium">Countries</p>
-                            <p class="text-2xl font-bold text-gray-900">15+</p>
+                            <p class="text-xl font-bold text-gray-900">15+</p>
                         </div>
                         <div class="text-right">
                             <p class="text-xs text-gray-400 font-medium">Patients served</p>
-                            <p class="text-2xl font-bold text-gray-900">8,000+</p>
+                            <p class="text-xl font-bold text-gray-900">8,000+</p>
                         </div>
                     </div>
                 </div>

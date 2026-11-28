@@ -249,25 +249,6 @@
     }
 </style>
 
-<!-- Partners Section -->
-<section class="py-12 bg-white/50 backdrop-blur-sm border-y border-gray-100 fade-up delay-500" data-animate>
-    <div class="max-w-7xl mx-auto px-6">
-        <p class="text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-10">
-            Trusted by over 500+ Leading Health Organizations
-        </p>
-        <div class="partners-scroll flex flex-wrap justify-center items-center gap-6 md:gap-16 opacity-40 grayscale transition-all">
-            @foreach (var brand in new[] { "HealthCore", "GlobalClinic", "BioGuard", "LifeSystems", "NeuroLink", "PulseNetwork" })
-            {
-                <div class="group cursor-pointer hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-                    <span class="text-xl md:text-2xl font-black italic tracking-tighter text-gray-600 group-hover:text-blue-600">
-                        @brand
-                    </span>
-                </div>
-            }
-        </div>
-    </div>
-</section>
-
 <!-- Problem Section -->
 @await Html.PartialAsync("_ProblemSection")
 
@@ -299,11 +280,6 @@
 <div class="experience-grid grid grid-cols-1 lg:grid-cols-2 gap-0 border-y border-gray-100">
     @await Html.PartialAsync("_DoctorExperience")
     @await Html.PartialAsync("_PatientExperience")
-</div>
-
-<!-- Security Section -->
-<div id="security">
-    @await Html.PartialAsync("_SecuritySection")
 </div>
 
 <!-- FAQ - REMOVED -->

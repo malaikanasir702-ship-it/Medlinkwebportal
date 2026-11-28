@@ -1,86 +1,299 @@
-<footer class="bg-gray-950 pt-16 pb-8 px-6">
-    <div class="max-w-7xl mx-auto">
+<style>
+    .ml-footer {
+        background-color: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        color: #0f172a;
+        padding: 84px 24px 44px;
+    }
+
+    .ml-footer-inner {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+
+    .ml-footer-grid {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr 1fr 1.15fr;
+        gap: 48px;
+        padding-bottom: 56px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .ml-footer-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+        text-decoration: none;
+    }
+
+    .ml-footer-logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        overflow: hidden;
+        flex-shrink: 0;
+        border: 1px solid #e2e8f0;
+    }
+
+    .ml-footer-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .ml-footer-brand-name {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #0f172a;
+    }
+
+    .ml-footer-desc {
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.7;
+        margin: 0 0 24px;
+        max-width: 320px;
+    }
+
+    .ml-footer-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 24px;
+    }
+
+    .ml-footer-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #334155;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        letter-spacing: 0.01em;
+    }
+
+    .ml-footer-socials {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .ml-footer-social-link {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .ml-footer-social-link:hover {
+        background-color: #0f172a;
+        border-color: #0f172a;
+        color: #ffffff;
+    }
+
+    .ml-footer-heading {
+        color: #0f172a;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 0 0 20px;
+    }
+
+    .ml-footer-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .ml-footer-link {
+        color: #334155;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.15s ease;
+    }
+
+    .ml-footer-link:hover {
+        color: #0f172a;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
+
+    .ml-footer-contact-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+
+    .ml-footer-contact-icon {
+        color: #0f172a;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .ml-footer-bottom {
+        padding-top: 32px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .ml-footer-copy {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .ml-footer-legal {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .ml-footer-legal-link {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: color 0.15s ease;
+    }
+
+    .ml-footer-legal-link:hover {
+        color: #0f172a;
+    }
+
+    @@media (max-width: 1024px) {
+        .ml-footer-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .ml-footer {
+            padding: 64px 20px 36px;
+        }
+
+        .ml-footer-grid {
+            grid-template-columns: 1fr;
+            gap: 32px;
+            padding-bottom: 40px;
+        }
+
+        .ml-footer-bottom {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<footer class="ml-footer">
+    <div class="ml-footer-inner">
 
         <!-- Main footer grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-14 pb-14 border-b border-gray-800">
+        <div class="ml-footer-grid">
 
             <!-- Brand column -->
-            <div class="lg:col-span-2">
-                <div class="flex items-center gap-2.5 mb-5">
-                    <div class="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
-                        <img src="/images/medlink-logo.png" alt="MedLink" class="w-full h-full object-cover">
+            <div>
+                <a href="/" class="ml-footer-brand">
+                    <div class="ml-footer-logo">
+                        <img src="/images/medlink-logo.png" alt="MedLink">
                     </div>
-                    <span class="text-xl font-bold tracking-tight text-white">MedLink</span>
-                </div>
-                <p class="text-gray-400 text-sm leading-relaxed mb-6 max-w-xs">
+                    <span class="ml-footer-brand-name">MedLink</span>
+                </a>
+                <p class="ml-footer-desc">
                     A unified digital health platform connecting patients with verified doctors, pharmacies, diagnostic labs, and global medical care — all in one place.
                 </p>
-                <!-- Social icons using inline SVG -->
-                <div class="flex items-center gap-4">
-                    <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center transition-colors" style="background-color:#1f2937;" aria-label="Twitter">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+
+                <div class="ml-footer-badges">
+                    <span class="ml-footer-badge">HIPAA-Aligned</span>
+                    <span class="ml-footer-badge">AES-256 Encrypted</span>
+                    <span class="ml-footer-badge">Verified Providers</span>
+                </div>
+
+                <!-- Social icons -->
+                <div class="ml-footer-socials">
+                    <a href="#" class="ml-footer-social-link" aria-label="Twitter">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
                     </a>
-                    <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center transition-colors" style="background-color:#1f2937;" aria-label="LinkedIn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                    <a href="#" class="ml-footer-social-link" aria-label="LinkedIn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
                     </a>
-                    <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center transition-colors" style="background-color:#1f2937;" aria-label="Instagram">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    <a href="#" class="ml-footer-social-link" aria-label="Instagram">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
                     </a>
                 </div>
             </div>
 
             <!-- Services -->
             <div>
-                <h4 class="text-white font-semibold text-sm mb-5 uppercase tracking-widest">Services</h4>
-                <ul class="space-y-3 text-sm text-gray-400">
-                    <li><a href="#specialists" class="hover:text-white transition-colors">Find a Doctor</a></li>
-                    <li><a href="#pharmacy" class="hover:text-white transition-colors">Online Pharmacy</a></li>
-                    <li><a href="#laboratory" class="hover:text-white transition-colors">Lab Tests at Home</a></li>
-                    <li><a href="#medical-tourism" class="hover:text-white transition-colors">Medical Tourism</a></li>
-                    <li><a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a></li>
-                    <li><a href="#features" class="hover:text-white transition-colors">Platform Features</a></li>
+                <h4 class="ml-footer-heading">Services</h4>
+                <ul class="ml-footer-list">
+                    <li><a href="#specialists" class="ml-footer-link">Find a Doctor</a></li>
+                    <li><a href="#pharmacy" class="ml-footer-link">Online Pharmacy</a></li>
+                    <li><a href="#laboratory" class="ml-footer-link">Lab Tests at Home</a></li>
+                    <li><a href="#medical-tourism" class="ml-footer-link">Medical Tourism</a></li>
+                    <li><a href="#how-it-works" class="ml-footer-link">How It Works</a></li>
+                    <li><a href="#features" class="ml-footer-link">Platform Features</a></li>
                 </ul>
             </div>
 
             <!-- For Patients -->
             <div>
-                <h4 class="text-white font-semibold text-sm mb-5 uppercase tracking-widest">For Patients</h4>
-                <ul class="space-y-3 text-sm text-gray-400">
-                    <li>
-                        <a asp-area="Identity" asp-page="/Account/Register" class="hover:text-white transition-colors">Create Account</a>
-                    </li>
-                    <li>
-                        <a asp-area="Identity" asp-page="/Account/Login" class="hover:text-white transition-colors">Book a Consultation</a>
-                    </li>
-                    <li>
-                        <a asp-area="Identity" asp-page="/Account/Login" class="hover:text-white transition-colors">View Health Records</a>
-                    </li>
-                    <li>
-                        <a asp-area="Identity" asp-page="/Account/Login" class="hover:text-white transition-colors">Order Medicines</a>
-                    </li>
-                    <li>
-                        <a asp-area="Identity" asp-page="/Account/Login" class="hover:text-white transition-colors">Book a Lab Test</a>
-                    </li>
-                    <li>
-                        <a href="@Url.Action("Terms", "Home")" class="hover:text-white transition-colors">Terms of Service</a>
-                    </li>
+                <h4 class="ml-footer-heading">For Patients</h4>
+                <ul class="ml-footer-list">
+                    <li><a asp-area="Identity" asp-page="/Account/Register" class="ml-footer-link">Create Account</a></li>
+                    <li><a asp-area="Identity" asp-page="/Account/Login" class="ml-footer-link">Book a Consultation</a></li>
+                    <li><a asp-area="Identity" asp-page="/Account/Login" class="ml-footer-link">View Health Records</a></li>
+                    <li><a asp-area="Identity" asp-page="/Account/Login" class="ml-footer-link">Order Medicines</a></li>
+                    <li><a asp-area="Identity" asp-page="/Account/Login" class="ml-footer-link">Book a Lab Test</a></li>
+                    <li><a href="@Url.Action("Terms", "Home")" class="ml-footer-link">Terms of Service</a></li>
                 </ul>
             </div>
 
             <!-- Contact -->
             <div>
-                <h4 class="text-white font-semibold text-sm mb-5 uppercase tracking-widest">Contact</h4>
-                <ul class="space-y-4 text-sm text-gray-400">
-                    <li class="flex items-start gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-shrink-0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <h4 class="ml-footer-heading">Contact</h4>
+                <ul class="ml-footer-list">
+                    <li class="ml-footer-contact-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-footer-contact-icon"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                         <span>support@medlink.io</span>
                     </li>
-                    <li class="flex items-start gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-shrink-0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.57 3.38 2 2 0 0 1 3.54 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.72a16 16 0 0 0 5.37 5.37l1.58-1.59a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <li class="ml-footer-contact-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-footer-contact-icon"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.57 3.38 2 2 0 0 1 3.54 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.72a16 16 0 0 0 5.37 5.37l1.58-1.59a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                         <span>+92 300 000 0000</span>
                     </li>
-                    <li class="flex items-start gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-shrink-0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <li class="ml-footer-contact-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-footer-contact-icon"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                         <span>Karachi, Pakistan</span>
                     </li>
                 </ul>
@@ -89,14 +302,14 @@
         </div>
 
         <!-- Bottom bar -->
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p class="text-gray-500 text-xs">
+        <div class="ml-footer-bottom">
+            <p class="ml-footer-copy">
                 &copy; @DateTime.Now.Year MedLink Health Systems. All rights reserved.
             </p>
-            <div class="flex items-center gap-6 text-xs text-gray-500">
-                <a href="@Url.Action("Privacy", "Home")" class="hover:text-gray-300 transition-colors">Privacy Policy</a>
-                <a href="@Url.Action("Terms", "Home")" class="hover:text-gray-300 transition-colors">Terms of Service</a>
-                <button onclick="resetCookieConsent()" class="hover:text-gray-300 transition-colors">Cookie Settings</button>
+            <div class="ml-footer-legal">
+                <a href="@Url.Action("Privacy", "Home")" class="ml-footer-legal-link">Privacy Policy</a>
+                <a href="@Url.Action("Terms", "Home")" class="ml-footer-legal-link">Terms of Service</a>
+                <button type="button" onclick="resetCookieConsent()" class="ml-footer-legal-link">Cookie Settings</button>
             </div>
         </div>
 

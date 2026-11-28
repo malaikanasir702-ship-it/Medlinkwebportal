@@ -249,13 +249,14 @@
     }
 </style>
 
-<!-- Problem Section -->
-@await Html.PartialAsync("_ProblemSection")
-
-<!-- Solution Section - REMOVED -->
-
 <!-- Doctor Showcase -->
 @await Html.PartialAsync("_DoctorShowcase", (object)ViewBag.Doctors)
+
+<!-- Pharmacy Section -->
+@await Html.PartialAsync("_PharmacySection")
+
+<!-- Laboratory Section -->
+@await Html.PartialAsync("_LaboratorySection")
 
 <!-- AI Diagnostic Section -->
 @await Html.PartialAsync("_AIDiagnostic", (object)ViewBag.Capabilities)

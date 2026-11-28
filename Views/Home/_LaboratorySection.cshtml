@@ -1,0 +1,85 @@
+<section id="laboratory" class="py-20 px-6 bg-gray-50">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            <!-- Left: Visual Card (flipped order for visual variety) -->
+            <div class="fade-up" data-animate>
+                <div class="bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-3xl p-8">
+                    <!-- Test list mock -->
+                    <p class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-4">Common Lab Tests</p>
+                    <div class="space-y-3 mb-6">
+                        @foreach (var test in new[] {
+                            new { name = "Complete Blood Count (CBC)", time = "4–6 hrs", price = "Rs. 850" },
+                            new { name = "HbA1c (Diabetes)", time = "Same Day", price = "Rs. 1,200" },
+                            new { name = "Thyroid Panel (T3/T4/TSH)", time = "6–8 hrs", price = "Rs. 1,800" },
+                            new { name = "Lipid Profile", time = "Same Day", price = "Rs. 950" },
+                            new { name = "Liver Function Test (LFT)", time = "4–6 hrs", price = "Rs. 1,100" }
+                        })
+                        {
+                            <div class="flex items-center justify-between bg-white rounded-xl px-4 py-3 border border-gray-100 hover:shadow-sm transition-shadow">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-800">@test.name</p>
+                                    <p class="text-xs text-gray-400">Results in @test.time</p>
+                                </div>
+                                <span class="text-sm font-bold text-blue-600">@test.price</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="border-t border-blue-100 pt-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-gray-400 font-medium">Tests available</p>
+                            <p class="text-2xl font-bold text-gray-900">500+</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-400 font-medium">Home collection</p>
+                            <p class="text-2xl font-bold text-gray-900">Free</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-400 font-medium">Partner labs</p>
+                            <p class="text-2xl font-bold text-gray-900">80+</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Content -->
+            <div class="fade-up delay-200" data-animate>
+                <div class="inline-flex items-center gap-2 text-blue-600 font-bold mb-4 text-sm tracking-widest uppercase">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/><path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"/><path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"/></svg>
+                    Diagnostic Labs
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight leading-tight mb-5">
+                    Lab tests at home, <br />
+                    <span class="text-gray-400 italic">results on your phone.</span>
+                </h2>
+                <p class="text-gray-500 text-base leading-relaxed mb-8 max-w-lg">
+                    Book from 500+ diagnostic tests online. A certified phlebotomist visits your home for sample collection. Digital reports land in your MedLink profile — shareable with your doctor in one tap.
+                </p>
+
+                <div class="space-y-3 mb-8">
+                    @foreach (var point in new[] {
+                        "Home sample collection at no extra cost",
+                        "Certified labs with ISO & NABL accreditation",
+                        "Digital reports linked directly to your health record",
+                        "Doctor review of results available on request"
+                    })
+                    {
+                        <div class="flex items-center gap-3">
+                            <div style="background-color:#dbeafe; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                            <p class="text-gray-600 text-sm">@point</p>
+                        </div>
+                    }
+                </div>
+
+                <a asp-area="Identity" asp-page="/Account/Login"
+                   class="inline-flex items-center gap-2 bg-blue-600 text-white text-sm font-bold px-6 py-3 rounded-full hover:bg-blue-700 transition-all shadow-md hover:shadow-blue-200 active:scale-95">
+                    Book a Lab Test
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>

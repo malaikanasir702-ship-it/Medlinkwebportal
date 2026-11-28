@@ -1,137 +1,114 @@
-<section id="features" class="py-24 px-6 bg-white relative">
+<section id="features" class="py-16 px-6 bg-white relative">
     <div class="max-w-7xl mx-auto">
-        <div class="text-center mb-12 md:mb-16 fade-up" data-animate>
-            <h2 class="text-sm font-bold text-blue-600 uppercase tracking-[0.2em] mb-4">Core Capabilities</h2>
-            <h3 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">Everything you need in <br /> one powerful platform.</h3>
+        <div class="text-center mb-10 fade-up" data-animate>
+            <h2 class="text-sm font-bold text-blue-600 uppercase tracking-[0.2em] mb-3">Core Capabilities</h2>
+            <h3 class="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">Everything you need in one powerful platform.</h3>
         </div>
 
-        <!-- Bento Grid using CSS Grid with inline style spans -->
-        <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem;">
+        <!-- Bento Grid -->
+        <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 0.75rem;">
 
-            <!-- Row 1 -->
             <!-- Card 1: Smart Scheduling — 3 cols -->
-            <div style="grid-column: span 3;" class="group bg-white border border-gray-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-xl hover:shadow-gray-200 transition-all duration-300">
-                <div class="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
+            <div style="grid-column: span 3;" class="group bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg transition-all duration-300">
+                <div style="background-color:#2563eb; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </div>
                 <div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-2">Smart Scheduling</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Browse specialists by availability, ratings, and language. Auto-sync with your calendar.</p>
+                    <h4 class="text-base font-bold text-gray-900 mb-1">Smart Scheduling</h4>
+                    <p class="text-gray-500 text-xs leading-relaxed">Browse specialists by availability, ratings, and language. Auto-sync with your calendar.</p>
                 </div>
             </div>
 
             <!-- Card 2: Expert Profiles — 2 cols -->
-            <div style="grid-column: span 2;" class="group bg-white border border-gray-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-xl hover:shadow-gray-200 transition-all duration-300">
-                <div class="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                    </svg>
+            <div style="grid-column: span 2;" class="group bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg transition-all duration-300">
+                <div style="background-color:#4f46e5; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </div>
                 <div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-2">Expert Profiles</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Detailed qualifications, specialty filtering, and verified patient reviews.</p>
+                    <h4 class="text-base font-bold text-gray-900 mb-1">Expert Profiles</h4>
+                    <p class="text-gray-500 text-xs leading-relaxed">Detailed qualifications, specialty filtering, and verified patient reviews.</p>
                 </div>
             </div>
 
             <!-- Card 3: Health Records — 1 col, 2 rows tall -->
-            <div style="grid-column: span 1; grid-row: span 2;" class="group bg-white border border-gray-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-xl hover:shadow-gray-200 transition-all duration-300">
-                <div style="background-color:#0d9488;" class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-                    </svg>
+            <div style="grid-column: span 1; grid-row: span 2;" class="group bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg transition-all duration-300">
+                <div style="background-color:#0d9488; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
                 </div>
                 <div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-2">Health Records</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Secure, cloud-based storage for history, scans, and lab results. Consent-based sharing.</p>
+                    <h4 class="text-base font-bold text-gray-900 mb-1">Health Records</h4>
+                    <p class="text-gray-500 text-xs leading-relaxed">Secure, cloud-based storage for history, scans, and lab results. Consent-based sharing.</p>
                 </div>
             </div>
 
-            <!-- Row 2 -->
             <!-- Card 4: Video Consultation — 3 cols -->
-            <div style="grid-column: span 3;" class="group bg-white border border-gray-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-xl hover:shadow-gray-200 transition-all duration-300">
-                <div class="w-14 h-14 rounded-2xl bg-blue-500 flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-                    </svg>
+            <div style="grid-column: span 3;" class="group bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg transition-all duration-300">
+                <div style="background-color:#3b82f6; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
                 </div>
                 <div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-2">Video Consultation</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Integrated secure HD calls with screen-sharing for diagnosis walkthroughs.</p>
+                    <h4 class="text-base font-bold text-gray-900 mb-1">Video Consultation</h4>
+                    <p class="text-gray-500 text-xs leading-relaxed">Integrated secure HD calls with screen-sharing for diagnosis walkthroughs.</p>
                 </div>
             </div>
 
             <!-- Card 5: Digital Prescriptions — 2 cols -->
-            <div style="grid-column: span 2;" class="group bg-white border border-gray-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-xl hover:shadow-gray-200 transition-all duration-300">
-                <div class="w-14 h-14 rounded-2xl bg-emerald-600 flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-                    </svg>
+            <div style="grid-column: span 2;" class="group bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg transition-all duration-300">
+                <div style="background-color:#059669; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 </div>
                 <div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-2">Digital Prescriptions</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Direct-to-patient scripts with automated refill reminders and follow-up tracking.</p>
+                    <h4 class="text-base font-bold text-gray-900 mb-1">Digital Prescriptions</h4>
+                    <p class="text-gray-500 text-xs leading-relaxed">Direct-to-patient scripts with automated refill reminders and follow-up tracking.</p>
                 </div>
             </div>
 
-            <!-- Row 3 -->
             <!-- Card 6: Secure Messaging — 2 cols -->
-            <div style="grid-column: span 2;" class="group bg-white border border-gray-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-xl hover:shadow-gray-200 transition-all duration-300">
-                <div style="background-color:#7c3aed;" class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
+            <div style="grid-column: span 2;" class="group bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg transition-all duration-300">
+                <div style="background-color:#7c3aed; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 </div>
                 <div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-2">Secure Messaging</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Encrypted text consultation for asynchronous questions and timely doctor responses.</p>
+                    <h4 class="text-base font-bold text-gray-900 mb-1">Secure Messaging</h4>
+                    <p class="text-gray-500 text-xs leading-relaxed">Encrypted text consultation for asynchronous questions and timely doctor responses.</p>
                 </div>
             </div>
 
             <!-- Card 7: Health Reminders — 2 cols -->
-            <div style="grid-column: span 2;" class="group bg-white border border-gray-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-xl hover:shadow-gray-200 transition-all duration-300">
-                <div style="background-color:#f97316;" class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                    </svg>
+            <div style="grid-column: span 2;" class="group bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg transition-all duration-300">
+                <div style="background-color:#f97316; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                 </div>
                 <div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-2">Health Reminders</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Automatic alerts for consultations, medication refills, and screening schedules.</p>
+                    <h4 class="text-base font-bold text-gray-900 mb-1">Health Reminders</h4>
+                    <p class="text-gray-500 text-xs leading-relaxed">Automatic alerts for consultations, medication refills, and screening schedules.</p>
                 </div>
             </div>
 
             <!-- Card 8: Provider Dashboard — 2 cols -->
-            <div style="grid-column: span 2;" class="group bg-white border border-gray-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-xl hover:shadow-gray-200 transition-all duration-300">
-                <div class="w-14 h-14 rounded-2xl bg-gray-800 flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                    </svg>
+            <div style="grid-column: span 2;" class="group bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg transition-all duration-300">
+                <div style="background-color:#1e293b; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                 </div>
                 <div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-2">Provider Dashboard</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Comprehensive tools for doctors to manage patient progress and review diagnostics.</p>
+                    <h4 class="text-base font-bold text-gray-900 mb-1">Provider Dashboard</h4>
+                    <p class="text-gray-500 text-xs leading-relaxed">Comprehensive tools for doctors to manage patient progress and review diagnostics.</p>
                 </div>
             </div>
 
-            <!-- Row 4 -->
             <!-- Card 9: Insurance & Billing — full 6 cols -->
-            <div style="grid-column: span 6;" class="group bg-white border border-gray-100 rounded-3xl p-8 flex flex-row items-center gap-8 hover:shadow-xl hover:shadow-gray-200 transition-all duration-300">
-                <div style="background-color:#0891b2;" class="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-                    </svg>
+            <div style="grid-column: span 6;" class="group bg-white border border-gray-100 rounded-2xl p-5 flex flex-row items-center gap-5 hover:shadow-lg transition-all duration-300">
+                <div style="background-color:#0891b2; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 </div>
                 <div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-1">Insurance &amp; Billing</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Secure invoice generation and insurance integration for hassle-free reimbursement. Fully automated end-to-end billing flow with real-time claim tracking.</p>
+                    <h4 class="text-base font-bold text-gray-900 mb-1">Insurance &amp; Billing</h4>
+                    <p class="text-gray-500 text-xs leading-relaxed">Secure invoice generation and insurance integration for hassle-free reimbursement. Fully automated end-to-end billing flow with real-time claim tracking.</p>
                 </div>
             </div>
 
         </div>
 
-        <!-- Mobile fallback: single column on small screens -->
         <style>
             @@media (max-width: 768px) {
                 #features [style*="grid-column"] {
